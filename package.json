@@ -1,0 +1,31 @@
+{
+  "name": "aiCoder",
+  "version": "1.0.0",
+  "main": "aiCoder.js",
+  "bin": {
+    "aiCoder": "./aiCoder.js"
+  },
+  "scripts": {
+    "start": "./aiCoder.js"
+  },
+  "author": "mmiscool",
+  "license": "MIT",
+  "description": "A tool to make AI coding tasks easy",
+  "type": "module",
+  "dependencies": {
+    "@babel/generator": "^7.26.0",
+    "@babel/parser": "^7.26.1",
+    "@babel/traverse": "^7.25.9",
+    "@babel/types": "^7.26.0",
+    "acorn": "^8.14.0",
+    "acorn-loose": "^8.4.0",
+    "astring": "^1.9.0",
+    "cli-highlight": "^2.1.11",
+    "inquirer": "^12.0.1",
+    "inquirer-file-selector": "^0.5.0",
+    "marked": "^13.0.3",
+    "marked-terminal": "^7.1.0",
+    "openai": "^4.68.4",
+    "prettier": "^3.3.3"
+  }
+}
