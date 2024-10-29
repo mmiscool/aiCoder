@@ -152,6 +152,8 @@ function convertToRelativePath(filePath) {
 
 // make a folder including any parent folders if they don't exist
 async function createBackup(filePath) {
+  console.log('Creating backup of the file:', filePath);
+
   const backupFolder = './.aiCoder/backups';
   await createFolderIfNotExists(backupFolder);
 
@@ -205,17 +207,20 @@ async function restoreFileFromBackup() {
     {
       type: 'list',
       name: 'backupFile',
-      message: 'Select a backup file to restore:',
+      message: 'Select a backup version to restore:',
       choices: allBackupFiles
     }
   ]);
   // clear the terminal
   clearTerminal();
   console.log('Restoring file from backup:', backupFile);
+  // backup the current file in the filePathArg variable. This needs to be converted to a relative path
+  await createBackup(convertToRelativePath(filePathArg));
   await rollbackFile(backupFile);
+  console.log('File restored successfully');
+  // pause the terminal for 2 seconds
 
-  // exit nodejs
-  process.exit(0);
+  await new Promise(resolve => setTimeout(resolve, 2000));
 }
 
 
@@ -347,17 +352,15 @@ async function mainUI() {
     await getFilePath();
 
     let choices = [
-      `Restore file from backup`,
       'Make AI assisted code changes',
       'Identify missing or incomplete functionality and add it',
-      new Separator(),
       ...await getPremadePrompts(),
       new Separator(),
       'Merge and format classes',
       'Setup openAI API key',
       'Edit pre-made prompts',
       'Select a different file',
-
+      `Restore file from backup`,
       'Exit'
     ]
 
