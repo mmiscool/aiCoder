@@ -21,7 +21,7 @@ It will prompt you to select a file. You can also call ```aiCoder ./fileName.js`
 
 A dynamic menu will appear, offering a variety of exciting options. Use the arrow keys to navigate through the possibilities. 
 ```
-Current file: (junk/BREP.js)
+Current file: (BREP.js)
 ? Select an action: (Use arrow keys)
 ❯ Make AI assisted code changes
   Identify missing or incomplete functionality and add it
@@ -72,17 +72,17 @@ Whenever a file is modified by aiCoder, a backup of the original file is created
 You can restore a file from its backup by selecting the `Restore file from backup` option in the menu. This will list all the available backup versions for the selected file, and you can choose which version to restore.
 
 ```
-Current file: (junk/BREP.js)
+Current file: (BREP.js)
 ✔ Select an action: Restore file from backup
-Restoring file from backup: junk/BREP.js
+Restoring file from backup: BREP.js
 ? Select a backup version to restore:
-❯ .aiCoder/backups/junk/BREP.js_backup_2024-10-29T01-10-21.732Z
-  .aiCoder/backups/junk/BREP.js_backup_2024-10-29T03-14-57.722Z
-  .aiCoder/backups/junk/BREP.js_backup_2024-10-29T03-15-22.568Z
-  .aiCoder/backups/junk/BREP.js_backup_2024-10-29T05-58-19.764Z
-  .aiCoder/backups/junk/BREP.js_backup_2024-10-29T06-01-08.084Z
-  .aiCoder/backups/junk/BREP.js_backup_2024-10-29T06-04-01.031Z
-  .aiCoder/backups/junk/BREP.js_backup_2024-10-29T06-17-31.942Z
+❯ .aiCoder/backups/BREP.js_backup_2024-10-29T01-10-21.732Z
+  .aiCoder/backups/BREP.js_backup_2024-10-29T03-14-57.722Z
+  .aiCoder/backups/BREP.js_backup_2024-10-29T03-15-22.568Z
+  .aiCoder/backups/BREP.js_backup_2024-10-29T05-58-19.764Z
+  .aiCoder/backups/BREP.js_backup_2024-10-29T06-01-08.084Z
+  .aiCoder/backups/BREP.js_backup_2024-10-29T06-04-01.031Z
+  .aiCoder/backups/BREP.js_backup_2024-10-29T06-17-31.942Z
 ```
 
 
