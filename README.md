@@ -58,3 +58,12 @@ This is a particularly useful feature and you can create your own pre-made promp
 This option will launch the nano text editor and open the ```premade-prompts.txt``` file. You can add your own pre-made prompts in this file. Each prompt needs to be a single line of text.
 
 You can add comments to this file by starting a line with a ```#``` character. 
+
+# Settings and Backups
+The settings for aiCoder are stored per project in a folder `./.aiCoder/`. This folder also contains backups of files modified by the tool, stored in `./.aiCoder/backups/`.
+
+## Backup Functionality
+Whenever a file is modified by aiCoder, a backup of the original file is created in the `./.aiCoder/backups/` folder. The backup file names include a timestamp to help identify different versions.
+
+## Restore Functionality
+You can restore a file from its backup by selecting the `Restore file from backup` option in the menu. This will list all the available backup versions for the selected file, and you can choose which version to restore.
