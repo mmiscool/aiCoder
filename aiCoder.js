@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // mergeClasses.js
 import fs from 'fs';
-import path from 'path';
+import path, { relative } from 'path';
 import * as acorn from 'acorn-loose';
 import * as astring from 'astring';
 import prettier from 'prettier';
@@ -13,8 +13,7 @@ import fileSelector from 'inquirer-file-selector';
 import { marked } from 'marked';
 import TerminalRenderer from 'marked-terminal';
 import { spawn } from 'child_process';
-import { file } from '@babel/types';
-import { glob } from 'glob';
+
 
 
 
@@ -169,7 +168,7 @@ async function createBackup(filePath) {
 
 
   // exit nodejs
-  process.exit(0);
+  //process.exit(0);
 
   return backupFilePath;
 }
@@ -341,8 +340,6 @@ function addCustomSpacing(code) {
   return code;
 }
 
-// Run the async function
-//mergeAndFormatClasses();
 
 
 
@@ -350,6 +347,7 @@ async function mainUI() {
   while (true) {
     await clearTerminal();
     await getFilePath();
+    await clearTerminal();
 
     let choices = [
       'Make AI assisted code changes',
@@ -362,9 +360,9 @@ async function mainUI() {
       'Select a different file',
       `Restore file from backup`,
       'Exit'
-    ]
+    ];
 
-      ;
+    console.log(`Current file: (${convertToRelativePath(filePathArg)})`);
 
     // show a menu with options
     const { action } = await inquirer.prompt([
@@ -372,7 +370,7 @@ async function mainUI() {
         type: 'list',
         name: 'action',
         pageSize: 20,
-        message: 'What do you want to do?',
+        message: 'Select an action:',
         choices
       }
     ]);
@@ -474,7 +472,7 @@ async function aiAssistedCodeChanges(premadePrompt = false) {
     if (premadePrompt == false) {
       // Ask the user for the changes they want to make
       changesPrompt = await input({
-        message: 'Tell me what you want, what you really really want (Enter to continue and merge) \n: ',
+        message: 'Tell me what you want, what you really really want (Enter to continue and merge) (q to quit) \n: ',
 
       });
     } else {
@@ -483,15 +481,10 @@ async function aiAssistedCodeChanges(premadePrompt = false) {
     }
 
 
-    if (changesPrompt === 'exit') {
+    if (changesPrompt === 'exit' || changesPrompt === 'quit' || changesPrompt === 'q') {
       break;
-      process.exit(0);
     }
-    if (changesPrompt === '') {
-      changesPrompt = 'apply';
-    }
-
-    if (changesPrompt === 'apply') {
+    if (changesPrompt === '' || changesPrompt === 'apply') {
       await applyChanges();
       break;
     }
