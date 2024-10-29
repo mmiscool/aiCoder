@@ -20,16 +20,17 @@ It will ask the user to select a file. You can call ```aiCoder ./fileName.js``` 
 
 It will present a menu of things you can do. You can us the arrow keys to navigate the menu. 
 ```
-? What do you want to do?
+Current file: (junk/BREP.js)
+? Select an action: (Use arrow keys)
 ❯ Make AI assisted code changes
   Identify missing or incomplete functionality and add it
- ──────────────
-  Identify missing imports.
+  Make my code more eligant
  ──────────────
   Merge and format classes
   Setup openAI API key
   Edit pre-made prompts
   Select a different file
+  Restore file from backup
   Exit
 ```
 
@@ -62,8 +63,8 @@ You can add comments to this file by starting a line with a ```#``` character.
 # Settings and Backups
 The settings for aiCoder are stored per project in a folder `./.aiCoder/`. This folder also contains backups of files modified by the tool, stored in `./.aiCoder/backups/`.
 
-## Backup Functionality
+# Backup Functionality
 Whenever a file is modified by aiCoder, a backup of the original file is created in the `./.aiCoder/backups/` folder. The backup file names include a timestamp to help identify different versions.
 
-## Restore Functionality
+# Restore file from backup
 You can restore a file from its backup by selecting the `Restore file from backup` option in the menu. This will list all the available backup versions for the selected file, and you can choose which version to restore.
