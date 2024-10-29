@@ -22,7 +22,18 @@ marked.setOptions({
 
 const debugMode = false;
 
+// make a hidden settings folder in the current directory
 
+if (!fs.existsSync('.aiCoder')) {
+  fs.mkdirSync('.aiCoder');
+}
+
+
+
+function clearTerminal() {
+  // Clears the screen buffer entirely, including scrollback history
+  process.stdout.write('\u001b[3J\u001b[2J\u001b[1J\u001b[H');
+}
 
 
 function launchNano(filePath) {
@@ -52,27 +63,6 @@ async function printCodeToTerminal(jsCode) {
 // Check for a command-line argument for the file path
 let filePathArg = process.argv[2];
 
-async function selectFile() {
-  const files = fs.readdirSync(process.cwd())
-    .filter(file => file.endsWith('.js'));
-
-  if (files.length === 0) {
-    console.error('No JavaScript files found in the current directory.');
-    process.exit(1);
-  }
-
-  const { filePath } = await inquirer.prompt([
-    {
-      type: 'list',
-      name: 'filePath',
-      message: 'Select a JavaScript file to process:',
-      choices: files
-    }
-  ]);
-
-  return filePath;
-}
-
 async function printDebugMessage(message) {
   if (debugMode) {
     console.log(message);
@@ -89,11 +79,27 @@ async function getFilePath() {
     }
     return filePathArg;
   } else {
-    //filePathArg = await selectFile();
-
     filePathArg = await fileSelector({
       message: 'Select a file:',
       pageSize: 20,
+      filter: (filePath) => {
+        printDebugMessage(filePath);
+        //return true;
+        if (filePath.path.includes(
+          'node_modules') ||
+          filePath.path.includes('.git') ||
+          filePath.path.includes('.vscode')
+        ) {
+          return false;
+        }
+
+        // check if the file starts with a dot
+        if (filePath.path.includes('/.')) {
+          return false;
+        }
+
+        return true;
+      }
 
     });
 
@@ -104,16 +110,18 @@ async function getFilePath() {
 
 
 async function readFile(filePath) {
-  const fileContent = fs.readFileSync(filePath, 'utf8');
-  return fileContent;
+  printDebugMessage("Reading file:",filePath);
+  return await fs.readFileSync(filePath, 'utf8');
 }
 
 async function writeFile(filePath, content) {
-  fs.writeFileSync(filePath, content, 'utf8');
+  printDebugMessage("Writing file:",filePath);
+  await fs.writeFileSync(filePath, content, 'utf8');
 }
 
 async function appendFile(filePath, content) {
-  fs.appendFileSync(filePath, content, 'utf8');
+  printDebugMessage("Appending to file:",filePath);
+  await fs.appendFileSync(filePath, content, 'utf8');
 }
 
 
@@ -218,6 +226,7 @@ function addCustomSpacing(code) {
 
 async function mainUI() {
   while (true) {
+    await clearTerminal();
     await getFilePath();
 
     let choices = [
@@ -257,7 +266,7 @@ async function mainUI() {
     }
     else if (action === 'Edit pre-made prompts') {
       console.log('Opening nano to edit pre-made prompts');
-      await launchNano('./premade-prompts.txt');
+      await launchNano('./.aiCoder/premade-prompts.txt');
     }
     else if (action === 'Select a different file') {
       filePathArg = undefined;
@@ -268,7 +277,6 @@ async function mainUI() {
     } else {
       await aiAssistedCodeChanges(action);
     }
-    console.clear();
   }
 }
 
@@ -276,18 +284,20 @@ mainUI();
 
 
 async function getPremadePrompts() {
-  const filePath = './premade-prompts.txt';
+  const filePath = './.aiCoder/premade-prompts.txt';
 
   // if file does not exist return an empty array
   if (!fs.existsSync(filePath)) {
     // Create the file if it doesn't exist
-    writeFile(filePath,
+
+    console.log('Creating pre-made prompts file');
+    await writeFile(filePath,
       `# Add your pre-made prompts here
 # Each custom prompt must all be on a single line.
 # Lines starting with # are ignored.`);
 
-
     return [];
+
   }
 
   // read the file and place each line in an array. Ignore empty lines and lines starting with #
@@ -298,13 +308,13 @@ async function getPremadePrompts() {
 
 
 async function setupOpenAIKey(overwrite = false) {
-  if (fs.existsSync('openai-key.txt') && !overwrite) {
-    return fs.readFileSync('openai-key.txt', 'utf8');
+  if (fs.existsSync('./.aiCoder/openai-key.txt') && !overwrite) {
+    return fs.readFileSync('./.aiCoder/openai-key.txt', 'utf8');
   } else {
     const apiKey = await input({
       message: 'Enter your OpenAI API key:'
     });
-    fs.writeFileSync('openai-key.txt', apiKey, 'utf8');
+    fs.writeFileSync('./.aiCoder/openai-key.txt', apiKey, 'utf8');
     return apiKey;
   }
 }
@@ -316,7 +326,7 @@ async function aiAssistedCodeChanges(premadePrompt = false) {
 
   // call openAI API passing the contents of the current code file. 
   const code = await readFile(filePathArg);
-  //console.log(code);
+
   let messages = [
     {
       role: "system",
@@ -416,20 +426,25 @@ const openAIModel = "gpt-4o";
 
 
 async function getOpenAIResponse(messages) {
-  // read key from file named openai-key.txt
   const apiKey = await setupOpenAIKey();
-
   let openai = new OpenAI({ apiKey });
 
-  //console.log(messages);
+  let responseText = '';
 
-  let result = await openai.chat.completions.create({
+  const resultStream = await openai.chat.completions.create({
     model: openAIModel,
-    messages
+    messages,
+    stream: true
   });
 
-  //console.log(result.choices[0]?.message?.content);
-  return result.choices[0]?.message?.content;
+  for await (const chunk of resultStream) {
+    const content = chunk.choices[0]?.delta?.content || '';
+    process.stdout.write(content); // Real-time printing to console
+    responseText += content;
+  }
+  // clear the console
+  clearTerminal();
+  return responseText;
 }
 
 
