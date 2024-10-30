@@ -66,8 +66,9 @@ export async function mergeAndFormatClasses() {
     targetClass.body.body = Array.from(targetMethods.values()); // Update the methods list
   }
 
-  // Traverse AST to collect and merge classes
+  // Traverse AST to collect and merge classes and functions
   const classesByName = new Map();
+  const functionsByName = new Map();
   const newBody = [];
 
   ast.body.forEach(node => {
@@ -86,13 +87,24 @@ export async function mergeAndFormatClasses() {
         newBody.push(node); // Add only the first occurrence
         printDebugMessage(`Added class: ${className}`);
       }
+    } else if (node.type === 'FunctionDeclaration') {
+      const functionName = node.id.name;
+      printDebugMessage(`Processing function: ${functionName}`);
+
+      // Track only the latest instance of each function
+      functionsByName.set(functionName, node);
     } else {
-      // Add non-class nodes as is
+      // Add non-class, non-function nodes as is
       newBody.push(node);
     }
   });
 
-  // Replace the AST body with the merged classes
+  // Add the latest instance of each function to the body
+  functionsByName.forEach(functionNode => {
+    newBody.push(functionNode);
+  });
+
+  // Replace the AST body with the merged classes and functions
   ast.body = newBody;
 
   // Generate code from the modified AST
@@ -115,11 +127,12 @@ export async function mergeAndFormatClasses() {
 
     // Write formatted code back to the file
     await writeFile(filePath, updatedCode, true);
-    console.log(`Classes in ${filePath} merged and formatted successfully.`);
+    console.log(`Classes and functions in ${filePath} merged and formatted successfully.`);
   } catch (error) {
     console.error("Error during code generation or formatting:", error.message);
   }
 }
+
 
 // Function to add custom spacing between classes and functions
 function addCustomSpacing(code) {
