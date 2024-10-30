@@ -1,7 +1,12 @@
 # aiCoder
-**Unleash the Power of AI to Write Your JavaScript Libraries!**
+**Harness AI to Craft Your JavaScript Libraries with Ease!**
 
-**aiCoder** is your coding co-pilot, here to streamline your development workflow, make your code more elegant, and turn code dreams into reality with the power of AI.
+Sick of endlessly copying and pasting code snippets from ChatGPT into your editor? **aiCoder** is here to transform your coding experience.
+
+With **aiCoder** as your coding co-pilot, you’ll streamline development, refine your code, and bring your ideas to life through the power of AI. This tool lets you modify code files seamlessly using natural language prompts, intelligently merging AI-suggested changes without altering or disrupting the original code.
+
+The real magic? aiCoder’s advanced merging keeps your code intact, seamlessly integrating new snippets with precision and reliability.
+
 
 
 ## INSTALLATION 
@@ -39,13 +44,12 @@ Current file: (BREP.js)
 ? Select an action: (Use arrow keys)
 ❯ Make AI assisted code changes
   Identify missing or incomplete functionality and add it
-  Make my code more elegant
- ──────────────
   Merge and format classes
-  Setup openAI API key
-  Edit pre-made prompts
-  Select a different file
+ ──────────────
+  Project settings
   Restore file from backup
+ ──────────────
+  Select a different file
   Exit
 ```
 
@@ -71,13 +75,31 @@ This is particularly handy when there are stub functions or missing functionalit
 This feature is highly valuable, and you can easily create your own pre-made prompts to display in the menu. 
 
 
-# Settings and Backups
+# Project settings
 The settings for aiCoder are stored per project in a folder `./.aiCoder/`. This folder also contains backups of files modified by the tool, stored in `./.aiCoder/backups/`.
+
+```
+✔ Select an action: Project settings
+? Settings: (Use arrow keys)
+❯ Setup openAI API key
+  Edit pre-made prompts
+  Edit default system prompt
+ ──────────────
+  Back to main menu
+
+```
+
+## Setup openAI API key
+This allows you to input your openAI api key. This key is stored with the project settings. 
 
 ## Edit pre-made prompts
 This option will launch the nano text editor and open the ```./aiCoder/premade-prompts.txt``` file. You can add your own pre-made prompts in this file. Each prompt needs to be a single line of text.
 
 You can add comments to this file by starting a line with a ```#``` character. 
+
+## Edit default system prompt
+This will allow you to edit the default system prompt. You might want to modify this to adapt it to your specific project. Each time the LLM is called this prompt will be sent before the code and your specific instructions. You can put in instructions about what the end goal of your project is and your preferences about what style of code is generated. 
+
 
 ## Backup Functionality
 Whenever a file is modified by aiCoder, a backup of the original file is created in the `./.aiCoder/backups/` folder. The backup file names include a timestamp to help identify different versions.
