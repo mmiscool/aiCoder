@@ -19,6 +19,18 @@ aiCoder
 ```
 
 It will prompt you to select a file. You can also call ```aiCoder ./fileName.js``` to skip this step. 
+```
+? Select a file:
+/home/user/projects/aiCoder/
+├── src/
+├── LICENSE
+├── package-lock.json
+├── package.json
+└── README.md
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+↑↓ navigate, <enter> select or open directory
+<backspace> go back
+```
 
 
 A dynamic menu will appear, offering a variety of exciting options. Use the arrow keys to navigate through the possibilities. 
