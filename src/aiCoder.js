@@ -169,6 +169,7 @@ export async function mainUI() {
         choices: [
           'Setup openAI API key',
           'Edit pre-made prompts',
+          'Edit default system prompt',
           '-',
           'Back to main menu'
         ]
@@ -187,6 +188,13 @@ export async function mainUI() {
     }
     else if (action === 'Edit pre-made prompts') {
       await launchNano('./.aiCoder/premade-prompts.txt');
+    }
+    else if (action === 'Edit default system prompt') {
+      // test if the file exists and create it if it doesn't
+      if (!fs.existsSync('./.aiCoder/default-system-prompt.txt')) {
+        await writeFile('./.aiCoder/default-system-prompt.txt', defaultSystemPrompt);
+      }
+      await launchNano('./.aiCoder/default-system-prompt.txt');
     }
     else if (action === 'Select a different file') {
       await getFilePath(true);
@@ -226,7 +234,10 @@ export async function getPremadePrompts() {
   return lines;
 }
 
-
+let defaultSystemPrompt =`
+You are an expert with javascript, NURBS curves and surfaces, and 3D modeling. 
+You are creating functions that will be part of a 3D modeling library.
+`;
 
 
 let lastResponse = '';
@@ -237,15 +248,16 @@ export async function aiAssistedCodeChanges(premadePrompt = false) {
   // call openAI API passing the contents of the current code file. 
   const code = await readFile(filePathArg);
 
+  defaultSystemPrompt = await readFile('./.aiCoder/default-system-prompt.txt') || defaultSystemPrompt;
+
   let messages = [
     {
       role: "system",
-      content: `You are an expert with javascript, NURBS curves and surfaces, and 3D modeling. 
-    You are creating functions that will be part of a 3D modeling library.`
+      content: defaultSystemPrompt
     },
     {
       role: "system",
-      content: `When providing code snipets include the class the function belongs to as part of your response.`
+      content: `When providing code snippets include the class the function belongs to as part of your response.`
     },
     {
       role: "user",

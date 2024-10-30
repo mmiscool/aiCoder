@@ -10,7 +10,14 @@ import { createBackup } from './backupSystem.js';
 
 export async function readFile(filePath) {
     printDebugMessage("Reading file:", filePath);
-    return await fs.readFileSync(filePath, 'utf8');
+    try {
+        return await fs.readFileSync(filePath, 'utf8');
+    }
+    catch (error) {
+        //console.log('Error reading file:', error);
+        return null;
+    }
+
 }
 
 export async function writeFile(filePath, content, makeBackup = false) {
@@ -46,6 +53,6 @@ export function convertToRelativePath(filePath) {
 
 export async function createFolderIfNotExists(folderPath) {
     if (!fs.existsSync(folderPath)) {
-      fs.mkdirSync(folderPath, { recursive: true });
+        fs.mkdirSync(folderPath, { recursive: true });
     }
-  }
+}
