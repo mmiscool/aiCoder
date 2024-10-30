@@ -8,7 +8,7 @@ import prettier from 'prettier';
 
 import { marked } from 'marked';
 import TerminalRenderer from 'marked-terminal';
-import { clearTerminal, printCodeToTerminal, input, printAndPause, selectListHeight, menuPrompt, launchNano } from './terminalHelpers.js';
+import { clearTerminal, printCodeToTerminal, input, confirmAction, printAndPause, selectListHeight, menuPrompt, launchNano } from './terminalHelpers.js';
 import { printDebugMessage } from './debugging.js';
 import { extractCodeSnippets } from './extractCodeSnippets.js';
 import { readFile, writeFile, appendFile, convertToRelativePath, createFolderIfNotExists } from './fileIO.js';
@@ -234,7 +234,7 @@ export async function getPremadePrompts() {
   return lines;
 }
 
-let defaultSystemPrompt =`
+let defaultSystemPrompt = `
 You are an expert with javascript, NURBS curves and surfaces, and 3D modeling. 
 You are creating functions that will be part of a 3D modeling library.
 `;
@@ -308,31 +308,28 @@ export async function aiAssistedCodeChanges(premadePrompt = false) {
 
 
 export async function applyChanges() {
-  const snipets = extractCodeSnippets(lastResponse);
+  const snippets = extractCodeSnippets(lastResponse);
 
 
 
   // loop through the snippets and ask the user if they want to apply the changes
-  for (let i = 0; i < snipets.length; i++) {
-    printCodeToTerminal(snipets[i]);
+  for (let i = 0; i < snippets.length; i++) {
+    // clear the terminal
+    await clearTerminal();
+    printCodeToTerminal(snippets[i]);
 
-    const { apply } = await inquirer.prompt([
-      {
-        type: 'confirm',
-        name: 'apply',
-        message: `Apply the following code snippet?`
-      }
-    ]);
+    const applySnippet = await confirmAction('Apply the following code snippet?');
+    await printAndPause(applySnippet);
 
-    if (!apply) {
-      snipets.splice(i, 1);
+    if (!applySnippet) {
+      snippets.splice(i, 1);
       i--;
     }
   }
 
 
   // append the snippets to the code
-  await appendFile(filePathArg, snipets.join('\n\n\n\n\n', true));
+  await appendFile(filePathArg, '\n\n\n\n\n' + snippets.join('\n\n\n\n\n', true));
   console.log('Changes applied');
 
   // run the merge and format classes function

@@ -14,7 +14,7 @@ export async function printCodeToTerminal(jsCode) {
 }
 
 
-export async function printAndPause(message, secondsToPause = 1) {
+export async function printAndPause(message, secondsToPause = 2) {
   console.log(message);
   await new Promise(resolve => setTimeout(resolve, secondsToPause * 1000));
 }
@@ -50,6 +50,14 @@ export async function input(promptText, defaultValue = '') {
   return await (await inquirer.prompt([promptObject])).input;
 }
 
+
+export async function confirmAction(message) {
+  let promptObject = {};
+  promptObject.type = 'confirm';
+  promptObject.name = 'confirm';
+  promptObject.message = message || 'Are you sure?';
+  return await (await inquirer.prompt([promptObject])).confirm;
+}
 
 
 export function launchNano(filePath) {

@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { printDebugMessage } from './debugging.js';
 import { createBackup } from './backupSystem.js';
+import { printAndPause } from './terminalHelpers.js';
 
 
 // Helper functions to read, write, and append to files
