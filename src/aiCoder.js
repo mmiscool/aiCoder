@@ -13,7 +13,7 @@ import { printDebugMessage } from './debugging.js';
 import { extractCodeSnippets } from './extractCodeSnippets.js';
 import { readFile, writeFile, appendFile, convertToRelativePath, createFolderIfNotExists } from './fileIO.js';
 import { getFilePath, filePathArg } from './fileSelector.js';
-import { getOpenAIResponse, setupOpenAIKey } from './llmCall.js';
+import { callLLM, setupLLM } from './llmCall.js';
 import { restoreFileFromBackup, } from './backupSystem.js';
 
 
@@ -177,10 +177,11 @@ export async function mainUI() {
 
 
     if (action === 'Project settings') {
+      await clearTerminal();
       action = await menuPrompt({
         message: 'Settings:',
         choices: [
-          'Setup openAI API key',
+          'Setup LLM',
           'Edit pre-made prompts',
           'Edit default system prompt',
           '-',
@@ -196,9 +197,10 @@ export async function mainUI() {
     else if (action === 'Make AI assisted code changes') {
       await aiAssistedCodeChanges();
     }
-    else if (action === 'Setup openAI API key') {
-      await setupOpenAIKey(true);
+    else if (action === 'Setup LLM') {
+      await setupLLM();
     }
+
     else if (action === 'Edit pre-made prompts') {
       await launchNano('./.aiCoder/premade-prompts.txt');
     }
@@ -308,8 +310,8 @@ export async function aiAssistedCodeChanges(premadePrompt = false) {
     });
 
 
-    // call the openAI API
-    lastResponse = await getOpenAIResponse(messages);
+    // call the llm with the messages
+    lastResponse = await callLLM(messages);
     messages.push({
       role: "assistant",
       content: lastResponse,

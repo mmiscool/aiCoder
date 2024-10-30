@@ -79,23 +79,28 @@ This feature is highly valuable, and you can easily create your own pre-made pro
 The settings for aiCoder are stored per project in a folder `./.aiCoder/`. This folder also contains backups of files modified by the tool, stored in `./.aiCoder/backups/`.
 
 ```
-✔ Select an action: Project settings
 ? Settings: (Use arrow keys)
-❯ Setup openAI API key
+❯ Setup LLM
   Edit pre-made prompts
   Edit default system prompt
  ──────────────
   Back to main menu
-
 ```
-
-## Setup openAI API key
-This allows you to input your openAI api key. This key is stored with the project settings. 
+## Setup LLM
+Provides a menu to configure the LLM you want to use. 
+```
+? Select the LLM setting you want to change: (Use arrow keys)
+❯ API key
+  Model
+  AI service
+ ──────────────
+  back
+```
 
 ## Edit pre-made prompts
 This option will launch the nano text editor and open the ```./aiCoder/premade-prompts.txt``` file. You can add your own pre-made prompts in this file. Each prompt needs to be a single line of text.
 
-You can add comments to this file by starting a line with a ```#``` character. 
+You can add comments to this file by starting a line with a ```#``` character and these lines will be ignored. 
 
 ## Edit default system prompt
 This will allow you to edit the default system prompt. You might want to modify this to adapt it to your specific project. Each time the LLM is called this prompt will be sent before the code and your specific instructions. You can put in instructions about what the end goal of your project is and your preferences about what style of code is generated. 
@@ -104,7 +109,7 @@ This will allow you to edit the default system prompt. You might want to modify 
 ## Backup Functionality
 Whenever a file is modified by aiCoder, a backup of the original file is created in the `./.aiCoder/backups/` folder. The backup file names include a timestamp to help identify different versions.
 
-## 🗂 Restore file from backup
+## ⭯ Restore file from backup
 You can restore a file from its backup by selecting the `Restore file from backup` option in the menu. This will list all the available backup versions for the selected file, and you can choose which version to restore.
 
 ```
@@ -116,11 +121,12 @@ Restoring file from backup: BREP.js
   .aiCoder/backups/BREP.js_backup_2024-10-29T03-14-57.722Z
   .aiCoder/backups/BREP.js_backup_2024-10-29T03-15-22.568Z
   .aiCoder/backups/BREP.js_backup_2024-10-29T05-58-19.764Z
-  .aiCoder/backups/BREP.js_backup_2024-10-29T06-01-08.084Z
-  .aiCoder/backups/BREP.js_backup_2024-10-29T06-04-01.031Z
-  .aiCoder/backups/BREP.js_backup_2024-10-29T06-17-31.942Z
+
 ```
 
+# Selecting and choosing an LLM provider
+This feature has been recently added so your milage may vary. It is recommended to use openai at the moment. 
+Groq and ollama are experimental. 
 
 
 # ✅ Current state of this project
@@ -130,10 +136,11 @@ Implemented:
  * Backup files before they are modified. This is extremely important to prevent making unintended changes. 
  * Extraction of code snippets from last LLM response and automated workflow to accept or reject on a per snippet basis. 
  * Custom reusable pre-made prompt manager. 
+ * Provide options to use other LLMs besides the openAI.
+ * Automatic setup on first use (prompt for LLM provider, api key and model selection)
 
 Todo: 
  * Make the tool work with multiple files at the same time. 
- * Provide options to use other LLMs besides the openAI.
  * Make it possible for the llm to request adding NPM packages to project.
  * Add support for LLM to work with html, css and md files in addition to js. This will require parsing these files to an AST (abstract syntax tree) and merging ASTs to recreate the file. 
  * Preserve comments when merging. 
