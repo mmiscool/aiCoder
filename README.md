@@ -1,5 +1,7 @@
 # aiCoder
-Unleash the Power of AI to Write JS Libraries!
+**Unleash the Power of AI to Write Your JavaScript Libraries!**
+
+**aiCoder** is your coding co-pilot, here to streamline your development workflow, make your code more elegant, and turn code dreams into reality with the power of AI.
 
 
 ## INSTALLATION 
@@ -68,7 +70,7 @@ You can add comments to this file by starting a line with a ```#``` character.
 ## Backup Functionality
 Whenever a file is modified by aiCoder, a backup of the original file is created in the `./.aiCoder/backups/` folder. The backup file names include a timestamp to help identify different versions.
 
-## Restore file from backup
+## 🗂 Restore file from backup
 You can restore a file from its backup by selecting the `Restore file from backup` option in the menu. This will list all the available backup versions for the selected file, and you can choose which version to restore.
 
 ```
@@ -87,7 +89,7 @@ Restoring file from backup: BREP.js
 
 
 
-# Current state of this project
+# ✅ Current state of this project
 Implemented: 
  * Clean up javascript file with multiple definitions of the same classes and functions updating the first instance of the class with elements of the class later defined in the file (Handy if you just copy and paste LLM snippets to the end of a file and want to automatically intelligently merge them in to the correct location. Works only on JS files at the moment.)
  * Prompt for instructions to modify a single JS file.
@@ -101,3 +103,9 @@ Todo:
  * Make it possible for the llm to request adding NPM packages to project.
  * Add support for LLM to work with html, css and md files in addition to js. This will require parsing these files to an AST (abstract syntax tree) and merging ASTs to recreate the file. 
  * Preserve comments when merging. 
+
+
+# 🌌 The Future Awaits
+aiCoder is more than just a tool—it's your personal AI code assistant, crafted to make development smarter, faster, and, yes, even a bit more magical.
+
+Start your journey with aiCoder today and redefine what’s possible in coding! 🌟

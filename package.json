@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "main": "aiCoder.js",
   "bin": {
-    "aiCoder": "./aiCoder.js"
+    "aiCoder": "./src/aiCoder.js"
   },
   "scripts": {
-    "start": "./aiCoder.js"
+    "start": "./src/aiCoder.js"
   },
   "author": "mmiscool",
   "license": "MIT",
