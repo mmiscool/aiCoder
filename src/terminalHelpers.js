@@ -8,6 +8,16 @@ import { spawn, exec } from "child_process";
 export function clearTerminal() {
   // Clears the screen buffer entirely, including scrollback history
   process.stdout.write('\u001b[3J\u001b[2J\u001b[1J\u001b[H');
+  // Clears the screen buffer up to the current line
+  process.stdout.write('\u001b[2J\u001b[1J\u001b[H');
+  // Clears the screen buffer from the current line down to the bottom of the screen
+  process.stdout.write('\u001b[J');
+
+  // Clears the screen buffer from the current line down to the bottom of the screen
+  process.stdout.write('\u001b[0f');
+  // Clears the screen buffer from the current line down to the bottom of the screen
+  process.stdout.write('\u001b[0J');
+
 }
 
 
@@ -35,6 +45,7 @@ export async function menuPrompt(menuObject) {
   menuObject.type = 'list';
   menuObject.name = 'action';
   menuObject.pageSize = await selectListHeight();
+  menuObject.loop = false;
 
   // show a menu with options
   let action = await (await inquirer.prompt([menuObject])).action;

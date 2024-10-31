@@ -15,6 +15,7 @@ import { readFile, writeFile, appendFile, convertToRelativePath, createFolderIfN
 import { getFilePath, filePathArg } from './fileSelector.js';
 import { callLLM, setupLLM } from './llmCall.js';
 import { restoreFileFromBackup, } from './backupSystem.js';
+import { skip } from '@babel/traverse/lib/path/context.js';
 
 
 // Check for a command-line argument for the file path
@@ -61,7 +62,7 @@ export async function mergeAndFormatClasses() {
   // Helper function to merge methods from one class into another
   function mergeClassMethods(targetClass, sourceClass) {
     const targetMethods = new Map(targetClass.body.body.map(method => [method.key.name, method]));
-    
+
     // Merge methods, replacing or adding each method from sourceClass
     sourceClass.body.body.forEach(method => {
       targetMethods.set(method.key.name, method);
@@ -69,7 +70,7 @@ export async function mergeAndFormatClasses() {
 
     // Update the methods list in targetClass
     targetClass.body.body = Array.from(targetMethods.values());
-    
+
     // Retain inheritance only if the target class does not already have it
     if (!targetClass.superClass && sourceClass.superClass) {
       targetClass.superClass = sourceClass.superClass;
@@ -158,9 +159,11 @@ function addCustomSpacing(code) {
 }
 
 
-
+let lastMenuChoice = '';
+let skipApprovingChanges = false;
 
 export async function mainUI() {
+
   while (true) {
     await clearTerminal();
     await getFilePath();
@@ -184,9 +187,11 @@ export async function mainUI() {
 
     let action = await menuPrompt({
       message: 'Select an action:',
-      choices
+      choices,
+      default: lastMenuChoice
     });
 
+    lastMenuChoice = action;
 
     if (action === 'Project settings') {
       await clearTerminal();
@@ -196,10 +201,13 @@ export async function mainUI() {
           'Setup LLM',
           'Edit pre-made prompts',
           'Edit default system prompt',
+          'skip approving changes (this session only)',
           '-',
           'Back to main menu'
-        ]
+        ],
+        default: lastMenuChoice
       });
+      lastMenuChoice = action;
     }
 
 
@@ -222,6 +230,11 @@ export async function mainUI() {
         await writeFile('./.aiCoder/default-system-prompt.txt', defaultSystemPrompt);
       }
       await launchNano('./.aiCoder/default-system-prompt.txt');
+    } else if (action === 'Back to main menu') {
+      console.log('Back to main menu');
+    }
+    else if (action === 'skip approving changes (this session only)') {
+      skipApprovingChanges = true;
     }
     else if (action === 'Select a different file') {
       await getFilePath(true);
@@ -264,6 +277,7 @@ export async function getPremadePrompts() {
 let defaultSystemPrompt = `
 You are an expert with javascript, NURBS curves and surfaces, and 3D modeling. 
 You are creating functions that will be part of a 3D modeling library.
+You will only only be providing javascript code snippets.
 `;
 
 
@@ -284,20 +298,13 @@ export async function aiAssistedCodeChanges(premadePrompt = false) {
     },
     {
       role: "system",
-      content: `When providing code snippets include the class the function belongs to as part of your response.
-example 
-
-class exampleClass {
-    static exampleFunction(curve, u) {
-      // code here
-    }
-   
-}
+      content: `When providing code snippets include the class the function belongs to as part of your response. 
+Include the class definition if you want to add or modify a function in a class.
       
       `
     },
     {
-      role: "user",
+      role: "system",
       content: code,
     },
   ]
@@ -338,7 +345,10 @@ class exampleClass {
       role: "assistant",
       content: lastResponse,
     });
-
+    await clearTerminal();
+    console.log("\n\n\nUser input:");
+    console.log(changesPrompt);
+    console.log("\n\nAI response:");
     console.log(marked(lastResponse));
   }
 }
@@ -355,8 +365,9 @@ export async function applyChanges() {
     await clearTerminal();
     printCodeToTerminal(snippets[i]);
 
-    const applySnippet = await confirmAction('Apply the following code snippet?');
-    await printAndPause(applySnippet);
+    let applySnippet = skipApprovingChanges;
+    if (applySnippet === false) applySnippet = await confirmAction('Apply the following code snippet?');
+    await printAndPause(applySnippet, .3);
 
     if (!applySnippet) {
       snippets.splice(i, 1);

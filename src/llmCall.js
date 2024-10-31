@@ -117,7 +117,8 @@ export async function selectModel(overwrite = false) {
 
         let selectedModel = await menuPrompt({
             message: "Select the model you want to use:",
-            choices: models
+            choices: models,
+            default: await readFile(llmModelFileName),
         });
 
         if (selectedModel === '') {
@@ -138,7 +139,8 @@ export async function selectAIservice(overwrite = false) {
         const services = ['openai', 'groq', 'ollama'];
         let selectedService = await menuPrompt({
             message: "Select the service you want to use:",
-            choices: services
+            choices: services,
+            default: await readFile('./.aiCoder/ai-service.txt'),
         });
 
         if (selectedService === '') {
@@ -282,7 +284,8 @@ export async function getGroqResponse(messages) {
                     content: "Explain the importance of fast language models",
                 },
             ],
-            model: "llama3-8b-8192",
+            model: await selectModel(),
+           
         })
     console.log(completion.choices[0].message.content);
 

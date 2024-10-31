@@ -107,6 +107,10 @@ You can add comments to this file by starting a line with a ```#``` character an
 ## Edit default system prompt
 This will allow you to edit the default system prompt. You might want to modify this to adapt it to your specific project. Each time the LLM is called this prompt will be sent before the code and your specific instructions. You can put in instructions about what the end goal of your project is and your preferences about what style of code is generated. 
 
+# Selecting and choosing an LLM provider
+This feature has been recently added so your milage may vary. It is recommended to use openai at the moment. 
+Ollama seems to provide better results than groq at this time. 
+
 
 ## Backup Functionality
 Whenever a file is modified by aiCoder, a backup of the original file is created in the `./.aiCoder/backups/` folder. The backup file names include a timestamp to help identify different versions.
@@ -126,9 +130,6 @@ Restoring file from backup: BREP.js
 
 ```
 
-# Selecting and choosing an LLM provider
-This feature has been recently added so your milage may vary. It is recommended to use openai at the moment. 
-Groq and ollama are experimental. 
 
 
 # ✅ Current state of this project
