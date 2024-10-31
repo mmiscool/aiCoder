@@ -10,8 +10,10 @@ The real magic? aiCoder’s advanced merging keeps your code intact, seamlessly 
 
 
 ## INSTALLATION 
+Clone this repo and navigate to the directory. 
 ```
-npm install -g .
+cd aiCoder
+npm install && npm install -g .
 ```
 Getting started is a breeze! Just run the above command to install `aiCoder` globally.
 

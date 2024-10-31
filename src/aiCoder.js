@@ -41,6 +41,7 @@ marked.setOptions({
 
 
 // Main export async function to handle parsing, modifying, and formatting the code
+// Main export async function to handle parsing, modifying, and formatting the code
 export async function mergeAndFormatClasses() {
   const filePath = await getFilePath();
 
@@ -60,10 +61,19 @@ export async function mergeAndFormatClasses() {
   // Helper function to merge methods from one class into another
   function mergeClassMethods(targetClass, sourceClass) {
     const targetMethods = new Map(targetClass.body.body.map(method => [method.key.name, method]));
+    
+    // Merge methods, replacing or adding each method from sourceClass
     sourceClass.body.body.forEach(method => {
-      targetMethods.set(method.key.name, method); // Replace or add method
+      targetMethods.set(method.key.name, method);
     });
-    targetClass.body.body = Array.from(targetMethods.values()); // Update the methods list
+
+    // Update the methods list in targetClass
+    targetClass.body.body = Array.from(targetMethods.values());
+    
+    // Retain inheritance only if the target class does not already have it
+    if (!targetClass.superClass && sourceClass.superClass) {
+      targetClass.superClass = sourceClass.superClass;
+    }
   }
 
   // Traverse AST to collect and merge classes and functions
@@ -73,7 +83,7 @@ export async function mergeAndFormatClasses() {
 
   ast.body.forEach(node => {
     if (node.type === 'ClassDeclaration') {
-      const className = node.id.name;
+      const className = node.id.name.toLowerCase(); // Treat class names as case-insensitive
       printDebugMessage(`Processing class: ${className}`);
 
       if (classesByName.has(className)) {
@@ -114,7 +124,7 @@ export async function mergeAndFormatClasses() {
     // Format the code with Prettier
     updatedCode = await prettier.format(updatedCode, {
       parser: 'babel',
-      tabWidth: 4,         // Customize as needed
+      tabWidth: 4,
       useTabs: false,
       printWidth: 80,
       endOfLine: 'lf',
@@ -132,6 +142,8 @@ export async function mergeAndFormatClasses() {
     console.error("Error during code generation or formatting:", error.message);
   }
 }
+
+
 
 
 // Function to add custom spacing between classes and functions
@@ -272,7 +284,17 @@ export async function aiAssistedCodeChanges(premadePrompt = false) {
     },
     {
       role: "system",
-      content: `When providing code snippets include the class the function belongs to as part of your response.`
+      content: `When providing code snippets include the class the function belongs to as part of your response.
+example 
+
+class exampleClass {
+    static exampleFunction(curve, u) {
+      // code here
+    }
+   
+}
+      
+      `
     },
     {
       role: "user",

@@ -1,7 +1,9 @@
 import { highlight } from 'cli-highlight';
 import inquirer from 'inquirer';
 import { Separator } from '@inquirer/prompts';
-import { spawn } from "child_process";
+import { spawn, exec } from "child_process";
+
+
 
 export function clearTerminal() {
   // Clears the screen buffer entirely, including scrollback history
@@ -77,3 +79,4 @@ export function launchNano(filePath) {
     });
   });
 }
+
