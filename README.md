@@ -85,6 +85,7 @@ The settings for aiCoder are stored per project in a folder `./.aiCoder/`. This 
 ❯ Setup LLM
   Edit pre-made prompts
   Edit default system prompt
+  skip approving changes (this session only)
  ──────────────
   Back to main menu
 ```
@@ -107,9 +108,11 @@ You can add comments to this file by starting a line with a ```#``` character an
 ## Edit default system prompt
 This will allow you to edit the default system prompt. You might want to modify this to adapt it to your specific project. Each time the LLM is called this prompt will be sent before the code and your specific instructions. You can put in instructions about what the end goal of your project is and your preferences about what style of code is generated. 
 
-# Selecting and choosing an LLM provider
+## Selecting and choosing an LLM provider
 This feature has been recently added so your milage may vary. It is recommended to use openai at the moment. 
 Ollama seems to provide better results than groq at this time. 
+
+## Skip approving changes (this session only)
 
 
 ## Backup Functionality

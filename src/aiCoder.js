@@ -201,7 +201,7 @@ export async function mainUI() {
           'Setup LLM',
           'Edit pre-made prompts',
           'Edit default system prompt',
-          'skip approving changes (this session only)',
+          'Skip approving changes (this session only)',
           '-',
           'Back to main menu'
         ],
@@ -233,7 +233,7 @@ export async function mainUI() {
     } else if (action === 'Back to main menu') {
       console.log('Back to main menu');
     }
-    else if (action === 'skip approving changes (this session only)') {
+    else if (action === 'Skip approving changes (this session only)') {
       skipApprovingChanges = true;
     }
     else if (action === 'Select a different file') {
