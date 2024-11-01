@@ -12,10 +12,11 @@ import { clearTerminal, printCodeToTerminal, input, confirmAction, printAndPause
 import { printDebugMessage } from './debugging.js';
 import { extractCodeSnippets } from './extractCodeSnippets.js';
 import { readFile, writeFile, appendFile, convertToRelativePath, createFolderIfNotExists } from './fileIO.js';
-import { getFilePath, filePathArg } from './fileSelector.js';
+import { getFilePath, filePathArg, firstLoadTryAndFindGitPath } from './fileSelector.js';
 import { callLLM, setupLLM } from './llmCall.js';
 import { restoreFileFromBackup, } from './backupSystem.js';
 import { skip } from '@babel/traverse/lib/path/context.js';
+
 
 
 // Check for a command-line argument for the file path
@@ -23,10 +24,6 @@ import { skip } from '@babel/traverse/lib/path/context.js';
 export const debugMode = false;
 
 
-// make a hidden settings folder in the current directory
-if (!fs.existsSync('.aiCoder')) {
-  fs.mkdirSync('.aiCoder');
-}
 
 
 
@@ -37,7 +34,10 @@ marked.setOptions({
 
 
 
-
+process.on('SIGINT', () => {
+  console.log("\nExiting gracefully...");
+  process.exit(0); // Exit with a success code
+});
 
 
 
@@ -162,7 +162,11 @@ function addCustomSpacing(code) {
 let lastMenuChoice = '';
 let skipApprovingChanges = false;
 
+
+const madgicPrompt = 'Identify missing or incomplete functionality and add it';
+
 export async function mainUI() {
+  await firstLoadTryAndFindGitPath();
 
   while (true) {
     await clearTerminal();
@@ -173,8 +177,9 @@ export async function mainUI() {
 
     let choices = [
       'Make AI assisted code changes',
-      'Identify missing or incomplete functionality and add it',
+      madgicPrompt,
       ...await getPremadePrompts(),
+      'Loop automadgically',
       'Merge and format classes',
       '-',
       'Project settings',
@@ -220,7 +225,9 @@ export async function mainUI() {
     else if (action === 'Setup LLM') {
       await setupLLM();
     }
-
+    else if (action === 'Loop automadgically') {
+      await loopAutomadgically();
+    }
     else if (action === 'Edit pre-made prompts') {
       await launchNano('./.aiCoder/premade-prompts.txt');
     }
@@ -281,8 +288,34 @@ You will only only be providing javascript code snippets.
 `;
 
 
+async function loopAutomadgically() {
+  // Loop automadgically
+  await clearTerminal();
+  await printAndPause('Loop automadgically', 1);
+
+
+  const numberOfLoops = await input('How many loops? (q to quit): ', 5);
+  if (numberOfLoops === 'q') return;
+  const promtToLoop = await input('What do you want to do? (q to quit): ', madgicPrompt);
+  if (promtToLoop === 'q') return;
+  await clearTerminal();
+
+  let oldValue = skipApprovingChanges;
+  if (skipApprovingChanges  === false) skipApprovingChanges = await confirmAction('Skip approving changes?');
+
+  for (let i = 0; i < numberOfLoops; i++) {
+    await aiAssistedCodeChanges(madgicPrompt, true);
+  }
+
+  skipApprovingChanges = oldValue;
+
+  return "done";
+  // call openAI API passing the contents of the current code file. 
+}
+
+
 let lastResponse = '';
-export async function aiAssistedCodeChanges(premadePrompt = false) {
+export async function aiAssistedCodeChanges(premadePrompt = false, skipApprovingChanges = false) {
   // AI assisted code changes
   printDebugMessage('AI assisted code changes');
 
@@ -316,7 +349,7 @@ Include the class definition if you want to add or modify a function in a class.
 
     if (premadePrompt) {
       changesPrompt = premadePrompt;
-    } else {
+    } else if (skipApprovingChanges === false) {
       // Ask the user for the changes they want to make
       changesPrompt = await input('Tell me what you want, what you really really want (Enter to continue and merge) (q to quit) \n: ');
     }
@@ -350,7 +383,14 @@ Include the class definition if you want to add or modify a function in a class.
     console.log(changesPrompt);
     console.log("\n\nAI response:");
     console.log(marked(lastResponse));
+
+    if (skipApprovingChanges) {
+      await applyChanges();
+      break;
+    }
   }
+
+  await printAndPause('Done prompting', 1);
 }
 
 
