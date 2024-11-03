@@ -465,8 +465,9 @@ export async function showListOfClassesAndFunctions() {
 
     // Optionally add function names
     if (includeFunctions) {
+      listOfClasses += '\n';
       functions.forEach(func => {
-        listOfClasses += `\n  ${func}() {}\n`;
+        listOfClasses += `  ${func}() {}\n`;
       });
     }
 
