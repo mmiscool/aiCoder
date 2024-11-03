@@ -8,7 +8,17 @@ import prettier from 'prettier';
 
 import { marked } from 'marked';
 import TerminalRenderer from 'marked-terminal';
-import { clearTerminal, printCodeToTerminal, input, confirmAction, printAndPause, selectListHeight, menuPrompt, launchNano } from './terminalHelpers.js';
+import {
+  clearTerminal,
+  printCodeToTerminal, 
+  input, 
+  confirmAction,
+  printAndPause,
+   selectListHeight,
+  menuPrompt, 
+  launchNano,
+  pressEnterToContinue,
+} from './terminalHelpers.js';
 import { printDebugMessage } from './debugging.js';
 import { extractCodeSnippets } from './extractCodeSnippets.js';
 import { readFile, writeFile, appendFile, convertToRelativePath, createFolderIfNotExists } from './fileIO.js';
@@ -163,7 +173,7 @@ let lastMenuChoice = '';
 let skipApprovingChanges = false;
 
 
-const madgicPrompt = 'Identify missing or incomplete functionality and add it';
+const magicPrompt = 'Identify missing or incomplete functionality and add it';
 
 export async function mainUI() {
   await firstLoadTryAndFindGitPath();
@@ -177,11 +187,13 @@ export async function mainUI() {
 
     let choices = [
       'Make AI assisted code changes',
-      madgicPrompt,
+      magicPrompt,
       ...await getPremadePrompts(),
-      'Loop automadgically',
+      'Loop automagically',
       'Merge and format classes',
       '-',
+      'List classes and functions',
+      "-",
       'Project settings',
       'Restore file from backup',
       '-',
@@ -225,8 +237,8 @@ export async function mainUI() {
     else if (action === 'Setup LLM') {
       await setupLLM();
     }
-    else if (action === 'Loop automadgically') {
-      await loopAutomadgically();
+    else if (action === 'Loop automagically') {
+      await loopAutomagically();
     }
     else if (action === 'Edit pre-made prompts') {
       await launchNano('./.aiCoder/premade-prompts.txt');
@@ -239,6 +251,9 @@ export async function mainUI() {
       await launchNano('./.aiCoder/default-system-prompt.txt');
     } else if (action === 'Back to main menu') {
       console.log('Back to main menu');
+    }
+    else if (action === 'List classes and functions') {
+      await showListOfClassesAndFunctions();
     }
     else if (action === 'Skip approving changes (this session only)') {
       skipApprovingChanges = true;
@@ -288,23 +303,25 @@ You will only only be providing javascript code snippets.
 `;
 
 
-async function loopAutomadgically() {
-  // Loop automadgically
+async function loopAutomagically() {
+  // Loop Automagically
   await clearTerminal();
-  await printAndPause('Loop automadgically', 1);
+  await printAndPause('Loop Automagically', 1);
 
 
   const numberOfLoops = await input('How many loops? (q to quit): ', 5);
   if (numberOfLoops === 'q') return;
-  const promtToLoop = await input('What do you want to do? (q to quit): ', madgicPrompt);
+  const promtToLoop = await input('What do you want to do? (q to quit): ', magicPrompt);
   if (promtToLoop === 'q') return;
   await clearTerminal();
 
   let oldValue = skipApprovingChanges;
-  if (skipApprovingChanges  === false) skipApprovingChanges = await confirmAction('Skip approving changes?');
+  if (skipApprovingChanges === false) skipApprovingChanges = await confirmAction('Skip approving changes?');
 
   for (let i = 0; i < numberOfLoops; i++) {
-    await aiAssistedCodeChanges(madgicPrompt, true);
+    await aiAssistedCodeChanges(magicPrompt, true);
+    const pauseTime = 20;
+    await printAndPause(`Loop ${i + 1} of ${numberOfLoops} Pausing ${pauseTime} seconds . . .`, pauseTime);
   }
 
   skipApprovingChanges = oldValue;
@@ -331,9 +348,12 @@ export async function aiAssistedCodeChanges(premadePrompt = false, skipApproving
     },
     {
       role: "system",
-      content: `When providing code snippets include the class the function belongs to as part of your response. 
+      content: `When providing code snippets include the class the function belongs to as part of your snippet. 
 Include the class definition if you want to add or modify a function in a class.
-      
+
+DO NOT INCLUDE EXAMPLES OR TESTS IN YOUR CODE SNIPPETS.
+DO NOT INCLUDE EXAMPLES OR TESTS IN YOUR CODE SNIPPETS.
+DO NOT INCLUDE EXAMPLES OR TESTS IN YOUR CODE SNIPPETS.
       `
     },
     {
@@ -427,5 +447,129 @@ export async function applyChanges() {
 
 
 
+export async function showListOfClassesAndFunctions() {
+  const list = await getClassAndFunctionList(await readFile(filePathArg));
+
+  // Prompt if the user wants to include function names in the list
+  const includeFunctions = await confirmAction('Include function names in the list?', false);
+
+  // Print the list in terminal in the format: class name extends parentClass {}
+  let listOfClasses = '';
+
+  for (const className in list) {
+    const { functions, superClass } = list[className];
+    const extendsClause = superClass ? ` extends ${superClass}` : '';
+
+    // Start the class declaration
+    listOfClasses += `class ${className}${extendsClause} {`;
+
+    // Optionally add function names
+    if (includeFunctions) {
+      functions.forEach(func => {
+        listOfClasses += `\n  ${func}() {}\n`;
+      });
+    }
+
+    // Close the class
+    listOfClasses += `}\n`; // Double newline for separation between classes
+  }
+
+  console.log(listOfClasses);
+
+  // Prompt if the user wants to prepend the list to the file
+  const prependToFile = await confirmAction('Prepend the list to the file?', false);
+
+  if (prependToFile) {
+    // Read the file
+    const fileContent = await readFile(filePathArg);
+
+    // Prepend the list to the file content
+    await writeFile(filePathArg, listOfClasses + '\n\n' + fileContent);
+  }
 
 
+  //await press any key to continue
+
+  //await pressEnterToContinue();
+
+  //await printAndPause('Done', 100);
+}
+
+export function getClassAndFunctionList(code) {
+  const ast = acorn.parse(code, { sourceType: 'module', ecmaVersion: 'latest' });
+  const classFunctionMap = {};
+
+  ast.body.forEach(node => {
+    if (node.type === 'ClassDeclaration') {
+      const className = node.id.name;
+      const superClass = node.superClass ? node.superClass.name : null;
+      const functions = [];
+
+      node.body.body.forEach(classElement => {
+        if (classElement.type === 'MethodDefinition' && classElement.key.type === 'Identifier') {
+          functions.push(classElement.key.name);
+        }
+      });
+
+      classFunctionMap[className] = { functions, superClass };
+    }
+  });
+
+  return classFunctionMap;
+}
+
+
+
+
+export function getClassAndFunctionListSorted(code) {
+  const ast = acorn.parse(code, { sourceType: 'module', ecmaVersion: 'latest' });
+  const classInfo = new Map();
+
+  // Collect information on each class and its methods, along with its parent class if it extends one
+  ast.body.forEach(node => {
+    if (node.type === 'ClassDeclaration') {
+      const className = node.id.name;
+      const parentClassName = node.superClass && node.superClass.name ? node.superClass.name : null;
+      const methods = [];
+
+      node.body.body.forEach(classElement => {
+        if (classElement.type === 'MethodDefinition' && classElement.key.type === 'Identifier') {
+          methods.push(classElement.key.name);
+        }
+      });
+
+      classInfo.set(className, { className, parentClassName, methods });
+    }
+  });
+
+  // Sort classes based on dependency hierarchy and alphabetically within each level
+  const sortedClasses = [];
+  const processedClasses = new Set();
+
+  function addClassAndSubclasses(className) {
+    if (processedClasses.has(className)) return;
+
+    const classData = classInfo.get(className);
+    if (!classData) return;
+
+    // Add the parent class first if it exists
+    if (classData.parentClassName && classInfo.has(classData.parentClassName)) {
+      addClassAndSubclasses(classData.parentClassName);
+    }
+
+    // Add the current class
+    sortedClasses.push(classData);
+    processedClasses.add(className);
+  }
+
+  // Sort classes alphabetically before building the hierarchy
+  Array.from(classInfo.keys()).sort().forEach(addClassAndSubclasses);
+
+  // Convert sorted classes into the final output format
+  const result = {};
+  sortedClasses.forEach(({ className, methods }) => {
+    result[className] = methods;
+  });
+
+  return result;
+}

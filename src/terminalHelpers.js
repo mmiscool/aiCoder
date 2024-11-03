@@ -64,11 +64,12 @@ export async function input(promptText, defaultValue = '') {
 }
 
 
-export async function confirmAction(message) {
+export async function confirmAction(message, defaultValue = true) {
   let promptObject = {};
   promptObject.type = 'confirm';
   promptObject.name = 'confirm';
   promptObject.message = message || 'Are you sure?';
+  promptObject.default = defaultValue;
   return await (await inquirer.prompt([promptObject])).confirm;
 }
 
@@ -91,3 +92,10 @@ export function launchNano(filePath) {
   });
 }
 
+
+
+
+// function to press any key to continue
+export async function pressEnterToContinue() {
+  return await input('Press Enter to continue...');
+}
