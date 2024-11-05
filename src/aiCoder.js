@@ -6,16 +6,20 @@ import * as acorn from 'acorn-loose';
 import * as astring from 'astring';
 import prettier from 'prettier';
 
+import './gitnoteSetup.js' ;
+
+
+
 import { marked } from 'marked';
 import TerminalRenderer from 'marked-terminal';
 import {
   clearTerminal,
-  printCodeToTerminal, 
-  input, 
+  printCodeToTerminal,
+  input,
   confirmAction,
   printAndPause,
-   selectListHeight,
-  menuPrompt, 
+  selectListHeight,
+  menuPrompt,
   launchNano,
   pressEnterToContinue,
 } from './terminalHelpers.js';
@@ -54,6 +58,7 @@ process.on('SIGINT', () => {
 // Main export async function to handle parsing, modifying, and formatting the code
 // Main export async function to handle parsing, modifying, and formatting the code
 export async function mergeAndFormatClasses() {
+  await organizeImportsAndDeclarations();
   const filePath = await getFilePath();
 
   // Read the file content
@@ -132,6 +137,82 @@ export async function mergeAndFormatClasses() {
   try {
     let updatedCode = astring.generate(ast);
 
+
+
+    // Format the code with Prettier
+    updatedCode = await prettier.format(updatedCode, {
+      parser: 'babel',
+      tabWidth: 4,
+      useTabs: false,
+      printWidth: 80,
+      endOfLine: 'lf',
+      semi: true,
+      singleQuote: true,
+      trailingComma: true,
+      bracketSpacing: true,
+      proseWrap: 'never',
+    });
+    // Ensure whitespace between classes and functions
+    updatedCode = updatedCode.replace(/}\n(class|function)/g, '}\n\n$1');
+    updatedCode = updatedCode.replace(/}\n(?!\n)/g, '}\n\n\n\n\n') // Adds a blank line after closing braces
+      .replace(/(\b(?:class|function|const|let|var) .+?;\n)(?!\n)/g, '$1\n\n\n\n\n'); // Adds blank lines after declarations
+
+    // Write formatted code back to the file
+    await writeFile(filePath, updatedCode, true);
+
+    console.log(`Classes and functions in ${filePath} merged and formatted successfully.`);
+  } catch (error) {
+    console.error("Error during code generation or formatting:", error.message);
+  }
+}
+
+
+
+async function addRootLevelSpacing(code) {
+  return await code
+    .replace(/}\n(?!\n)/g, '}\n\n\n\n\n') // Adds a blank line after closing braces
+    .replace(/(\b(?:class|function|const|let|var) .+?;\n)(?!\n)/g, '$1\n\n\n\n\n'); // Adds blank lines after declarations
+};
+
+
+export async function organizeImportsAndDeclarations() {
+  const filePath = await getFilePath();
+
+  // Read the file content
+  const fileContent = fs.readFileSync(filePath, 'utf8');
+
+  // Parse into AST with loose parsing
+  let ast;
+  try {
+    ast = acorn.parse(fileContent, { sourceType: 'module', ecmaVersion: 'latest' });
+    console.log('AST parsing successful');
+  } catch (error) {
+    console.error("Parsing error:", error.message);
+    process.exit(1);
+  }
+
+  // Separate imports, variable declarations, and other statements
+  const importStatements = [];
+  const variableDeclarations = [];
+  const otherStatements = [];
+
+  ast.body.forEach(node => {
+    if (node.type === 'ImportDeclaration') {
+      importStatements.push(node);
+    } else if (node.type === 'VariableDeclaration') {
+      variableDeclarations.push(node);
+    } else {
+      otherStatements.push(node);
+    }
+  });
+
+  // Reorganize AST body with imports and variables at the top
+  ast.body = [...importStatements, ...variableDeclarations, ...otherStatements];
+
+  // Generate code from the modified AST
+  try {
+    let updatedCode = astring.generate(ast);
+
     // Format the code with Prettier
     updatedCode = await prettier.format(updatedCode, {
       parser: 'babel',
@@ -143,12 +224,11 @@ export async function mergeAndFormatClasses() {
       singleQuote: true
     });
 
-    // Custom post-process to add extra lines between classes and functions
-    updatedCode = addCustomSpacing(updatedCode);
 
-    // Write formatted code back to the file
+    updatedCode = await addCustomSpacing(updatedCode);
+    // Write organized code back to the file
     await writeFile(filePath, updatedCode, true);
-    console.log(`Classes and functions in ${filePath} merged and formatted successfully.`);
+    console.log(`Imports and variable declarations in ${filePath} organized successfully.`);
   } catch (error) {
     console.error("Error during code generation or formatting:", error.message);
   }
@@ -164,6 +244,11 @@ function addCustomSpacing(code) {
 
   // Add 1 blank line between methods inside classes
   code = code.replace(/}\n\s*(\w+\s*\()/g, '}\n\n    $1');
+
+  // Add 2 blank lines between functions
+  code = code.replace(/}\nfunction /g, '}\n\n\nfunction ');
+
+
 
   return code;
 }
