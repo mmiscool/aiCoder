@@ -41,4 +41,4 @@ function addFilesToGitignore(files) {
 }
 
 // Example usage:
-addFilesToGitignore(['.aiCoder/*key*', '.aiCoder/backups/*']);
+addFilesToGitignore(['*aiCoder/*key*', '*aiCoder/backups/*']);

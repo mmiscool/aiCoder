@@ -98,30 +98,35 @@ export async function mergeAndFormatClasses() {
   const newBody = [];
 
   ast.body.forEach(node => {
+    let classNode = null;
+    let className = null;
+
     if (node.type === 'ClassDeclaration') {
-      const className = node.id.name.toLowerCase(); // Treat class names as case-insensitive
+      classNode = node;
+      className = node.id.name.toLowerCase();
+    } else if (node.type === 'ExportNamedDeclaration' && node.declaration?.type === 'ClassDeclaration') {
+      classNode = node.declaration;
+      className = classNode.id.name.toLowerCase();
+    }
+
+    if (classNode) {
       printDebugMessage(`Processing class: ${className}`);
 
       if (classesByName.has(className)) {
-        // Duplicate class found, merge with the existing class
         const existingClass = classesByName.get(className);
         printDebugMessage(`Merging duplicate class: ${className}`);
-        mergeClassMethods(existingClass, node);
+        mergeClassMethods(existingClass, classNode);
       } else {
-        // First occurrence of the class
-        classesByName.set(className, node);
-        newBody.push(node); // Add only the first occurrence
+        classesByName.set(className, classNode);
+        newBody.push(node); // Add the first occurrence
         printDebugMessage(`Added class: ${className}`);
       }
     } else if (node.type === 'FunctionDeclaration') {
       const functionName = node.id.name;
       printDebugMessage(`Processing function: ${functionName}`);
-
-      // Track only the latest instance of each function
       functionsByName.set(functionName, node);
     } else {
-      // Add non-class, non-function nodes as is
-      newBody.push(node);
+      newBody.push(node); // Add non-class, non-function nodes as is
     }
   });
 
@@ -137,8 +142,6 @@ export async function mergeAndFormatClasses() {
   try {
     let updatedCode = astring.generate(ast);
 
-
-
     // Format the code with Prettier
     updatedCode = await prettier.format(updatedCode, {
       parser: 'babel',
@@ -147,22 +150,18 @@ export async function mergeAndFormatClasses() {
       printWidth: 80,
       endOfLine: 'lf',
       semi: true,
-      singleQuote: true,
-      trailingComma: true,
-      bracketSpacing: true,
-      proseWrap: 'never',
+      singleQuote: true
     });
-    // Ensure whitespace between classes and functions
-    updatedCode = updatedCode.replace(/}\n(class|function)/g, '}\n\n$1');
-    updatedCode = updatedCode.replace(/}\n(?!\n)/g, '}\n\n\n\n\n') // Adds a blank line after closing braces
-      .replace(/(\b(?:class|function|const|let|var) .+?;\n)(?!\n)/g, '$1\n\n\n\n\n'); // Adds blank lines after declarations
+
+    // Custom post-process to add extra lines between classes and functions
+    updatedCode = await addCustomSpacing(updatedCode);
 
     // Write formatted code back to the file
     await writeFile(filePath, updatedCode, true);
-
     console.log(`Classes and functions in ${filePath} merged and formatted successfully.`);
   } catch (error) {
     console.error("Error during code generation or formatting:", error.message);
+    await pressEnterToContinue();
   }
 }
 
@@ -176,6 +175,7 @@ async function addRootLevelSpacing(code) {
 
 
 export async function organizeImportsAndDeclarations() {
+
   const filePath = await getFilePath();
 
   // Read the file content
@@ -210,8 +210,9 @@ export async function organizeImportsAndDeclarations() {
   ast.body = [...importStatements, ...variableDeclarations, ...otherStatements];
 
   // Generate code from the modified AST
+  let updatedCode = fileContent;
   try {
-    let updatedCode = astring.generate(ast);
+     updatedCode = astring.generate(ast);
 
     // Format the code with Prettier
     updatedCode = await prettier.format(updatedCode, {
@@ -225,13 +226,16 @@ export async function organizeImportsAndDeclarations() {
     });
 
 
-    updatedCode = await addCustomSpacing(updatedCode);
+    //updatedCode = await addCustomSpacing(updatedCode);
     // Write organized code back to the file
     await writeFile(filePath, updatedCode, true);
     console.log(`Imports and variable declarations in ${filePath} organized successfully.`);
   } catch (error) {
-    console.error("Error during code generation or formatting:", error.message);
+    console.error("Error during code generation or formatting:", error);
+    await pressEnterToContinue();
   }
+
+  return updatedCode;
 }
 
 
@@ -247,9 +251,6 @@ function addCustomSpacing(code) {
 
   // Add 2 blank lines between functions
   code = code.replace(/}\nfunction /g, '}\n\n\nfunction ');
-
-
-
   return code;
 }
 
@@ -572,13 +573,6 @@ export async function showListOfClassesAndFunctions() {
     // Prepend the list to the file content
     await writeFile(filePathArg, listOfClasses + '\n\n' + fileContent);
   }
-
-
-  //await press any key to continue
-
-  //await pressEnterToContinue();
-
-  //await printAndPause('Done', 100);
 }
 
 export function getClassAndFunctionList(code) {
@@ -586,12 +580,22 @@ export function getClassAndFunctionList(code) {
   const classFunctionMap = {};
 
   ast.body.forEach(node => {
+    let classNode = null;
+
     if (node.type === 'ClassDeclaration') {
-      const className = node.id.name;
-      const superClass = node.superClass ? node.superClass.name : null;
+      // Regular class declaration
+      classNode = node;
+    } else if (node.type === 'ExportNamedDeclaration' && node.declaration?.type === 'ClassDeclaration') {
+      // Exported class declaration
+      classNode = node.declaration;
+    }
+
+    if (classNode) {
+      const className = classNode.id.name;
+      const superClass = classNode.superClass ? classNode.superClass.name : null;
       const functions = [];
 
-      node.body.body.forEach(classElement => {
+      classNode.body.body.forEach(classElement => {
         if (classElement.type === 'MethodDefinition' && classElement.key.type === 'Identifier') {
           functions.push(classElement.key.name);
         }

@@ -278,14 +278,8 @@ export async function getGroqResponse(messages) {
 
     const completion = await groq.chat.completions
         .create({
-            messages: [
-                {
-                    role: "user",
-                    content: "Explain the importance of fast language models",
-                },
-            ],
+            messages,
             model: await selectModel(),
-           
         })
     console.log(completion.choices[0].message.content);
 
