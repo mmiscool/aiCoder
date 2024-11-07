@@ -1,12 +1,15 @@
 #!/usr/bin/env node
 // mergeClasses.js
 import fs from 'fs';
-import path, { relative } from 'path';
+
 import * as acorn from 'acorn-loose';
 import * as astring from 'astring';
 import prettier from 'prettier';
 
-import './gitnoteSetup.js' ;
+
+
+
+import './gitnoteSetup.js';
 
 
 
@@ -25,7 +28,7 @@ import {
 } from './terminalHelpers.js';
 import { printDebugMessage } from './debugging.js';
 import { extractCodeSnippets } from './extractCodeSnippets.js';
-import { readFile, writeFile, appendFile, convertToRelativePath, createFolderIfNotExists } from './fileIO.js';
+import { readFile, writeFile, appendFile, convertToRelativePath, createFolderIfNotExists, readOrLoadFromDefault } from './fileIO.js';
 import { getFilePath, filePathArg, firstLoadTryAndFindGitPath } from './fileSelector.js';
 import { callLLM, setupLLM } from './llmCall.js';
 import { restoreFileFromBackup, } from './backupSystem.js';
@@ -212,7 +215,7 @@ export async function organizeImportsAndDeclarations() {
   // Generate code from the modified AST
   let updatedCode = fileContent;
   try {
-     updatedCode = astring.generate(ast);
+    updatedCode = astring.generate(ast);
 
     // Format the code with Prettier
     updatedCode = await prettier.format(updatedCode, {
@@ -268,7 +271,7 @@ export async function mainUI() {
     await clearTerminal();
     await getFilePath();
     await clearTerminal();
-
+    //console.log(await getScriptFolderPath())
     console.log(`Current file: (${convertToRelativePath(filePathArg)})`);
 
     let choices = [
@@ -331,9 +334,7 @@ export async function mainUI() {
     }
     else if (action === 'Edit default system prompt') {
       // test if the file exists and create it if it doesn't
-      if (!fs.existsSync('./.aiCoder/default-system-prompt.txt')) {
-        await writeFile('./.aiCoder/default-system-prompt.txt', defaultSystemPrompt);
-      }
+      await readOrLoadFromDefault('./.aiCoder/default-system-prompt.txt', '/prompts/default-system-prompt.txt');
       await launchNano('./.aiCoder/default-system-prompt.txt');
     } else if (action === 'Back to main menu') {
       console.log('Back to main menu');
@@ -360,33 +361,13 @@ mainUI();
 
 
 export async function getPremadePrompts() {
-  const filePath = './.aiCoder/premade-prompts.txt';
-
-  // if file does not exist return an empty array
-  if (!fs.existsSync(filePath)) {
-    // Create the file if it doesn't exist
-
-    console.log('Creating pre-made prompts file');
-    await writeFile(filePath,
-      `# Add your pre-made prompts here
-# Each custom prompt must all be on a single line.
-# Lines starting with # are ignored.`);
-
-    return [];
-
-  }
-
+  const fileContent = await readOrLoadFromDefault('./.aiCoder/premade-prompts.txt', '/prompts/premade-prompts.txt');
   // read the file and place each line in an array. Ignore empty lines and lines starting with #
-  const fileContent = fs.readFileSync(filePath, 'utf8');
   const lines = fileContent.split('\n').map(line => line.trim()).filter(line => line && !line.startsWith('#'));
   return lines;
 }
 
-let defaultSystemPrompt = `
-You are an expert with javascript, NURBS curves and surfaces, and 3D modeling. 
-You are creating functions that will be part of a 3D modeling library.
-You will only only be providing javascript code snippets.
-`;
+let defaultSystemPrompt = '';
 
 
 async function loopAutomagically() {
@@ -425,7 +406,7 @@ export async function aiAssistedCodeChanges(premadePrompt = false, skipApproving
   // call openAI API passing the contents of the current code file. 
   const code = await readFile(filePathArg);
 
-  defaultSystemPrompt = await readFile('./.aiCoder/default-system-prompt.txt') || defaultSystemPrompt;
+  defaultSystemPrompt = await readOrLoadFromDefault('./.aiCoder/default-system-prompt.txt', '/prompts/default-system-prompt.txt');
 
   let messages = [
     {
@@ -663,3 +644,9 @@ export function getClassAndFunctionListSorted(code) {
 
   return result;
 }
+
+
+
+
+
+

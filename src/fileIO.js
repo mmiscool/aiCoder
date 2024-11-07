@@ -1,9 +1,9 @@
 import fs from 'fs';
-import path from 'path';
+import path, { relative, dirname } from 'path';
 import { printDebugMessage } from './debugging.js';
 import { createBackup } from './backupSystem.js';
 import { printAndPause } from './terminalHelpers.js';
-
+import { fileURLToPath } from 'url';
 
 // Helper functions to read, write, and append to files
 // backups to be created in the ./.aiCoder/backups folder
@@ -25,7 +25,6 @@ export async function writeFile(filePath, content, makeBackup = false) {
     printDebugMessage("Writing file:", filePath);
     filePath = await convertToRelativePath(filePath);
     if (makeBackup) await createBackup(filePath);
-
     await fs.writeFileSync(filePath, content, 'utf8');
 }
 
@@ -57,3 +56,30 @@ export async function createFolderIfNotExists(folderPath) {
         fs.mkdirSync(folderPath, { recursive: true });
     }
 }
+
+
+
+
+
+
+export async function readOrLoadFromDefault(filePath, defaultFilePath) {
+    defaultFilePath = await getScriptFolderPath() + defaultFilePath;
+    let fileContent = await readFile(filePath);
+    if (fileContent === null) {
+        console.log('File not found, creating new file:', filePath);
+        fileContent = await readFile(defaultFilePath);
+        await writeFile(filePath, fileContent);
+    }
+    return fileContent;
+}
+
+
+
+
+export function getScriptFolderPath() {
+    // Retrieve the current file's directory path
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = dirname(__filename);
+    return __dirname;
+}
+
