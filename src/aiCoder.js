@@ -465,6 +465,36 @@ DO NOT INCLUDE EXAMPLES OR TESTS IN YOUR CODE SNIPPETS.
       role: "assistant",
       content: lastResponse,
     });
+
+
+    // loop up to 3 times to make sure the code snippets are correct
+    let areSnippetsValid = '';
+    for (let i = 0; i < 3; i++) {
+      console.log(`Validating code snippets attempt ${i + 1}`);
+      areSnippetsValid = await callLLM([...messages, {
+        role: "system",
+        content:
+          `Are the code snippets you generated in the correct format including class definitions? 
+      If the answer is yes reply with one word "yes". If they are not in the correct format correct them.` }]);
+
+      areSnippetsValid = areSnippetsValid.trim();
+      console.log(marked(lastResponse));
+
+      if (areSnippetsValid.toLowerCase().startsWith('yes')) {
+        
+        break;
+      } else {
+        lastResponse = areSnippetsValid;
+        console.log('Code snippets are not valid');
+        await printAndPause(areSnippetsValid, 20);
+        messages.push({ role: "system", content: areSnippetsValid });
+      }
+
+    }
+
+    
+
+
     await clearTerminal();
     console.log("\n\n\nUser input:");
     console.log(changesPrompt);
