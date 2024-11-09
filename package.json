@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "main": "aiCoder.js",
   "bin": {
-    "aiCoder": "./src/aiCoder.js",
-    "aicoder": "./src/aiCoder.js",
-    "a": "./src/aiCoder.js"
+    "aiCoder": "src/aiCoder.js",
+    "aicoder": "src/aiCoder.js",
+    "a": "src/aiCoder.js"
   },
   "scripts": {
     "start": "./src/aiCoder.js"
