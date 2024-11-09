@@ -1,5 +1,5 @@
 {
-  "name": "aiCodertool",
+  "name": "aicodertool",
   "version": "1.0.4",
   "main": "aiCoder.js",
   "bin": {
