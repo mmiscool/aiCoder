@@ -10,6 +10,12 @@ The real magic? aiCoder’s advanced merging keeps your code intact, seamlessly 
 
 
 ## INSTALLATION 
+Install from NPM.
+```
+npm i aicodertool -g
+```
+
+Install from source.
 Clone this repo and navigate to the directory. 
 ```
 cd aiCoder
