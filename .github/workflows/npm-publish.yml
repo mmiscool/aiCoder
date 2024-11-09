@@ -48,14 +48,8 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 20
-      - run: npm install -g conventional-changelog-conventionalcommits
-      - run: npm install -g semantic-release@v21.0.2
-      - run: npm install -g @semantic-release/exec
-      - run: npm install -g @semantic-release/npm
-      - run: npm install -g @semantic-release/git
-      - run: npm install -g @semantic-release/release-notes-generator
-      - run: npm install -g @semantic-release/changelog
-      - run: npm install -g @semantic-release/github
+      - name: Install dependencies
+        run: npm install -g semantic-release conventional-changelog-conventionalcommits @semantic-release/exec @semantic-release/git @semantic-release/github @semantic-release/changelog @semantic-release/release-notes-generator
       - name: Release
         env:
           GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
