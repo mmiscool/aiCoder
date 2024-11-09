@@ -1,6 +1,6 @@
 {
   "name": "aiCoderTool",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "main": "aiCoder.js",
   "bin": {
     "aiCoder": "src/aiCoder.js",
