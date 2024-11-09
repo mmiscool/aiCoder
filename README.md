@@ -150,6 +150,7 @@ Todo:
  * Make it possible for the llm to request adding NPM packages to project.
  * Add support for LLM to work with html, css and md files in addition to js. This will require parsing these files to an AST (abstract syntax tree) and merging ASTs to recreate the file. 
  * Preserve comments when merging. 
+ * Publish as npm package
 
 
 # 🌌 The Future Awaits
