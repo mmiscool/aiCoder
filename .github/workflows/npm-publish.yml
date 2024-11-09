@@ -10,7 +10,7 @@ on:
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
+  NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -59,6 +59,7 @@ jobs:
       - name: Release
         env:
           GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ env.NPM_TOKEN }}
         run: |
           sudo apt-get install -y jq
           chmod +x ./scripts/prepareCMD.sh
