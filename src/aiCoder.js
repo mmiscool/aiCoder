@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// mergeClasses.js
+
 import fs from 'fs';
 
 import * as acorn from 'acorn-loose';
@@ -33,7 +33,7 @@ import { getFilePath, filePathArg, firstLoadTryAndFindGitPath } from './fileSele
 import { callLLM, setupLLM } from './llmCall.js';
 import { restoreFileFromBackup, } from './backupSystem.js';
 import { skip } from '@babel/traverse/lib/path/context.js';
-
+//import {mergeSnippets }from './mergeTool.js';
 
 
 // Check for a command-line argument for the file path
