@@ -208,7 +208,7 @@ async function installOllama() {
     return new Promise((resolve, reject) => {
         const command = 'curl';
         const args = ['-fsSL', 'https://ollama.com/install.sh', '|', 'sh'];
-        
+
         const installer = spawn(command, args, { stdio: 'inherit', shell: true });
 
         installer.on('error', (error) => {

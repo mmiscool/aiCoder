@@ -58,7 +58,7 @@ export async function input(promptText, defaultValue = '') {
   let promptObject = {};
   promptObject.type = 'input';
   promptObject.name = 'input';
-  promptObject.message = promptText|| 'Enter a value:';
+  promptObject.message = promptText || 'Enter a value:';
   promptObject.default = defaultValue || '';
   return await (await inquirer.prompt([promptObject])).input;
 }
@@ -98,4 +98,60 @@ export function launchNano(filePath) {
 // function to press any key to continue
 export async function pressEnterToContinue() {
   return await input('Press Enter to continue...');
+}
+
+
+
+
+export async function displayMenu(menuSystem, lastSelectedName = null) {
+  // Function to recursively process the menu structure
+  async function processMenu(menuNode, lastSelected = null) {
+    // Find the index of the last selected item by name
+
+    while (true) {
+      // Prepare the menu object with prompt text from menu name
+      const menuObject = {
+        message: menuNode.name, // Use menu name as the prompt text
+        choices: menuNode.options.map((item) => {
+          if (item === '-') return new Separator();
+          return { name: item.name, value: item.name }; // Using name as value for selection matching
+        }),
+
+        default: lastSelected
+
+      };
+
+      // Display the menu and get the selected item by name
+      const selectedName = await menuPrompt({ ...menuObject, default: lastSelected });
+      const selectedItem = menuNode.options.find((item) => item.name === selectedName);
+      lastSelected = selectedName;
+
+      if (selectedItem.name === 'Back') {
+        // If 'Back' is selected, return 'back' to exit this submenu
+        return 'back';
+      } else if (selectedItem.options) {
+        // add a separator
+        selectedItem.options.unshift('-');
+        // If submenu exists, add a 'Back' option and process the submenu
+        selectedItem.options.unshift({
+          name: 'Back',
+          action: () => 'back'
+        });
+
+
+        const submenuResult = await processMenu(selectedItem, 'Back'); // Set 'Back' as default for submenus
+        selectedItem.options.shift(); // Remove 'Back' after returning
+
+        if (submenuResult === 'back') {
+          continue; // Go back to the previous menu
+        }
+      } else if (selectedItem.action) {
+        // Execute the action and stay in the current menu level
+        await selectedItem.action();
+      }
+    }
+  }
+
+  // Start processing the menu with the initial selection by name
+  await processMenu(menuSystem, lastSelectedName);
 }

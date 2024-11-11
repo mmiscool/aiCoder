@@ -7,6 +7,8 @@ With **aiCoder** as your coding co-pilot, you’ll streamline development, refin
 
 The real magic? aiCoder’s advanced merging keeps your code intact, seamlessly integrating new snippets with precision and reliability.
 
+## UNSTABLE
+This project is going to be in a state of flux for a while. Settings and prompt files may need to be recreated after updates as more settings are added and files are renamed. 
 
 
 ## INSTALLATION 

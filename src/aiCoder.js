@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import fs from 'fs';
+import fs, { read } from 'fs';
 
 import * as acorn from 'acorn-loose';
 import * as astring from 'astring';
@@ -25,21 +25,22 @@ import {
   menuPrompt,
   launchNano,
   pressEnterToContinue,
+  displayMenu,
 } from './terminalHelpers.js';
 import { printDebugMessage } from './debugging.js';
 import { extractCodeSnippets } from './extractCodeSnippets.js';
 import { readFile, writeFile, appendFile, convertToRelativePath, createFolderIfNotExists, readOrLoadFromDefault } from './fileIO.js';
 import { getFilePath, filePathArg, firstLoadTryAndFindGitPath } from './fileSelector.js';
-import { callLLM, setupLLM } from './llmCall.js';
+import { callLLM, setupLLM, selectAIservice } from './llmCall.js';
 import { restoreFileFromBackup, } from './backupSystem.js';
 import { skip } from '@babel/traverse/lib/path/context.js';
+import { title } from 'process';
 //import {mergeSnippets }from './mergeTool.js';
 
 
 // Check for a command-line argument for the file path
 
 export const debugMode = false;
-
 
 
 
@@ -265,6 +266,7 @@ let skipApprovingChanges = false;
 const magicPrompt = 'Identify missing or incomplete functionality and add it';
 
 export async function mainUI() {
+  await clearTerminal();
   await firstLoadTryAndFindGitPath();
 
   while (true) {
@@ -307,6 +309,8 @@ export async function mainUI() {
           'Setup LLM',
           'Edit pre-made prompts',
           'Edit default system prompt',
+          'Edit snippet production prompt',
+          'Edit snippet validation prompt',
           'Skip approving changes (this session only)',
           '-',
           'Back to main menu'
@@ -330,12 +334,21 @@ export async function mainUI() {
       await loopAutomagically();
     }
     else if (action === 'Edit pre-made prompts') {
-      await launchNano('./.aiCoder/premade-prompts.txt');
+      await readOrLoadFromDefault('./.aiCoder/premade-prompts.md', '/prompts/premade-prompts.md');
+      await launchNano('./.aiCoder/premade-prompts.md');
+    }
+    else if (action === 'Edit snippet production prompt') {
+      await readOrLoadFromDefault('./.aiCoder/snippet-production-prompt.md', '/prompts/snippet-production-prompt.md');
+      await launchNano('./.aiCoder/snippet-production-prompt.md');
+    }
+    else if (action === 'Edit snippet validation prompt') {
+      await readOrLoadFromDefault('./.aiCoder/snippet-validation-prompt.md', '/prompts/snippet-validation-prompt.md');
+      await launchNano('./.aiCoder/snippet-validation-prompt.md');
     }
     else if (action === 'Edit default system prompt') {
       // test if the file exists and create it if it doesn't
-      await readOrLoadFromDefault('./.aiCoder/default-system-prompt.txt', '/prompts/default-system-prompt.txt');
-      await launchNano('./.aiCoder/default-system-prompt.txt');
+      await readOrLoadFromDefault('./.aiCoder/default-system-prompt.md', '/prompts/default-system-prompt.md');
+      await launchNano('./.aiCoder/default-system-prompt.md');
     } else if (action === 'Back to main menu') {
       console.log('Back to main menu');
     }
@@ -361,13 +374,13 @@ mainUI();
 
 
 export async function getPremadePrompts() {
-  const fileContent = await readOrLoadFromDefault('./.aiCoder/premade-prompts.txt', '/prompts/premade-prompts.txt');
+  const fileContent = await readOrLoadFromDefault('./.aiCoder/premade-prompts.md', '/prompts/premade-prompts.md');
   // read the file and place each line in an array. Ignore empty lines and lines starting with #
   const lines = fileContent.split('\n').map(line => line.trim()).filter(line => line && !line.startsWith('#'));
   return lines;
 }
 
-let defaultSystemPrompt = '';
+
 
 
 async function loopAutomagically() {
@@ -387,7 +400,12 @@ async function loopAutomagically() {
 
   for (let i = 0; i < numberOfLoops; i++) {
     await aiAssistedCodeChanges(magicPrompt, true);
-    const pauseTime = 20;
+
+    let pauseTime = 20;
+    // find out what LLM is being used and turn the throttle on and off as needed
+    const llmBeingUsed = await selectAIservice();
+    if (llmBeingUsed === "ollama") pauseTime = 3;
+
     await printAndPause(`Loop ${i + 1} of ${numberOfLoops} Pausing ${pauseTime} seconds . . .`, pauseTime);
   }
 
@@ -406,26 +424,20 @@ export async function aiAssistedCodeChanges(premadePrompt = false, skipApproving
   // call openAI API passing the contents of the current code file. 
   const code = await readFile(filePathArg);
 
-  defaultSystemPrompt = await readOrLoadFromDefault('./.aiCoder/default-system-prompt.txt', '/prompts/default-system-prompt.txt');
-
+  let defaultSystemPrompt = await readOrLoadFromDefault('./.aiCoder/default-system-prompt.md', '/prompts/default-system-prompt.md');
+  let snippetProductionPrompt = await readOrLoadFromDefault('./.aiCoder/snippet-production-prompt.md', '/prompts/snippet-production-prompt.md');
   let messages = [
     {
       role: "system",
       content: defaultSystemPrompt
     },
     {
-      role: "system",
-      content: `When providing code snippets include the class the function belongs to as part of your snippet. 
-Include the class definition if you want to add or modify a function in a class.
-
-DO NOT INCLUDE EXAMPLES OR TESTS IN YOUR CODE SNIPPETS.
-DO NOT INCLUDE EXAMPLES OR TESTS IN YOUR CODE SNIPPETS.
-DO NOT INCLUDE EXAMPLES OR TESTS IN YOUR CODE SNIPPETS.
-      `
+      role: "fileManager",
+      content: code,
     },
     {
       role: "system",
-      content: code,
+      content: snippetProductionPrompt
     },
   ]
 
@@ -467,21 +479,21 @@ DO NOT INCLUDE EXAMPLES OR TESTS IN YOUR CODE SNIPPETS.
     });
 
 
+    let snippetValidationPrompt = await readOrLoadFromDefault('./.aiCoder/snippet-validation-prompt.md', '/prompts/snippet-validation-prompt.md');
     // loop up to 3 times to make sure the code snippets are correct
     let areSnippetsValid = '';
     for (let i = 0; i < 3; i++) {
       console.log(`Validating code snippets attempt ${i + 1}`);
       areSnippetsValid = await callLLM([...messages, {
         role: "system",
-        content:
-          `Are the code snippets you generated in the correct format including class definitions? 
-      If the answer is yes reply with one word "yes". If they are not in the correct format correct them.` }]);
+        content: snippetValidationPrompt
+      }]);
 
       areSnippetsValid = areSnippetsValid.trim();
       console.log(marked(lastResponse));
 
       if (areSnippetsValid.toLowerCase().startsWith('yes')) {
-        
+
         break;
       } else {
         lastResponse = areSnippetsValid;
@@ -492,7 +504,7 @@ DO NOT INCLUDE EXAMPLES OR TESTS IN YOUR CODE SNIPPETS.
 
     }
 
-    
+
 
 
     await clearTerminal();
@@ -500,6 +512,7 @@ DO NOT INCLUDE EXAMPLES OR TESTS IN YOUR CODE SNIPPETS.
     console.log(changesPrompt);
     console.log("\n\nAI response:");
     console.log(marked(lastResponse));
+    printAndPause('Changes are good and will be applied.', 3);
 
     if (skipApprovingChanges) {
       await applyChanges();
