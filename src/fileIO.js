@@ -21,6 +21,8 @@ export async function readFile(filePath) {
 
 }
 
+
+
 export async function writeFile(filePath, content, makeBackup = false) {
     printDebugMessage("Writing file:", filePath);
     filePath = await convertToRelativePath(filePath);

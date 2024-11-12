@@ -1,6 +1,6 @@
 # Code Review Instructions for LLM
 
-Review the provided code snippets to ensure they comply with the following rules. If any rule is not followed, **rewrite the snippets to conform**.
+Review all provided code snippets to ensure they comply with the following rules. If any rule is not followed, **rewrite the snippets to conform**.
 
 1. **Class Context (Important)**:  
    - **All functions must be encapsulated within the class syntax.** 
@@ -17,7 +17,7 @@ Review the provided code snippets to ensure they comply with the following rules
    - Constructors should only be modified when absolutely necessary.
 
 5. **No Global Code**:  
-   - Ensure there are no global variables or functions; all logic should be encapsulated within the class.
+   - Ensure there are no global variables or functions; all code should be encapsulated within the class or functions.
 
 **If the code snippets fully comply with these rules**, reply with "yes". Otherwise, reply with a new set of code snippets that meet the requirements, ensuring each function is properly contained within the class syntax.
 

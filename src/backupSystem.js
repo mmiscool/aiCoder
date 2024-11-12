@@ -16,8 +16,6 @@ export async function createBackup(filePath) {
     const backupFolder = './.aiCoder/backups';
     await createFolderIfNotExists(backupFolder);
 
-    console.log('Creating backup of the file:', filePath);
-
     const timestamp = new Date().toISOString().replace(/:/g, '-');
     const backupFilePath = path.join(backupFolder, path.dirname(filePath), `${path.basename(filePath)}_backup_${timestamp}`);
 

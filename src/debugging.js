@@ -1,4 +1,4 @@
-import { debugMode } from "./aiCoder.js";
+import { debugMode } from "./main.js";
 
 export async function printDebugMessage(message) {
   if (debugMode) {

@@ -1,15 +1,15 @@
 {
   "name": "aicodertool",
   "version": "1.0.8",
-  "main": "aiCoder.js",
+  "main": "main.js",
   "homepage": "https://github.com/mmiscool/aiCoder",
   "bin": {
-    "aiCoder": "src/aiCoder.js",
-    "aicoder": "src/aiCoder.js",
-    "a": "src/aiCoder.js"
+    "aiCoder": "src/main.js",
+    "aicoder": "src/main.js",
+    "a": "src/main.js"
   },
   "scripts": {
-    "start": "./src/aiCoder.js"
+    "start": "./src/main.js"
   },
   "author": "mmiscool",
   "license": "MIT",

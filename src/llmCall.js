@@ -1,23 +1,61 @@
 import { OpenAI } from "openai";
 import fs from 'fs';
 import { readFile, writeFile } from "./fileIO.js"
-import { input, clearTerminal, printAndPause, menuPrompt, confirmAction, } from "./terminalHelpers.js";
+import { input, clearTerminal, printAndPause, menuPrompt, confirmAction, pressEnterToContinue, } from "./terminalHelpers.js";
 import Groq from "groq-sdk";
 import ollama from 'ollama';
 import cliProgress from 'cli-progress';
 import { spawn } from 'child_process';
 
+let throttleTime = 20;
+let lastCallTime = 0;
 
+export class conversation {
+    constructor() {
+        this.messages = [];
+    }
+
+    async addMessage(role, content) {
+        this.messages.push({ role, content });
+    }
+
+    async lastMessage() {
+        return this.messages[this.messages.length - 1].content;
+    }
+
+    async callLLM() {
+        let llmResponse = await callLLM(this.messages);
+        llmResponse = llmResponse.trim();
+        await this.addMessage('system', llmResponse);
+        return llmResponse;
+    }
+}
+
+
+async function throttle(){
+    // check if the current time is greater than the last call time + throttle time and if not wait until it is
+    // if it needs use the printAndPause function to show a message to the user and wait the remaining time
+    const currentTime = new Date().getTime();
+    if (currentTime < lastCallTime + throttleTime) {
+        const remainingTime = (lastCallTime + throttleTime) - currentTime;
+        await printAndPause(`Throttling. Please wait ${remainingTime / 1000} seconds.`, remainingTime / 1000);
+    }
+    return;
+}
 
 
 
 export async function callLLM(messages) {
     const llmToUse = await selectAIservice();
     if (llmToUse === 'openai') {
+        await throttle();
         return await getOpenAIResponse(messages);
     } else if (llmToUse === 'groq') {
+        await throttle();
         return await getGroqResponse(messages);
     } else if (llmToUse === 'ollama') {
+        // console.log(messages);
+        // await pressEnterToContinue();
         return await getOllamaResponse(messages);
     }
     else {

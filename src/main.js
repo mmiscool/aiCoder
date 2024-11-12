@@ -1,0 +1,186 @@
+#!/usr/bin/env node
+import {
+    displayMenu,
+    clearTerminal,
+    printAndPause,
+    input,
+    getFilePath,
+    launchNano
+} from './terminalHelpers.js';
+import { intelligentlyMergeSnippets } from './intelligentMerge.js';
+import { setupLLM } from './llmCall.js';
+import { readOrLoadFromDefault } from './fileIO.js';
+import { aiAssistedCodeChanges, loopAIcodeGeneration } from './aiAssistedCodeChanges.js';
+
+import { spawn } from 'child_process';
+import { showListOfClassesAndFunctions } from './classListing.js';
+import './gitnoteSetup.js';
+
+
+export const debugMode = false;
+
+
+// graceful shutdown
+process.on('SIGINT', () => {
+    printAndPause("\nExiting gracefully...");
+    process.exit(0); // Exit with a success code
+});
+
+
+//Current target file
+export const ctx = {
+    targetFile: process.argv[2],
+    skipApprovingChanges: false,
+};
+
+
+export async function getPremadePrompts() {
+    const fileContent = await readOrLoadFromDefault('./.aiCoder/premade-prompts.md', '/prompts/premade-prompts.md');
+    // read the file and place each line in an array. Ignore empty lines and lines starting with #
+    const lines = fileContent.split('\n').map(line => line.trim()).filter(line => line && !line.startsWith('#'));
+
+    // loop over each line and create a menu option
+    const premadePrompts = lines.map((line, index) => {
+        return {
+            name: line,
+            action: async function () {
+                await aiAssistedCodeChanges(line);
+            }
+        }
+    });
+
+
+    return premadePrompts;
+}
+
+
+
+
+
+async function mainLoop(params) {
+    while (true) {
+
+
+        const customPremadePrompts = await getPremadePrompts()
+
+
+        let mainMenu = {
+            name: function () {
+                return `Editing: '${ctx.targetFile}'`;
+            },
+            options: [
+                {
+                    name: "Make AI assisted changes",
+                    action: async function () {
+                        await aiAssistedCodeChanges();
+                    }
+                },
+
+                ...customPremadePrompts,
+                "-",
+                {
+                    name: "Loop automagically",
+                    action: async function () {
+                        await loopAIcodeGeneration(null, null, null);
+                    }
+                },
+                {
+                    name: "Intelligently merge snippets",
+                    action: async function () {
+                        await intelligentlyMergeSnippets(ctx.targetFile);
+                    }
+                },
+                {
+                    name:"List classes and functions",
+                    action: showListOfClassesAndFunctions
+                },
+                {
+                    name: "Project settings",
+                    options: [
+
+                        {
+                            name: "Setup LLM",
+                            action: async function () {
+                                await setupLLM();
+                            }
+                        },
+                        {
+                            name: "Edit pre-made prompts (requires restart)",
+                            exitAfter: true,
+                            action: async function () {
+                                await readOrLoadFromDefault('./.aiCoder/premade-prompts.md', '/prompts/premade-prompts.md');
+                                await launchNano('./.aiCoder/premade-prompts.md');
+                            }
+                        },
+                        {
+                            name: "Edit default system prompt",
+                            action: async function () {
+                                await readOrLoadFromDefault('./.aiCoder/default-system-prompt.md', '/prompts/default-system-prompt.md');
+                                await launchNano('./.aiCoder/default-system-prompt.md');
+                            }
+                        },
+                        {
+                            name: "Edit snippet production prompt",
+                            action: async function () {
+                                await readOrLoadFromDefault('./.aiCoder/snippet-production-prompt.md', '/prompts/snippet-production-prompt.md');
+                                await launchNano('./.aiCoder/snippet-production-prompt.md');
+                            }
+                        },
+                        {
+                            name: "Edit snippet validation prompt",
+                            action: async function () {
+                                await readOrLoadFromDefault('./.aiCoder/snippet-validation-prompt.md', '/prompts/snippet-validation-prompt.md');
+                                await launchNano('./.aiCoder/snippet-validation-prompt.md');
+                            }
+                        },
+                        {
+                            name: "Skip approving changes (this session only)",
+                            action: async function () {
+                                ctx.skipApprovingChanges = true;
+                            }
+                        },
+
+
+                    ]
+                },
+                "-",
+                {
+                    name: "Edit file",
+                    action: async function () {
+                        await launchNano(ctx.targetFile);
+                    }
+                },
+                {
+                    name: "Select another file",
+                    action: async function () {
+                        printAndPause("Selecting a new file", 5);
+                        ctx.targetFile = await getFilePath(ctx.targetFile);
+                        printAndPause(`Selected file: ${ctx.targetFile}`, 1);
+                    }
+                },
+                "-", // spacer
+                {
+                    name: "Quit",
+                    action: async function () {
+                        await printAndPause("Quitting", 1);
+                        process.exit(0);
+
+                    }
+                }
+            ]
+        };
+
+
+
+        await clearTerminal();
+        try {
+            await displayMenu(mainMenu);
+        }
+        catch (error) {
+            console.error(error);
+            await printAndPause("An error occurred. Please try again", 10);
+        }
+    }
+}
+
+mainLoop();
