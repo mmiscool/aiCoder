@@ -4,7 +4,6 @@ Review all provided code snippets to ensure they comply with the following rules
 
 1. **Code snippets are in correct language (Important)**:  
    - **All code snippets must be javascript**
-   - **Python code is unacceptable**
 
 2. **Class Context (Important)**:  
    - **All functions must be encapsulated within the class syntax.** 

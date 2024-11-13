@@ -19,6 +19,10 @@ export async function intelligentlyMergeSnippets(filename) {
     //await convertMonkeyPatchesToClasses(filename);
     await mergeAndFormatClasses(filename);
 
+    await removeClassFromFile(filename, 'exampleClass');
+
+    await mergeAndFormatClasses(filename);
+
     await printAndPause('Completed merging classes and functions', 3);
 }
 
@@ -370,5 +374,64 @@ export async function extractClassesAndFunctions(codeString) {
     } catch (error) {
         console.error("Error during code generation or formatting:", error.message);
         return null;
+    }
+}
+
+
+export async function removeClassFromFile(filePath, className) {
+    // Convert className to lowercase for case-insensitive comparison
+    const targetClassName = className.toLowerCase();
+
+    // Read the file content
+    let fileContent = await readFile(filePath);
+
+    // Parse the content into an AST
+    let ast;
+    try {
+        ast = acorn.parse(fileContent, { sourceType: 'module', ecmaVersion: 'latest' });
+        printDebugMessage('AST parsing successful for class removal');
+    } catch (error) {
+        console.error("Parsing error:", error.message);
+        return;
+    }
+
+    // Filter out the target class by name (case-insensitive)
+    const newBody = ast.body.filter(node => {
+        if (node.type === 'ClassDeclaration' && node.id?.name.toLowerCase() === targetClassName) {
+            printDebugMessage(`Removing class: ${node.id.name}`);
+            return false; // Exclude the target class
+        }
+        if (node.type === 'ExportNamedDeclaration' &&
+            node.declaration?.type === 'ClassDeclaration' &&
+            node.declaration.id?.name.toLowerCase() === targetClassName) {
+            printDebugMessage(`Removing exported class: ${node.declaration.id.name}`);
+            return false; // Exclude the exported target class
+        }
+        return true; // Retain other nodes
+    });
+
+    // Replace the AST body with the filtered content
+    ast.body = newBody;
+
+    // Generate code from the modified AST
+    try {
+        let updatedCode = astring.generate(ast);
+
+        // Format the code with Prettier
+        updatedCode = await prettier.format(updatedCode, {
+            parser: 'babel',
+            tabWidth: 4,
+            useTabs: false,
+            printWidth: 80,
+            endOfLine: 'lf',
+            semi: true,
+            singleQuote: true
+        });
+
+        // Write the modified code back to the file
+        await writeFile(filePath, updatedCode, false);
+        console.log(`Class ${className} removed from ${filePath} if it existed.`);
+    } catch (error) {
+        console.error("Error during code generation or formatting:", error.message);
     }
 }

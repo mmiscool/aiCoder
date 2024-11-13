@@ -3,7 +3,7 @@ DO NOT INCLUDE EXAMPLES OR TESTS IN YOUR CODE SNIPPETS.
 DO NOT INCLUDE EXAMPLES OR TESTS IN YOUR CODE SNIPPETS.
 DO NOT INCLUDE EXAMPLES OR TESTS IN YOUR CODE SNIPPETS.
 
-1. **Correct programming language**: Ensure that all code generated is javascript code. Only javascript code is acceptable. Python code is unacceptable. 
+1. **Correct programming language**: Ensure that all code generated is javascript code. Only javascript code is acceptable.
 
 2. **Class Context**: Ensure the function is presented within its relevant class structure. Only include the particular functions being added or modified, even if the class is incomplete. *The function should never be presented outside of a class context.* Always exclude functions within a class that are not being modified.
 

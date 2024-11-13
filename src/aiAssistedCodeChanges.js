@@ -36,7 +36,7 @@ export async function aiAssistedCodeChanges(premade_llmInstructionPrompt = null,
         await chat.addMessage("user", llmInstructionPrompt);
         await markdownToTerminal(await chat.callLLM());
         const forceSnippetsFormat = `Convert all snippets to this format:
-\`\`\`
+\`\`\`javascript
 class exampleClass {
    exampleMethod(){
       //example code
