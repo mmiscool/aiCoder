@@ -4,7 +4,7 @@ import { clearTerminal, input, printAndPause, confirmAction, printCodeToTerminal
 import { ctx } from "./main.js";
 import { readFile, readOrLoadFromDefault, appendFile } from "./fileIO.js";
 import { extractCodeSnippets } from "./extractCodeSnippets.js";
-import { intelligentlyMergeSnippets } from './intelligentMerge.js';
+import { convertMonkeyPatchesToClasses, extractClassesAndFunctions, intelligentlyMergeSnippets } from './intelligentMerge.js';
 
 export async function aiAssistedCodeChanges(premade_llmInstructionPrompt = null, skipApprovingChanges = ctx.skipApprovingChanges) {
     // load the premade prompts
@@ -21,6 +21,7 @@ export async function aiAssistedCodeChanges(premade_llmInstructionPrompt = null,
     await chat.addMessage("system", "//File contents: \n\n\n" + codeFileContents);
     await chat.addMessage("system", snippetProductionPrompt);
 
+
     await clearTerminal();
     // Loop for conversation with the AI
     while (true) {
@@ -33,6 +34,18 @@ export async function aiAssistedCodeChanges(premade_llmInstructionPrompt = null,
         if (llmInstructionPrompt === 'q') return;
 
         await chat.addMessage("user", llmInstructionPrompt);
+        await markdownToTerminal(await chat.callLLM());
+        const forceSnippetsFormat = `Convert all snippets to this format:
+\`\`\`
+class exampleClass {
+   exampleMethod(){
+      //example code
+   }
+}
+\`\`\`
+`;
+        await chat.addMessage("system", forceSnippetsFormat);
+
 
         await markdownToTerminal(await chat.callLLM());
 
@@ -85,9 +98,12 @@ export async function applySnippets(snippets, skipApprovingChanges = false) {
         }
     }
 
+    let cleanedSnippets = await snippets.join('\n\n\n\n\n', true);
+    cleanedSnippets = await convertMonkeyPatchesToClasses(cleanedSnippets);
+    cleanedSnippets = await extractClassesAndFunctions(cleanedSnippets);
 
     // append the snippets to the code
-    await appendFile(ctx.targetFile, '\n\n\n\n\n' + snippets.join('\n\n\n\n\n', true));
+    await appendFile(ctx.targetFile, '\n\n\n\n\n' + cleanedSnippets);
     console.log('Changes applied');
 
     // run the merge and format classes function

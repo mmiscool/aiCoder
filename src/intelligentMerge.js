@@ -16,7 +16,9 @@ export async function intelligentlyMergeSnippets(filename) {
     await createBackup(filename);
     await organizeImportsAndDeclarations(filename);
 
+    //await convertMonkeyPatchesToClasses(filename);
     await mergeAndFormatClasses(filename);
+
     await printAndPause('Completed merging classes and functions', 3);
 }
 
@@ -24,7 +26,9 @@ export async function intelligentlyMergeSnippets(filename) {
 
 export async function mergeAndFormatClasses(filePath) {
     // Read the file content
-    const fileContent = await readFile(filePath);
+    let fileContent = await readFile(filePath);
+
+    fileContent = await convertMonkeyPatchesToClasses(fileContent);
 
     // Parse into AST with loose parsing
     let ast;
@@ -36,13 +40,25 @@ export async function mergeAndFormatClasses(filePath) {
         process.exit(1);
     }
 
-    // Helper function to merge methods from one class into another
+    // Helper function to merge methods from one class into another, retaining non-empty methods
     function mergeClassMethods(targetClass, sourceClass) {
         const targetMethods = new Map(targetClass.body.body.map(method => [method.key.name, method]));
 
         // Merge methods, replacing or adding each method from sourceClass
         sourceClass.body.body.forEach(method => {
-            targetMethods.set(method.key.name, method);
+            const methodName = method.key.name;
+            const targetMethod = targetMethods.get(methodName);
+
+            // Check if the source method has an empty body
+            const isSourceMethodEmpty = !method.value.body || method.value.body.body.length === 0;
+
+            // Replace the method only if the source is not empty, or target method doesn't exist
+            if (!isSourceMethodEmpty || !targetMethod) {
+                targetMethods.set(methodName, method);
+                printDebugMessage(`Added or replaced method: ${methodName} (Empty: ${isSourceMethodEmpty})`);
+            } else {
+                printDebugMessage(`Skipped replacing method: ${methodName} due to empty body in source`);
+            }
         });
 
         // Update the methods list in targetClass
@@ -128,6 +144,7 @@ export async function mergeAndFormatClasses(filePath) {
 }
 
 
+
 export async function organizeImportsAndDeclarations(filePath) {
     const fileContent = await readFile(filePath);
 
@@ -182,7 +199,7 @@ export async function organizeImportsAndDeclarations(filePath) {
         console.log(`Imports and variable declarations in ${filePath} organized successfully.`);
     } catch (error) {
         console.error("Error during code generation or formatting:", error.message);
-        await printAndPause({ message:"Error during code generation or formatting:", error }, 10);
+        await printAndPause({ message: "Error during code generation or formatting:", error }, 10);
         await pressEnterToContinue();
     }
 
@@ -203,4 +220,155 @@ function addCustomSpacing(code) {
     // Add 2 blank lines between functions
     code = code.replace(/}\nfunction /g, '}\n\n\nfunction ');
     return code;
+}
+
+
+
+export async function convertMonkeyPatchesToClasses(fileContent) {
+    // Read the file content
+    //const fileContent = await readFile(filePath);
+
+    // Parse into AST with loose parsing
+    let ast;
+    try {
+        ast = acorn.parse(fileContent, { sourceType: 'module', ecmaVersion: 'latest' });
+        printDebugMessage('AST parsing successful for monkey patch conversion');
+    } catch (error) {
+        console.error("Parsing error:", error.message);
+        process.exit(1);
+    }
+
+    // Store detected monkey patches by class name
+    const monkeyPatches = new Map();
+
+    // Traverse the AST to locate monkey-patched methods
+    const newBody = [];
+    ast.body.forEach(node => {
+        // Identify monkey patches
+        if (
+            node.type === 'ExpressionStatement' &&
+            node.expression.type === 'AssignmentExpression' &&
+            node.expression.left.type === 'MemberExpression' &&
+            node.expression.left.object.type === 'Identifier' &&
+            node.expression.left.property.type === 'Identifier'
+        ) {
+            const className = node.expression.left.object.name;
+            const methodName = node.expression.left.property.name;
+            const methodBody = node.expression.right;
+
+            printDebugMessage(`Identified monkey patch: ${className}.${methodName}`);
+
+            // Store the monkey-patched method by class name
+            if (!monkeyPatches.has(className)) {
+                monkeyPatches.set(className, []);
+            }
+            monkeyPatches.get(className).push({ methodName, methodBody });
+
+            // Skip adding this node to the new body, effectively removing it
+            return;
+        }
+
+        // Add non-monkey-patch nodes to the new AST body
+        newBody.push(node);
+    });
+
+    // Create new class declarations for each monkey-patched class
+    monkeyPatches.forEach((methods, className) => {
+        printDebugMessage(`Creating new class for monkey-patched methods: ${className}`);
+
+        // Create a new class AST node
+        const newClass = {
+            type: 'ClassDeclaration',
+            id: { type: 'Identifier', name: className },
+            superClass: null,
+            body: {
+                type: 'ClassBody',
+                body: methods.map(({ methodName, methodBody }) => ({
+                    type: 'MethodDefinition',
+                    key: { type: 'Identifier', name: methodName },
+                    value: methodBody,
+                    kind: 'method',
+                    static: false,
+                    computed: false
+                }))
+            }
+        };
+
+        // Add the new class to the list of appended classes
+        newBody.push(newClass);
+    });
+
+    // Replace the AST body with the new body containing converted classes and no monkey patches
+    ast.body = newBody;
+
+    // Generate code from the modified AST
+    try {
+        let updatedCode = astring.generate(ast);
+
+        // Format the code with Prettier
+        updatedCode = await prettier.format(updatedCode, {
+            parser: 'babel',
+            tabWidth: 4,
+            useTabs: false,
+            printWidth: 80,
+            endOfLine: 'lf',
+            semi: true,
+            singleQuote: true
+        });
+
+        // Write the modified code back to the file
+        return updatedCode;
+        console.log(`Monkey patches in ${filePath} converted to new classes and original patches removed successfully.`);
+    } catch (error) {
+        console.error("Error during code generation or formatting:", error.message);
+        await pressEnterToContinue();
+    }
+}
+
+
+
+
+
+export async function extractClassesAndFunctions(codeString) {
+    // Parse the code string into an AST
+    let ast;
+    try {
+        ast = acorn.parse(codeString, { sourceType: 'module', ecmaVersion: 'latest' });
+        printDebugMessage('AST parsing successful for extracting classes and functions');
+    } catch (error) {
+        console.error("Parsing error:", error.message);
+        return null;
+    }
+
+    // Filter AST to retain only class and function declarations
+    const extractedBody = ast.body.filter(node =>
+        node.type === 'ClassDeclaration' || node.type === 'FunctionDeclaration'
+    );
+
+    // Replace the AST body with only the extracted classes and functions
+    const extractedAst = {
+        ...ast,
+        body: extractedBody
+    };
+
+    // Generate code from the extracted AST
+    try {
+        let extractedCode = astring.generate(extractedAst);
+
+        // Format the extracted code with Prettier
+        extractedCode = await prettier.format(extractedCode, {
+            parser: 'babel',
+            tabWidth: 4,
+            useTabs: false,
+            printWidth: 80,
+            endOfLine: 'lf',
+            semi: true,
+            singleQuote: true
+        });
+
+        return extractedCode;
+    } catch (error) {
+        console.error("Error during code generation or formatting:", error.message);
+        return null;
+    }
 }

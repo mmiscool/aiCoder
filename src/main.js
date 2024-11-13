@@ -58,6 +58,8 @@ export async function getPremadePrompts() {
 
 
 async function mainLoop(params) {
+    if (!ctx.targetFile) ctx.targetFile = await getFilePath();
+
     while (true) {
 
 
@@ -91,7 +93,7 @@ async function mainLoop(params) {
                     }
                 },
                 {
-                    name:"List classes and functions",
+                    name: "List classes and functions",
                     action: showListOfClassesAndFunctions
                 },
                 {
