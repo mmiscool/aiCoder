@@ -13,6 +13,7 @@ import path from 'path';
 
 
 export function clearTerminal() {
+
   // Clears the screen buffer entirely, including scrollback history
   process.stdout.write('\u001b[3J\u001b[2J\u001b[1J\u001b[H');
   // Clears the screen buffer up to the current line

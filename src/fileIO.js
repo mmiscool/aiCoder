@@ -28,6 +28,8 @@ export async function writeFile(filePath, content, makeBackup = false) {
     filePath = await convertToRelativePath(filePath);
     if (makeBackup) await createBackup(filePath);
     await fs.writeFileSync(filePath, content, 'utf8');
+    await printAndPause(`File written: ${filePath}`);
+    await printAndPause(`Content: ${content}`, 10);
 }
 
 export async function appendFile(filePath, content, makeBackup = false) {

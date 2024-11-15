@@ -26,7 +26,7 @@ export class conversation {
     async callLLM() {
         let llmResponse = await callLLM(this.messages);
         llmResponse = llmResponse.trim();
-        await this.addMessage('system', llmResponse);
+        await this.addMessage('assistant', llmResponse);
         return llmResponse;
     }
 }
@@ -257,6 +257,7 @@ async function installOllama() {
         installer.on('exit', (code) => {
             if (code === 0) {
                 console.log('Ollama installed successfully!');
+                pullOllamaModelWithProgress('granite3-dense:latest');
                 resolve();
             } else {
                 console.log(`Installation failed with code: ${code}`);
@@ -365,7 +366,7 @@ async function getOpenAIResponse(messages) {
         responseText += content;
     }
     // clear the console
-    clearTerminal();
+    //clearTerminal();
     return responseText;
 }
 

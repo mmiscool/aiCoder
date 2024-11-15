@@ -2,9 +2,9 @@
 import { conversation } from "./llmCall.js";
 import { clearTerminal, input, printAndPause, confirmAction, printCodeToTerminal, markdownToTerminal, pressEnterToContinue } from "./terminalHelpers.js";
 import { ctx } from "./main.js";
-import { readFile, readOrLoadFromDefault, appendFile } from "./fileIO.js";
+import { readFile, readOrLoadFromDefault, writeFile } from "./fileIO.js";
 import { extractCodeSnippets } from "./extractCodeSnippets.js";
-import { convertMonkeyPatchesToClasses, extractClassesAndFunctions, intelligentlyMergeSnippets } from './intelligentMerge.js';
+import { codeManipulator } from './intelligentMerge.js';
 
 export async function aiAssistedCodeChanges(premade_llmInstructionPrompt = null, skipApprovingChanges = ctx.skipApprovingChanges) {
     // load the premade prompts
@@ -35,39 +35,35 @@ export async function aiAssistedCodeChanges(premade_llmInstructionPrompt = null,
 
         await chat.addMessage("user", llmInstructionPrompt);
         await markdownToTerminal(await chat.callLLM());
-        const forceSnippetsFormat = `Convert all snippets to this format:
-\`\`\`javascript
-class exampleClass {
-   exampleMethod(){
-      //example code
-   }
-}
-\`\`\`
-`;
-        await chat.addMessage("system", forceSnippetsFormat);
+        await printAndPause("done producing snippets", 5);
 
-
-        await markdownToTerminal(await chat.callLLM());
 
         // break out of the loop if using a premade prompt
         if (premade_llmInstructionPrompt) break;
 
     }
 
-    let lastLlmResponse = '';
 
-    // automatically check the code snippets for valid formatting
-    for (let i = 0; i < 3; i++) {
-        lastLlmResponse = await chat.lastMessage();
-        // send snippet validation prompt
-        await chat.addMessage("system", snippetValidationPrompt);
-        const snippetValidationResult = await chat.callLLM();
-
-        // check if snippetValidationResult starts with yes in a case insensitive way
-        if (snippetValidationResult.toLowerCase().startsWith('yes')) {
-            break;
-        }
+    const forceSnippetsFormat = `Convert all snippets to this format. Omit any methods that are not changed:
+    \`\`\`javascript
+    class exampleClass {
+       // ... existing code
+       exampleMethod(){
+          //example code
+       }
     }
+
+    
+    \`\`\`
+    `;
+    await chat.addMessage("system", forceSnippetsFormat);
+
+    await chat.callLLM()
+    await markdownToTerminal(await chat.lastMessage());
+
+
+
+    let lastLlmResponse = await chat.lastMessage();
 
     // extract the code snippets from the laseLllmResponse variable
     let codeSnippets = extractCodeSnippets(lastLlmResponse);
@@ -99,15 +95,15 @@ export async function applySnippets(snippets, skipApprovingChanges = false) {
     }
 
     let cleanedSnippets = await snippets.join('\n\n\n\n\n', true);
-    cleanedSnippets = await convertMonkeyPatchesToClasses(cleanedSnippets);
-    cleanedSnippets = await extractClassesAndFunctions(cleanedSnippets);
+    //cleanedSnippets = await convertMonkeyPatchesToClasses(cleanedSnippets);
+    //cleanedSnippets = await extractClassesAndFunctions(cleanedSnippets);
 
     // append the snippets to the code
-    await appendFile(ctx.targetFile, '\n\n\n\n\n' + cleanedSnippets);
+    //await appendFile(ctx.targetFile, '\n\n\n\n\n' + cleanedSnippets);
     console.log('Changes applied');
 
-    // run the merge and format classes function
-    await intelligentlyMergeSnippets(ctx.targetFile);
+    const manipulator = new codeManipulator(ctx.targetFile);
+    await manipulator.mergeCode(cleanedSnippets);
 }
 
 

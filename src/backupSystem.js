@@ -5,8 +5,9 @@ import { convertToRelativePath, createFolderIfNotExists } from './fileIO.js';
 import inquirer from 'inquirer';
 import { input, Separator } from '@inquirer/prompts';
 
-import { filePathArg } from './fileSelector.js';
-import { clearTerminal, printAndPause, selectListHeight } from './terminalHelpers.js';
+//import { ctx.targetFile } from './fileSelector.js';
+import { ctx } from './main.js';
+import { clearTerminal, pressEnterToContinue, printAndPause, selectListHeight } from './terminalHelpers.js';
 
 
 // make a folder including any parent folders if they don't exist
@@ -17,29 +18,35 @@ export async function createBackup(filePath) {
     await createFolderIfNotExists(backupFolder);
 
     const timestamp = new Date().toISOString().replace(/:/g, '-');
-    const backupFilePath = path.join(backupFolder, path.dirname(filePath), `${path.basename(filePath)}_backup_${timestamp}`);
+    const backupFilePath = path.join(backupFolder, path.dirname(filePath), `${path.basename(filePath)}_backup_`);
 
     await createFolderIfNotExists(path.dirname(backupFilePath)); // Ensure nested directories exist
-    await fs.copyFileSync(filePath, backupFilePath);
+
+    await fs.copyFileSync(filePath, `${backupFilePath}${timestamp}`);
+
+    // deduplicate the backups
+    const allBackupFiles = await listFilesMatchingName(backupFilePath);
+    await deleteDuplicates(allBackupFiles);
 
     return backupFilePath;
+
 }
 
 
 
 
 export async function rollbackFile(pathToBackupFile) {
-    await fs.copyFileSync(pathToBackupFile, filePathArg);
+    await fs.copyFileSync(pathToBackupFile, ctx.targetFile);
 }
 
 
 export async function restoreFileFromBackup() {
-    // List all the versions of the filePathArg file in the ./.aiCoder/backups folder
+    // List all the versions of the ctx.targetFile file in the ./.aiCoder/backups folder
     // Ask the user to select a version to restore
     // Restore the selected version
     const backupFolder = '.aiCoder/backups';
 
-    let filePath = await convertToRelativePath(filePathArg);
+    let filePath = await convertToRelativePath(ctx.targetFile);
 
     console.log('Restoring file from backup:', filePath);
 
@@ -69,8 +76,8 @@ export async function restoreFileFromBackup() {
     if (backupFile === 'Cancel') return console.log('File restore cancelled');
 
     console.log('Restoring file from backup:', backupFile);
-    // backup the current file in the filePathArg variable. This needs to be converted to a relative path
-    await createBackup(convertToRelativePath(filePathArg));
+    // backup the current file in the ctx.targetFile variable. This needs to be converted to a relative path
+    await createBackup(convertToRelativePath(ctx.targetFile));
     await rollbackFile(backupFile);
 
     await printAndPause('File restored successfully', 2);
@@ -133,11 +140,11 @@ export async function deleteDuplicates(files) {
         const filePath = path.resolve(file);
 
         try {
-            const hash = await calculateFileHash(filePath);
+            const hash = await calculateFileHash(filePath);  // Ensure this function is async and returns a string hash
 
             if (seenFiles.has(hash)) {
                 // Delete file if hash already exists in map
-                fs.unlinkSync(filePath);
+                await fs.promises.unlink(filePath);  // Use async version of unlink
                 console.log(`Deleted duplicate file: ${filePath}`);
             } else {
                 // Store first occurrence of unique file by hash
@@ -152,12 +159,3 @@ export async function deleteDuplicates(files) {
 
 
 
-// list all the exported functions from this file
-export default {
-    createBackup,
-    rollbackFile,
-    restoreFileFromBackup,
-    listFilesMatchingName,
-    calculateFileHash,
-    deleteDuplicates,
-};

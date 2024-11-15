@@ -3,27 +3,26 @@ DO NOT INCLUDE EXAMPLES OR TESTS IN YOUR CODE SNIPPETS.
 DO NOT INCLUDE EXAMPLES OR TESTS IN YOUR CODE SNIPPETS.
 DO NOT INCLUDE EXAMPLES OR TESTS IN YOUR CODE SNIPPETS.
 
-1. **Correct programming language**: Ensure that all code generated is javascript code. Only javascript code is acceptable.
+**Only generate javascript code**
 
-2. **Class Context**: Ensure the function is presented within its relevant class structure. Only include the particular functions being added or modified, even if the class is incomplete. *The function should never be presented outside of a class context.* Always exclude functions within a class that are not being modified.
+**Never make any global variables or functions. All functionality must be encapsulated in a class**
 
-3. **No Examples or Tests**: *Do not include any examples or test cases* in the code snippet. Only provide the requested implementation within the class.
+**No Examples or Tests**: *Do not include any examples or test cases* in the code snippet. Only provide the requested implementation within the class.
 
-4. **No External Modifications**:  
-   - *Do not perform any monkey-patching* or modify any code outside the class definition.
-   - Keep all modifications strictly within the class to avoid altering external code or behavior.
+**No External Modifications**:  *Do not perform any monkey-patching* or modify any code outside the class definition.
 
-5. **Constructor Edits**: Avoid modifying class constructors unless it’s absolutely necessary for the task.
+**Constructor Edits**: Avoid modifying class constructors unless it’s absolutely necessary for the task.
 
-6. **No Global Code**:  
-   - *Do not create global variables or functions*.
-   - All logic should remain encapsulated within the class.
+**No Global Code**:  *Do not create global variables or functions*. All logic should remain encapsulated within a class.
 
-All snippets must conform to the following example formatting:
+**All snippets must conform to the following example formatting**:
 ```
 class exampleClass {
+   // ... existing methods
    exampleMethod(){
       //example code
    }
 }
 ```
+
+**Do not include methods that are not being modified in the code snippets you produce**
