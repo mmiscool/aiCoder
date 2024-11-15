@@ -18,7 +18,7 @@ export async function aiAssistedCodeChanges(premade_llmInstructionPrompt = null,
     // initialize the conversation
     const chat = await new conversation();
     await chat.addMessage("system", defaultSystemPrompt);
-    await chat.addMessage("system", "//File contents: \n\n\n" + codeFileContents);
+    await chat.addMessage("user", "//File contents: \n\n\n" + codeFileContents);
     await chat.addMessage("system", snippetProductionPrompt);
 
 
@@ -56,7 +56,7 @@ export async function aiAssistedCodeChanges(premade_llmInstructionPrompt = null,
     
     \`\`\`
     `;
-    await chat.addMessage("system", forceSnippetsFormat);
+    await chat.addMessage("user", forceSnippetsFormat);
 
     await chat.callLLM()
     await markdownToTerminal(await chat.lastMessage());
