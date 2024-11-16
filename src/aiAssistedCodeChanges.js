@@ -34,6 +34,7 @@ export async function aiAssistedCodeChanges(premade_llmInstructionPrompt = null,
         if (llmInstructionPrompt === 'q') return;
 
         await chat.addMessage("user", llmInstructionPrompt);
+        await ctx.setLastPrompt(llmInstructionPrompt);
         await markdownToTerminal(await chat.callLLM());
         await printAndPause("done producing snippets", 5);
 
@@ -42,6 +43,8 @@ export async function aiAssistedCodeChanges(premade_llmInstructionPrompt = null,
         if (premade_llmInstructionPrompt) break;
 
     }
+
+
 
 
     const forceSnippetsFormat = `Convert all snippets to this format. Omit any methods that are not changed:

@@ -25,7 +25,7 @@ export class conversation {
 
     async callLLM() {
         console.log(this.messages);
-        await pressEnterToContinue();
+        //await pressEnterToContinue();
         let llmResponse = await callLLM(this.messages);
         llmResponse = llmResponse.trim();
         await this.addMessage('assistant', llmResponse);
@@ -34,14 +34,16 @@ export class conversation {
 }
 
 
-async function throttle(){
+async function throttle() {
     // check if the current time is greater than the last call time + throttle time and if not wait until it is
     // if it needs use the printAndPause function to show a message to the user and wait the remaining time
     const currentTime = new Date().getTime();
-    if (currentTime < lastCallTime + throttleTime) {
+    if (currentTime < lastCallTime + throttleTime * 1000) {
         const remainingTime = (lastCallTime + throttleTime) - currentTime;
         await printAndPause(`Throttling. Please wait ${remainingTime / 1000} seconds.`, remainingTime / 1000);
     }
+
+    lastCallTime = new Date().getTime();
     return;
 }
 
@@ -49,21 +51,25 @@ async function throttle(){
 
 export async function callLLM(messages) {
     const llmToUse = await selectAIservice();
+    let response = '';
     if (llmToUse === 'openai') {
         await throttle();
-        return await getOpenAIResponse(messages);
+        response = await getOpenAIResponse(messages);
     } else if (llmToUse === 'groq') {
         await throttle();
-        return await getGroqResponse(messages);
+        response = await getGroqResponse(messages);
     } else if (llmToUse === 'ollama') {
         // console.log(messages);
         // await pressEnterToContinue();
-        return await getOllamaResponse(messages);
+        response = await getOllamaResponse(messages);
     }
     else {
         await printAndPause('This feature is not yet implemented.', 1.5);
-        return '';
+        response = '';
     }
+
+    lastCallTime = new Date().getTime();
+    return response;
 }
 
 

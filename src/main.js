@@ -9,12 +9,13 @@ import {
 } from './terminalHelpers.js';
 import { intelligentlyMergeSnippets } from './intelligentMerge.js';
 import { setupLLM } from './llmCall.js';
-import { readOrLoadFromDefault } from './fileIO.js';
+import { readFile, readOrLoadFromDefault, writeFile, } from './fileIO.js';
 import { aiAssistedCodeChanges, loopAIcodeGeneration } from './aiAssistedCodeChanges.js';
 
 import { spawn } from 'child_process';
 import { showListOfClassesAndFunctions } from './classListing.js';
 import './gitnoteSetup.js';
+
 
 
 export const debugMode = false;
@@ -31,6 +32,10 @@ process.on('SIGINT', () => {
 export const ctx = {
     targetFile: process.argv[2],
     skipApprovingChanges: false,
+    getLastPrompt: await async function () { return await readFile('./.aiCoder/last-prompt.md') },
+    setLastPrompt: function (prompt) {
+        writeFile('./.aiCoder/last-prompt.md', prompt);
+    }
 };
 
 
@@ -43,7 +48,9 @@ export async function getPremadePrompts() {
     const premadePrompts = lines.map((line, index) => {
         return {
             name: line,
+            exitAfter: true,
             action: async function () {
+                ctx.setLastPrompt(line);
                 await aiAssistedCodeChanges(line);
             }
         }
@@ -73,17 +80,32 @@ async function mainLoop(params) {
             options: [
                 {
                     name: "Make AI assisted changes",
+                    exitAfter: true,
                     action: async function () {
                         await aiAssistedCodeChanges();
                     }
+                },
+                {
+                    name: `Repeat last prompt: ${await ctx.getLastPrompt() || 'none'}`,
+                    action: async function () {
+                        await aiAssistedCodeChanges(await ctx.getLastPrompt());
+                    },
                 },
 
                 ...customPremadePrompts,
                 "-",
                 {
                     name: "Loop automagically",
+                    exitAfter: true,
                     action: async function () {
                         await loopAIcodeGeneration(null, null, null);
+                    }
+                },
+                {
+                    name: `Loop last prompt: ${await ctx.getLastPrompt() || 'none'}`,
+                    exitAfter: true,
+                    action: async function () {
+                        await loopAIcodeGeneration(await ctx.getLastPrompt(), null, null);
                     }
                 },
                 {

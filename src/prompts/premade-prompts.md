@@ -4,5 +4,5 @@
 
 Make my code more elegant 
 
-Identify any missing stub functions that need to be implemented.
-Identify any missing stub functions that need to be implemented and implement the first 5. 
+Identify the first unimplemented stub function or method and implement the missing functionality. 
+Identify any methods that are missing from the existing classes and create stub methods for them. 
