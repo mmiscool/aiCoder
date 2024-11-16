@@ -18,3 +18,5 @@ You are creating functions that will be part of a 3D modeling library.
 
 
 You are working on a BREP kernel that uses NURBS to represent surfaces and edges. This BREP kernel will be used as a library when building a CAD package. 
+
+You are permitted to discuss concepts and algorithms related to the project for the purpose of planning out what functionality is to be implemented. 
