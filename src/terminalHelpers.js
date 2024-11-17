@@ -12,25 +12,25 @@ import fs from 'fs';
 import path from 'path';
 
 
-export function clearTerminal() {
+export async function clearTerminal() {
 
   // Clears the screen buffer entirely, including scrollback history
-  process.stdout.write('\u001b[3J\u001b[2J\u001b[1J\u001b[H');
+  await process.stdout.write('\u001b[3J\u001b[2J\u001b[1J\u001b[H');
   // Clears the screen buffer up to the current line
-  process.stdout.write('\u001b[2J\u001b[1J\u001b[H');
+  await process.stdout.write('\u001b[2J\u001b[1J\u001b[H');
   // Clears the screen buffer from the current line down to the bottom of the screen
-  process.stdout.write('\u001b[J');
+  await process.stdout.write('\u001b[J');
 
   // Clears the screen buffer from the current line down to the bottom of the screen
-  process.stdout.write('\u001b[0f');
+  await process.stdout.write('\u001b[0f');
   // Clears the screen buffer from the current line down to the bottom of the screen
-  process.stdout.write('\u001b[0J');
+  await process.stdout.write('\u001b[0J');
 
 }
 
 
 export async function printCodeToTerminal(jsCode) {
-  console.log(highlight(jsCode, { language: 'javascript', theme: 'dracula' }));
+  await console.log(await highlight(jsCode, { language: 'javascript', theme: 'dracula' }));
 }
 
 

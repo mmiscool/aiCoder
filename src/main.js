@@ -177,9 +177,9 @@ async function mainLoop(params) {
                 {
                     name: "Select another file",
                     action: async function () {
-                        printAndPause("Selecting a new file", 5);
+                        await printAndPause("Selecting a new file", 0);
                         ctx.targetFile = await getFilePath(ctx.targetFile);
-                        printAndPause(`Selected file: ${ctx.targetFile}`, 1);
+                        await printAndPause(`Selected file: ${ctx.targetFile}`, 1);
                     }
                 },
                 "-", // spacer

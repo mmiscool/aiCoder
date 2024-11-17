@@ -85,7 +85,7 @@ export async function applySnippets(snippets, skipApprovingChanges = false) {
     for (let i = 0; i < snippets.length; i++) {
         // clear the terminal
         await clearTerminal();
-        printCodeToTerminal(snippets[i]);
+        await printCodeToTerminal(snippets[i]);
 
         let applySnippet = skipApprovingChanges;
         if (applySnippet === false) applySnippet = await confirmAction('Apply the following code snippet?');
