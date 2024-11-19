@@ -24,6 +24,9 @@ export async function readFile(filePath) {
 
 
 export async function writeFile(filePath, content, makeBackup = false) {
+    // create the folders in the file path if they don't exist
+    let folderPath = path.dirname(filePath);
+    await createFolderIfNotExists(folderPath);
     printDebugMessage("Writing file:", filePath);
     filePath = await convertToRelativePath(filePath);
     if (makeBackup) await createBackup(filePath);
