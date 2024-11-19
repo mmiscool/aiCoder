@@ -3,6 +3,12 @@
 [![semantic versioning](https://img.shields.io/badge/semantic%20versioning-2.0.0-green.svg)](https://semver.org)
 > All notable changes to this project will be documented in this file
 
+## [1.0.10](https://github.com/mmiscool/aiCoder/compare/v1.0.9...v1.0.10) (2024-11-19)
+
+### 🤖 Build System
+
+* Triggering npm package build ([d57f4b8](https://github.com/mmiscool/aiCoder/commit/d57f4b8a93802c46ed2a9547f863d08286d7a5e8))
+
 ## [1.0.9](https://github.com/mmiscool/aiCoder/compare/v1.0.8...v1.0.9) (2024-11-12)
 
 ### 🤖 Build System
