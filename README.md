@@ -152,13 +152,14 @@ Implemented:
  * Custom reusable pre-made prompt manager. 
  * Provide options to use other LLMs besides the openAI.
  * Automatic setup on first use (prompt for LLM provider, api key and model selection)
-
+ * Publish as npm package
+ * Allow for selection of stub methods and automatically generate the method. 
 Todo: 
  * Make the tool work with multiple files at the same time. 
  * Make it possible for the llm to request adding NPM packages to project.
  * Add support for LLM to work with html, css and md files in addition to js. This will require parsing these files to an AST (abstract syntax tree) and merging ASTs to recreate the file. 
  * Preserve comments when merging. 
- * Publish as npm package
+
 
 
 # 🌌 The Future Awaits
