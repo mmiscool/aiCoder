@@ -49,6 +49,8 @@ export async function selectListHeight() {
 }
 
 export async function menuPrompt(menuObject) {
+  // console.log(menuObject);
+  // await pressEnterToContinue();
   // replace all "-" elements with Separator
   menuObject.choices = await menuObject.choices.map((option) => {
     if (option === '-') return new Separator();
@@ -128,13 +130,15 @@ export async function pressEnterToContinue() {
 
 
 export async function displayMenu(menuSystem, lastSelectedName = null) {
-  // clear the terminal
-
   // Function to recursively process the menu structure
   async function processMenu(menuNode, lastSelected = null) {
     // Find the index of the last selected item by name
 
     while (true) {
+      console.log("This is where the problem is");
+      console.log(menuNode);
+      console.log("This is where the problem is");
+      console.log(menuNode.options);
       // Prepare the menu object with prompt text from menu name
       const menuObject = {
         message: menuNode.name, // Use menu name as the prompt text
@@ -149,6 +153,7 @@ export async function displayMenu(menuSystem, lastSelectedName = null) {
 
       // Display the menu and get the selected item by name
       await clearTerminal();
+
       const selectedName = await menuPrompt({ ...menuObject, default: lastSelected });
       const selectedItem = menuNode.options.find((item) => item.name === selectedName);
       lastSelected = selectedName;

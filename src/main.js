@@ -5,15 +5,17 @@ import {
     printAndPause,
     input,
     getFilePath,
-    launchNano
+    launchNano,
+    pressEnterToContinue,
+    menuPrompt
 } from './terminalHelpers.js';
 import { intelligentlyMergeSnippets } from './intelligentMerge.js';
 import { setupLLM } from './llmCall.js';
 import { readFile, readOrLoadFromDefault, writeFile, } from './fileIO.js';
-import { aiAssistedCodeChanges, loopAIcodeGeneration } from './aiAssistedCodeChanges.js';
+import { aiAssistedCodeChanges, implementSpecificClassMethod, loopAIcodeGeneration } from './aiAssistedCodeChanges.js';
 
 import { spawn } from 'child_process';
-import { showListOfClassesAndFunctions } from './classListing.js';
+import { getMethodsWithArguments, getStubMethods, showListOfClassesAndFunctions } from './classListing.js';
 import './gitnoteSetup.js';
 
 
@@ -94,6 +96,54 @@ async function mainLoop(params) {
 
                 ...customPremadePrompts,
                 "-",
+                {
+                    name: "Implement specific class method",
+                    action: async function () {
+                        const className = await input("Enter the class name:");
+                        const methodName = await input("Enter the method name:");
+                        const methodArgs = await input("Enter the method arguments:");
+                        await implementSpecificClassMethod(className, methodName);
+
+                    }
+                },
+                {
+                    name: "Implement stub method (select from list)",
+                    action: async function () {
+                        const listOfMethods = await getStubMethods(await readFile(ctx.targetFile));
+                        //console.log(listOfMethods);
+                        // make a menu of the methods
+                        const menuObject = {
+                            name: "Select a method to implement",
+                            message: "Select a method to implement",
+                            options: [],
+                        };
+
+                        for (const className in listOfMethods) {
+                            //console.log(className);
+                            const methods = listOfMethods[className];
+
+                            for (const { name, args } of methods) {
+                                const argList = args.join(', ');
+                                menuObject.options.push({
+                                    name: `${className}.${name}(${argList})`,
+                                    value: `${className}.${name}`,
+                                    exitAfter: true,
+                                    action: async function () {
+                                        await printAndPause(`Implementing ${className}.${name}(${argList})`);
+                                        await implementSpecificClassMethod(className, name);
+                                        await printAndPause("Method implemented", 2);
+                                    }
+                                });
+                            }
+                        }
+
+                        await console.log(menuObject);
+
+                        const itemToWorkOn = await displayMenu(menuObject)
+
+                        console.log(itemToWorkOn);
+                    }
+                },
                 {
                     name: "Loop automagically",
                     exitAfter: true,

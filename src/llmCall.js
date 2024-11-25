@@ -24,7 +24,7 @@ export class conversation {
     }
 
     async callLLM() {
-        console.log(this.messages);
+        // console.log(this.messages);
         //await pressEnterToContinue();
         let llmResponse = await callLLM(this.messages);
         llmResponse = llmResponse.trim();

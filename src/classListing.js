@@ -1,37 +1,37 @@
 import * as acorn from 'acorn-loose';
-
-import {confirmAction} from './terminalHelpers.js';
-
+import { confirmAction } from './terminalHelpers.js';
 import { readFile, writeFile, } from './fileIO.js';
-import {  filePathArg,  } from './fileSelector.js';
+import { filePathArg, } from './fileSelector.js';
 
 
-export async function showListOfClassesAndFunctions() {
-  const list = await getClassAndFunctionList(await readFile(filePathArg));
+export async function showListOfClassesAndFunctions(onlyStubs = true) {
+  onlyStubs = true;
+  const list = await getMethodsWithArguments(await readFile(filePathArg), onlyStubs);
+  console.log(list);
 
   // Prompt if the user wants to include function names in the list
-  const includeFunctions = await confirmAction('Include function names in the list?', false);
+  const includeFunctions = true; //await confirmAction('Include function names in the list?', false);
 
-  // Print the list in terminal in the format: class name extends parentClass {}
+  // Build the output of classes and methods
   let listOfClasses = '';
 
   for (const className in list) {
-    const { functions, superClass } = list[className];
-    const extendsClause = superClass ? ` extends ${superClass}` : '';
+    const methods = list[className];
 
     // Start the class declaration
-    listOfClasses += `class ${className}${extendsClause} {`;
+    listOfClasses += `class ${className} {`;
 
-    // Optionally add function names
+    // Optionally add method names with arguments
     if (includeFunctions) {
       listOfClasses += '\n';
-      functions.forEach(func => {
-        listOfClasses += `  ${func}() {}\n`;
+      methods.forEach(({ name, args }) => {
+        const argList = args.join(', ');
+        listOfClasses += `  ${name}(${argList}) {}\n`;
       });
     }
 
     // Close the class
-    listOfClasses += `}\n`; // Double newline for separation between classes
+    listOfClasses += `}\n\n`; // Double newline for separation between classes
   }
 
   console.log(listOfClasses);
@@ -48,47 +48,14 @@ export async function showListOfClassesAndFunctions() {
   }
 }
 
-export function getClassAndFunctionList(code) {
-  const ast = acorn.parse(code, { sourceType: 'module', ecmaVersion: 'latest' });
-  const classFunctionMap = {};
-
-  ast.body.forEach(node => {
-    let classNode = null;
-
-    if (node.type === 'ClassDeclaration') {
-      // Regular class declaration
-      classNode = node;
-    } else if (node.type === 'ExportNamedDeclaration' && node.declaration?.type === 'ClassDeclaration') {
-      // Exported class declaration
-      classNode = node.declaration;
-    }
-
-    if (classNode) {
-      const className = classNode.id.name;
-      const superClass = classNode.superClass ? classNode.superClass.name : null;
-      const functions = [];
-
-      classNode.body.body.forEach(classElement => {
-        if (classElement.type === 'MethodDefinition' && classElement.key.type === 'Identifier') {
-          functions.push(classElement.key.name);
-        }
-      });
-
-      classFunctionMap[className] = { functions, superClass };
-    }
-  });
-
-  return classFunctionMap;
-}
 
 
 
-
-export function getClassAndFunctionListSorted(code) {
+export function getMethodsWithArguments(code) { 
   const ast = acorn.parse(code, { sourceType: 'module', ecmaVersion: 'latest' });
   const classInfo = new Map();
 
-  // Collect information on each class and its methods, along with its parent class if it extends one
+  // Collect information on each class, its methods, and arguments
   ast.body.forEach(node => {
     if (node.type === 'ClassDeclaration') {
       const className = node.id.name;
@@ -97,7 +64,28 @@ export function getClassAndFunctionListSorted(code) {
 
       node.body.body.forEach(classElement => {
         if (classElement.type === 'MethodDefinition' && classElement.key.type === 'Identifier') {
-          methods.push(classElement.key.name);
+          const methodName = classElement.key.name;
+
+          // Collect method arguments
+          const args = classElement.value.params.map(param => {
+            if (param.type === 'Identifier') return param.name;
+            if (param.type === 'AssignmentPattern' && param.left.type === 'Identifier') return param.left.name;
+            return 'unknown';
+          });
+
+          // Check if method is a stub
+          const isStub =
+            classElement.value.body &&
+            (classElement.value.body.body.length === 0 || // Empty body
+              (classElement.value.body.body.length === 1 &&
+                classElement.value.body.body[0].type === 'ReturnStatement' &&
+                !classElement.value.body.body[0].argument)); // Single "return;" statement
+
+          // Debugging output for each method
+          console.debug(`Class: ${className}, Method: ${methodName}, Args: ${args}, IsStub: ${isStub}`);
+
+          // Include all methods, no filter for onlyStubs
+          methods.push({ name: methodName, args, isStub });
         }
       });
 
@@ -139,6 +127,22 @@ export function getClassAndFunctionListSorted(code) {
 
 
 
+export async function getStubMethods(code) {
+  // Call the original getMethodsWithArguments function
+  const allMethods = await getMethodsWithArguments(code);
 
+  // Filter to only include classes and methods where isStub is true
+  const stubMethods = {};
 
+  for (const [className, methods] of Object.entries(allMethods)) {
+    // Filter methods within the class asynchronously
+    const stubMethodsInClass = await methods.filter(method => method.isStub);
 
+    // Only include the class if it has stub methods
+    if (stubMethodsInClass.length > 0) {
+      stubMethods[className] = stubMethodsInClass;
+    }
+  }
+
+  return stubMethods;
+}

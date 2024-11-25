@@ -129,4 +129,17 @@ export async function loopAIcodeGeneration(textPrompt = null, numberOfIterations
     }
 
     await printAndPause("Finished", 5);
-}   
+}
+
+
+
+
+export async function implementSpecificClassMethod(className, methodName) {
+    const promptString = `Identify the ${methodName} method in the ${className} class. Implement it. 
+Only modify the ${className} class. No code for any other class should be generated. 
+Only work on the Wire class. Do not touch any other class.
+Only work on the Wire class. Do not touch any other class. 
+Only work on the Wire class. Do not touch any other class.`
+
+    await aiAssistedCodeChanges(promptString);
+}
