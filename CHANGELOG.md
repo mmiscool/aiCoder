@@ -3,6 +3,12 @@
 [![semantic versioning](https://img.shields.io/badge/semantic%20versioning-2.0.0-green.svg)](https://semver.org)
 > All notable changes to this project will be documented in this file
 
+## [1.0.11](https://github.com/mmiscool/aiCoder/compare/v1.0.10...v1.0.11) (2024-11-25)
+
+### 🤖 Build System
+
+* Allow for selection of stub methods and automatically generate the method. ([faa2d15](https://github.com/mmiscool/aiCoder/commit/faa2d15171b87efb0725a0846df86aa8c28001e0))
+
 ## [1.0.10](https://github.com/mmiscool/aiCoder/compare/v1.0.9...v1.0.10) (2024-11-19)
 
 ### 🤖 Build System
