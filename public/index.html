@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="color-scheme" content="light dark">
+    <title>AI Coder</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+
+            overflow: hidden;
+        }
+
+        .toolBar {
+            position: absolute;
+            top: 0;
+            width: 100%;
+            height: 50px;
+        }
+
+        .leftSideBar {
+            position: absolute;
+            left: 0;
+            top: 50px;
+            bottom: 3px;
+            width: 200px;
+
+            background-color: red;
+            border-right: 1px solid #ccc;
+            overflow-y: scroll;
+        }
+
+        .rightMain {
+            position: absolute;
+            left: 200px;
+            top: 50px;
+            right: 0;
+            bottom: 3px;
+            background-color: yellow;
+            overflow: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="toolBar" class="toolBar"></div>
+    <div id="leftSideBar" class="leftSideBar"></div>
+    <div id="rightMain" class="rightMain"></div>
+
+
+    <script type="module">
+        import { loadCode } from './main.js';
+    </script>
+</body>
+
+</html>

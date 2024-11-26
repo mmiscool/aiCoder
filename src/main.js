@@ -17,6 +17,7 @@ import { aiAssistedCodeChanges, implementSpecificClassMethod, loopAIcodeGenerati
 import { spawn } from 'child_process';
 import { getMethodsWithArguments, getStubMethods, showListOfClassesAndFunctions } from './classListing.js';
 import './gitnoteSetup.js';
+import {setupServer} from './apiServer.js';
 
 
 
@@ -31,14 +32,15 @@ process.on('SIGINT', () => {
 
 
 //Current target file
-export const ctx = {
-    targetFile: process.argv[2],
-    skipApprovingChanges: false,
-    getLastPrompt: await async function () { return await readFile('./.aiCoder/last-prompt.md') },
-    setLastPrompt: function (prompt) {
-        writeFile('./.aiCoder/last-prompt.md', prompt);
-    }
+export const ctx = {};
+
+ctx.targetFile = process.argv[2];
+ctx.skipApprovingChanges = false;
+ctx.getLastPrompt = async function () { return await readFile('./.aiCoder/last-prompt.md') };
+ctx.setLastPrompt = function (prompt) {
+    writeFile('./.aiCoder/last-prompt.md', prompt);
 };
+
 
 
 export async function getPremadePrompts() {
@@ -68,6 +70,7 @@ export async function getPremadePrompts() {
 
 async function mainLoop(params) {
     if (!ctx.targetFile) ctx.targetFile = await getFilePath();
+    setupServer();
 
     while (true) {
 

@@ -36,6 +36,7 @@
     "inquirer-file-selector": "^0.5.0",
     "marked": "^13.0.3",
     "marked-terminal": "^7.1.0",
+    "mime": "^4.0.4",
     "node-pty": "^1.0.0",
     "ollama": "^0.5.9",
     "openai": "^4.68.4",
