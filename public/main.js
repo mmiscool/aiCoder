@@ -1,59 +1,275 @@
-export async function doAjax(endpoint, data) {
-    try {
-        const response = await fetch("./" + endpoint, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
+import { tabInterface } from './tabInterface.js';
+import { MarkdownToHtml } from './MarkdownToHtml.js';
+
+function generateSettingsDiv(container) {
+    // Loop through all localStorage keys
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+
+        // Check if the key starts with "setting_"
+        if (key.startsWith('setting_')) {
+            // Create a label for the textarea
+            const label = document.createElement('label');
+            label.textContent = key;
+            label.style.display = 'block';
+            label.style.marginBottom = '5px';
+
+            // Create a textarea
+            const textarea = document.createElement('textarea');
+            textarea.value = localStorage.getItem(key) || '';
+            textarea.style.width = '100%';
+            textarea.style.height = '30%';
+            textarea.style.marginBottom = '10px';
+
+            // Update localStorage on input
+            textarea.addEventListener('input', (event) => {
+                localStorage.setItem(key, event.target.value);
+            });
+
+            // Append the label and textarea to the container
+            container.appendChild(label);
+            container.appendChild(textarea);
+        }
+    }
+
+    // Return the container div
+    return container;
+}
+
+
+
+
+
+
+
+
+async function setup() {
+    const tabs = new tabInterface();
+    const chatTab = tabs.createTab("Chat");
+    const bla = new generateChatDiv(chatTab);
+
+    const toolsTab = tabs.createTab("Tools");
+    const tools = new toolsDiv(toolsTab);
+
+    const settingsTab = tabs.createTab("Project Settings");
+    generateSettingsDiv(settingsTab);
+
+
+
+    document.body.style.margin = "0";
+    document.body.style.height = "100vh";
+    document.body.style.display = "flex";
+
+    document.body.appendChild(tabs.getElement());
+}
+
+
+async function setDefaultLocalStorageKey(key, value) {
+    if (!localStorage.getItem(key)) {
+        localStorage.setItem(key, value);
+    }
+}
+
+// call the setup function only after the DOM has loaded
+document.addEventListener('DOMContentLoaded', setup);
+
+
+
+
+class toolsDiv {
+    constructor(container) {
+        this.container = container;
+        this.container.style.padding = '10px';
+        this.container.style.border = '1px solid #ccc';
+        this.container.style.flex = '1';
+        this.container.style.flexDirection = 'column';
+        this.container.style.overflow = 'auto';
+
+
+        this.showToolBar();
+    }
+
+    async showToolBar() {
+        this.container.innerHTML = '';
+        const toolBar = document.createElement('div');
+        toolBar.style.display = 'flex';
+        toolBar.style.flexDirection = 'row';
+        toolBar.style.justifyContent = 'space-between';
+        toolBar.style.marginBottom = '10px';
+
+        const pullMethodsListButton = document.createElement('button');
+        pullMethodsListButton.textContent = 'Pull Methods List';
+        pullMethodsListButton.addEventListener('click', () => {
+            this.pullMethodsList();
+        });
+        toolBar.appendChild(pullMethodsListButton);
+
+        const implementAllStubsButton = document.createElement('button');
+        implementAllStubsButton.textContent = 'Implement All Stubs';
+        implementAllStubsButton.addEventListener('click', async () => {
+            await this.implementAllStubs();
+        });
+        toolBar.appendChild(implementAllStubsButton);
+
+        this.container.appendChild(toolBar);
+    }
+
+    async pullMethodsList() {
+        this.showToolBar();
+        const listOfMethods = await doAjax('/pullMethodsList', {});
+
+        // the response contains 
+
+
+
+
+
+        for (const className in listOfMethods) {
+            //console.log(className);
+            const methods = listOfMethods[className];
+
+            for (const { name, args, isStub } of methods) {
+                const argList = args.join(', ');
+
+                console.log(`${className}.${name}(${argList})`);
+
+                const button = document.createElement('dim');
+                button.textContent = `${className}.${name}(${argList})`;
+                if (isStub) {
+                    button.style.color = 'red';
+                }
+                else {
+                    button.style.color = 'green';
+                }
+                button.addEventListener('click', async () => {
+                    await this.implementSpecificClassMethod(className, name);
+                });
+
+                this.container.appendChild(button);
+                this.container.appendChild(document.createElement('br'));
+            }
+        }
+    }
+}
+
+
+
+class generateChatDiv {
+    constructor(container) {
+        this.container = container;
+        this.newChatButton = document.createElement('button');
+        this.newChatButton.textContent = 'New Chat';
+        this.newChatButton.addEventListener('click', () => {
+            this.newChat();
+        });
+        this.container.appendChild(this.newChatButton);
+
+        this.chatMessageDiv = document.createElement('div');
+        this.container.appendChild(this.chatMessageDiv);
+
+
+
+
+        // add label for user input
+        this.userInputLabel = document.createElement('label');
+        this.userInputLabel.textContent = 'User Input:';
+        this.userInputLabel.style.display = 'block';
+        this.userInputLabel.style.marginBottom = '5px';
+        this.container.appendChild(this.userInputLabel);
+
+        // add text area for user input
+        this.userInput = document.createElement('textarea');
+        this.userInput.style.width = '100%';
+        this.userInput.style.height = '100px';
+        this.userInput.style.marginBottom = '10px';
+        this.container.appendChild(this.userInput);
+
+        // add button to submit user input
+        this.submitButton = document.createElement('button');
+        this.submitButton.textContent = 'Submit';
+        this.submitButton.style.width = '100%';
+        this.submitButton.style.marginBottom = '10px';
+        this.submitButton.addEventListener('click', () => {
+            this.addMessage(this.userInput.value);
+            this.callLLM();
+
+        });
+        this.container.appendChild(this.submitButton);
+
+
+        this.pullMessages();
+    }
+
+    async pullMessages() {
+      
+        const response = await doAjax('/pullMessages', {});
+        this.chatMessageDiv.innerHTML = '';
+        response.forEach(async message => {
+            const individualMessageDiv = document.createElement('div');
+            individualMessageDiv.style.border = '1px solid black';
+            individualMessageDiv.style.padding = '10px';
+            individualMessageDiv.style.marginBottom = '10px';
+
+            if (message.role === 'user') {
+                //slightly transparent blue
+                individualMessageDiv.style.backgroundColor = 'rgba(0, 0, 255, 0.2)';
+            }
+            if (message.role === 'system' || message.role === 'assistant') {
+                individualMessageDiv.style.backgroundColor = 'rgba(0, 255, 0, 0.2)';
+            }
+
+
+
+            const roleDiv = document.createElement('div');
+            roleDiv.textContent = message.role;
+            roleDiv.style.fontWeight = 'bold';
+            individualMessageDiv.appendChild(roleDiv);
+
+
+            const contentDiv = document.createElement('div');
+            new MarkdownToHtml(contentDiv, message.content);
+            individualMessageDiv.appendChild(contentDiv);
+
+            this.chatMessageDiv.appendChild(individualMessageDiv);
+            individualMessageDiv.scrollIntoView();
+   
         });
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const result = await response.text();
-        try {
-            return JSON.parse(result);
-        } catch (err) {
-            throw new Error("Failed to parse JSON: " + result);
-        }
-    } catch (error) {
-        console.error("Error in doAjax:", error);
-        return null;
     }
-}
 
+    async addMessage(message) {
+        await doAjax('/addMessage', { message });
+        await this.pullMessages();
+    }
 
-export const mainApp= {
-    toolbar: document.getElementById("toolbar"),
-    leftSideBar: document.getElementById("leftSideBar"),
-    rightMain: document.getElementById("rightMain"),
+    async newChat() {
+        await doAjax('/newChat', {});
+        await this.pullMessages();
+    }
+
+    async callLLM() {
+        await doAjax('/callLLM', {});
+        await this.pullMessages();
+    }
+
 }
 
 
 
-let code;
 
-export async function loadCode() {
-    // check if the code element exists and if not create it and add it to the body
-    if (!code) {
-        code = document.createElement("textarea");
-        code.id = "code";
-        code.style.width = "calc(100% - 10px)";
-        code.style.height = "calc(100% - 10px)";
-        code.style.margin = "5px";
-        rightMain.appendChild(code);
-    }
-
-
-
-    const response = await doAjax("readFile", {});
-    if (response && response.file) {
-        code.value = response.file;
-    } else {
-        code.value = "Error: Could not load the code. Check the console for details.";
-    }
+async function doAjax(urlToCall, body) {
+    const response = await fetch(urlToCall, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+    });
+    const responseJson = await response.json();
+    console.log(responseJson);
+    return responseJson;
 }
 
-loadCode();
+
+
+

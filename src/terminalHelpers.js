@@ -10,10 +10,16 @@ import { printDebugMessage } from './debugging.js';
 
 import fs from 'fs';
 import path from 'path';
+import { ctx } from './main.js';
 
 
 export async function clearTerminal() {
 
+  if (ctx.ws) {
+    ctx.ws.send("clear");
+  }
+
+  return console.log("----------------------------------------------------------------------------");
   // Clears the screen buffer entirely, including scrollback history
   await process.stdout.write('\u001b[3J\u001b[2J\u001b[1J\u001b[H');
   // Clears the screen buffer up to the current line
@@ -135,10 +141,6 @@ export async function displayMenu(menuSystem, lastSelectedName = null) {
     // Find the index of the last selected item by name
 
     while (true) {
-      console.log("This is where the problem is");
-      console.log(menuNode);
-      console.log("This is where the problem is");
-      console.log(menuNode.options);
       // Prepare the menu object with prompt text from menu name
       const menuObject = {
         message: menuNode.name, // Use menu name as the prompt text

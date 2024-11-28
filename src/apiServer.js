@@ -2,55 +2,123 @@
 import { ctx } from './main.js';
 import http from 'http';
 import url from 'url';
-import fs from 'fs/promises'; // Use promise-based fs
+import fs from 'fs/promises';
 import path from 'path';
 import mime from 'mime'; // Install this package with `npm install mime`
-import { getScriptFolderPath, readFile } from './fileIO.js';
+import WebSocket, { WebSocketServer } from 'ws'; // WebSocket support
+
+import { intelligentlyMergeSnippets } from './intelligentMerge.js';
+import { conversation, setupLLM } from './llmCall.js';
+import { readFile, readOrLoadFromDefault, writeFile, getScriptFolderPath } from './fileIO.js';
+import { aiAssistedCodeChanges, implementSpecificClassMethod, loopAIcodeGeneration } from './aiAssistedCodeChanges.js';
+
+import { spawn } from 'child_process';
+import { getMethodsWithArguments, getStubMethods, showListOfClassesAndFunctions } from './classListing.js';
+import { printAndPause } from './terminalHelpers.js';
+
+
+
+let webUIConversation = new conversation();
+
+
+
+
+
+
+
+
+
 
 export function setupServer() {
     // ctx variables
-    console.log(ctx);
     ctx.appData = {};
     ctx.appData.counter = 0;
     ctx.appData.message = "Hello, world!";
     ctx.appData.serveDirectory = path.resolve(getScriptFolderPath() + "/../public"); // Directory to serve files from
 
-    // Server code
+
+
     const server = http.createServer(async (req, res) => {
         try {
             const parsedUrl = url.parse(req.url, true);
-            const pathname = parsedUrl.pathname === '/' ? '/index.html' : parsedUrl.pathname; // Default to index.html
-            const query = parsedUrl.query;
+            const pathname = parsedUrl.pathname === '/' ? '/index.html' : parsedUrl.pathname;
+
+            let parsedBody = {};
+            if (req.method === 'POST') {
+                // Read the body of the request
+                const body = await new Promise((resolve, reject) => {
+                    let data = '';
+                    req.on('data', chunk => {
+                        data += chunk;
+                    });
+                    req.on('end', () => {
+                        resolve(data);
+                    });
+                    req.on('error', err => {
+                        reject(err);
+                    });
+                });
+
+                if (body) {
+                    try {
+                        parsedBody = JSON.parse(body);
+                    } catch (err) {
+                        console.error('Invalid JSON:', err.message);
+                        parsedBody = {}; // Default to an empty object if parsing fails
+                    }
+                }
+            }
 
             // API endpoints
-            if (pathname === '/readFile') {
-                try {
-                    const fileContent = await readFile(ctx.targetFile, 'utf8');
-                    res.statusCode = 200;
-                    res.setHeader('Content-Type', 'application/json');
-                    res.end(JSON.stringify({ success: true, file: fileContent }));
-                } catch (err) {
-                    res.statusCode = 500;
-                    res.setHeader('Content-Type', 'application/json');
-                    res.end(JSON.stringify({ success: false, message: 'Error reading file', error: err.message }));
-                }
+            if (pathname === '/addMessage') {
+                console.log('addMessage', parsedBody.message);
+                // Assuming `webUIConversation.addMessage` exists
+                await webUIConversation.addMessage("user", parsedBody.message);
+                res.statusCode = 200;
+                res.setHeader('Content-Type', 'application/json');
+                res.end(JSON.stringify({ success: true }));
                 return;
             }
 
-            if (pathname === '/message') {
-                if (query.msg) {
-                    ctx.appData.message = query.msg;
-                }
+            if (pathname === '/pullMessages') {
+                const response = await webUIConversation.getMessages();
                 res.statusCode = 200;
                 res.setHeader('Content-Type', 'application/json');
-                res.end(JSON.stringify({ success: true, message: ctx.appData.message }));
+                res.end(JSON.stringify(response));
                 return;
             }
 
-            if (pathname === '/status') {
+            if (pathname === '/newChat') {
+                webUIConversation = new conversation();
+                webUIConversation.addFileMessage("system", './.aiCoder/default-system-prompt.md');
+                webUIConversation.addFileMessage("user", ctx.targetFile);
+                webUIConversation.addFileMessage("system", './.aiCoder/snippet-production-prompt.md');
+
+
+                const response = webUIConversation.getMessages();
                 res.statusCode = 200;
                 res.setHeader('Content-Type', 'application/json');
-                res.end(JSON.stringify({ success: true, data: ctx.appData }));
+                res.end(JSON.stringify(response));
+                return;
+            }
+
+            if (pathname === '/callLLM') {
+                console.log('callLLM');
+                await webUIConversation.callLLM();
+                const response = await webUIConversation.getMessages();
+                res.statusCode = 200;
+                res.setHeader('Content-Type', 'application/json');
+                res.end(JSON.stringify(response));
+                return;
+            }
+
+
+
+            if (pathname === '/pullMethodsList') {
+                const response = await getMethodsWithArguments(await readFile(ctx.targetFile));
+                res.statusCode = 200;
+                res.setHeader('Content-Type', 'application/json');
+                res.end(JSON.stringify(response));
                 return;
             }
 
@@ -88,10 +156,55 @@ export function setupServer() {
         }
     });
 
+
+    // WebSocket server
+    const wss = new WebSocketServer({ server });
+
+    wss.on('connection', (ws) => {
+        console.log('WebSocket connection established.');
+
+        ws.on('message', (message) => {
+            console.log('Received:', message);
+            // Echo the message back
+            ws.send(`Echo: ${message}`);
+        });
+
+        ws.on('close', () => {
+            console.log('WebSocket connection closed.');
+        });
+
+        ws.send('Welcome to the WebSocket server!');
+
+        ctx.ws = ws;
+    });
+
     // Start the server
     const PORT = 5000;
     server.listen(PORT, () => {
         console.log(`Server is running at http://localhost:${PORT}`);
         console.log(`Serving files from: ${ctx.appData.serveDirectory}`);
     });
+}
+
+// Dynamically call a function by its name with arguments
+async function callFunctionByName(functionName, args) {
+    console.log(`Calling function: ${functionName} with args:`, args);
+    try {
+        const func = eval(functionName); // Dynamically resolve the function
+        if (typeof func === 'function') {
+            // If args is an array, use spread operator; otherwise, assume no arguments
+            return Array.isArray(args) ? await func(...args) : await func();
+        } else {
+            throw new Error(`"${functionName}" is not a function.`);
+        }
+    } catch (error) {
+        console.error(`Error in callFunctionByName: ${error.message}`);
+        throw error; // Propagate the error for proper handling
+    }
+}
+
+// Example server-side function
+async function readCurrentFile(filePath) {
+    const fileContent = await readFile(filePath, 'utf8');
+    return fileContent;
 }

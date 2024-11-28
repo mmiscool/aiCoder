@@ -19,6 +19,10 @@ export class conversation {
         this.messages.push({ role, content });
     }
 
+    async addFileMessage(role, filePath) {
+        this.messages.push({ role, content:filePath, filePath });
+    }
+
     async lastMessage() {
         return this.messages[this.messages.length - 1].content;
     }
@@ -30,6 +34,10 @@ export class conversation {
         llmResponse = llmResponse.trim();
         await this.addMessage('assistant', llmResponse);
         return llmResponse;
+    }
+
+    async getMessages() {
+        return this.messages;
     }
 }
 
@@ -51,6 +59,15 @@ async function throttle() {
 
 export async function callLLM(messages) {
     const llmToUse = await selectAIservice();
+
+    // for each message in the array, check if it is a file path and if it is read the file and add the content to the messages array
+    for (let i = 0; i < messages.length; i++) {
+        if (messages[i].filePath) {
+            messages[i].content = await readFile(messages[i].filePath);
+        }
+    }
+
+
     let response = '';
     if (llmToUse === 'openai') {
         await throttle();
@@ -66,6 +83,13 @@ export async function callLLM(messages) {
     else {
         await printAndPause('This feature is not yet implemented.', 1.5);
         response = '';
+    }
+
+    // for each message in the array, check if it is a file path and if it is delete the content from the messages array
+    for (let i = 0; i < messages.length; i++) {
+        if (messages[i].filePath) {
+            messages[i].content = messages[i].filePath;
+        }
     }
 
     lastCallTime = new Date().getTime();

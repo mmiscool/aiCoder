@@ -2,7 +2,7 @@ import fs from 'fs';
 import path, { relative, dirname } from 'path';
 import { printDebugMessage } from './debugging.js';
 import { createBackup } from './backupSystem.js';
-import { printAndPause } from './terminalHelpers.js';
+import { pressEnterToContinue, printAndPause } from './terminalHelpers.js';
 import { fileURLToPath } from 'url';
 
 // Helper functions to read, write, and append to files
@@ -24,6 +24,12 @@ export async function readFile(filePath) {
 
 
 export async function writeFile(filePath, content, makeBackup = false) {
+    if (typeof content !== 'string') {
+        await printAndPause('Content is not a string:',0);
+        await printAndPause(content,0);
+        await pressEnterToContinue();
+        
+    }
     // create the folders in the file path if they don't exist
     let folderPath = path.dirname(filePath);
     await createFolderIfNotExists(folderPath);

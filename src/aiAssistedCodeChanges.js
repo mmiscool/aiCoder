@@ -6,6 +6,12 @@ import { readFile, readOrLoadFromDefault, writeFile } from "./fileIO.js";
 import { extractCodeSnippets } from "./extractCodeSnippets.js";
 import { codeManipulator } from './intelligentMerge.js';
 
+readOrLoadFromDefault('./.aiCoder/default-system-prompt.md', '/prompts/default-system-prompt.md');
+readOrLoadFromDefault('./.aiCoder/snippet-production-prompt.md', '/prompts/snippet-production-prompt.md');
+readOrLoadFromDefault('./.aiCoder/snippet-validation-prompt.md', '/prompts/snippet-validation-prompt.md');
+
+
+
 export async function aiAssistedCodeChanges(premade_llmInstructionPrompt = null, skipApprovingChanges = ctx.skipApprovingChanges) {
     // load the premade prompts
     let defaultSystemPrompt = await readOrLoadFromDefault('./.aiCoder/default-system-prompt.md', '/prompts/default-system-prompt.md');
