@@ -19,7 +19,7 @@ export async function clearTerminal() {
     ctx.ws.send("clear");
   }
 
-  return console.log("----------------------------------------------------------------------------");
+  //return console.log("----------------------------------------------------------------------------");
   // Clears the screen buffer entirely, including scrollback history
   await process.stdout.write('\u001b[3J\u001b[2J\u001b[1J\u001b[H');
   // Clears the screen buffer up to the current line
@@ -41,6 +41,7 @@ export async function printCodeToTerminal(jsCode) {
 
 
 export async function printAndPause(message, secondsToPause = 2) {
+  return console.log(message);
   console.log(message);
   if (secondsToPause > 4) {
     return;

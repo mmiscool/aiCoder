@@ -1,43 +1,10 @@
 import { tabInterface } from './tabInterface.js';
 import { MarkdownToHtml } from './MarkdownToHtml.js';
+import { LLMSettingsManager } from './LLMSettingsManager.js';
+import { doAjax } from './doAjax.js';
+import { ProjectSettingsManager } from './ProjectSettingsManager.js';
 
-function generateSettingsDiv(container) {
-    // Loop through all localStorage keys
-    for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-
-        // Check if the key starts with "setting_"
-        if (key.startsWith('setting_')) {
-            // Create a label for the textarea
-            const label = document.createElement('label');
-            label.textContent = key;
-            label.style.display = 'block';
-            label.style.marginBottom = '5px';
-
-            // Create a textarea
-            const textarea = document.createElement('textarea');
-            textarea.value = localStorage.getItem(key) || '';
-            textarea.style.width = '100%';
-            textarea.style.height = '30%';
-            textarea.style.marginBottom = '10px';
-
-            // Update localStorage on input
-            textarea.addEventListener('input', (event) => {
-                localStorage.setItem(key, event.target.value);
-            });
-
-            // Append the label and textarea to the container
-            container.appendChild(label);
-            container.appendChild(textarea);
-        }
-    }
-
-    // Return the container div
-    return container;
-}
-
-
-
+//async function llmSettingsDiv(container) {
 
 
 
@@ -51,10 +18,11 @@ async function setup() {
     const toolsTab = tabs.createTab("Tools");
     const tools = new toolsDiv(toolsTab);
 
-    const settingsTab = tabs.createTab("Project Settings");
-    generateSettingsDiv(settingsTab);
+    const projectSettings = tabs.createTab("Project Settings");
+    new ProjectSettingsManager(projectSettings);
 
-
+    const llmSettings = tabs.createTab("LLM Settings");
+    new LLMSettingsManager(llmSettings);
 
     document.body.style.margin = "0";
     document.body.style.height = "100vh";
@@ -119,11 +87,6 @@ class toolsDiv {
         const listOfMethods = await doAjax('/pullMethodsList', {});
 
         // the response contains 
-
-
-
-
-
         for (const className in listOfMethods) {
             //console.log(className);
             const methods = listOfMethods[className];
@@ -182,6 +145,7 @@ class generateChatDiv {
         this.userInput.style.width = '100%';
         this.userInput.style.height = '100px';
         this.userInput.style.marginBottom = '10px';
+        this.userInput.style.padding = '5px';
         this.container.appendChild(this.userInput);
 
         // add button to submit user input
@@ -193,8 +157,6 @@ class generateChatDiv {
             this.addMessage(this.userInput.value);
             this.userInput.value = '';
             this.callLLM();
-
-
         });
         this.container.appendChild(this.submitButton);
 
@@ -237,12 +199,9 @@ class generateChatDiv {
 
             this.chatMessageDiv.appendChild(individualMessageDiv);
             this.submitButton.scrollIntoView();
-
         });
 
-
         addCodeToolbars();
-
     }
 
     async addMessage(message) {
@@ -265,18 +224,7 @@ class generateChatDiv {
 
 
 
-async function doAjax(urlToCall, body) {
-    const response = await fetch(urlToCall, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(body)
-    });
-    const responseJson = await response.json();
-    console.log(responseJson);
-    return responseJson;
-}
+
 
 
 function addCodeToolbars() {
@@ -348,6 +296,3 @@ function addCodeToolbars() {
         wrapper.appendChild(toolbar);
     });
 }
-
-// Call the function to add toolbars to all <code> elements
-addCodeToolbars();

@@ -121,6 +121,7 @@ export class MarkdownToHtml {
         } else {
             code.classList.add("language-plaintext");
         }
+        code.style.paddingTop = "20px";
 
         pre.appendChild(code);
         return pre;

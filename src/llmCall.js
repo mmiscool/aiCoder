@@ -1,9 +1,9 @@
 import { OpenAI } from "openai";
+import Groq from "groq-sdk";
+import ollama from 'ollama';
 import fs from 'fs';
 import { readFile, writeFile } from "./fileIO.js"
 import { input, clearTerminal, printAndPause, menuPrompt, confirmAction, pressEnterToContinue, } from "./terminalHelpers.js";
-import Groq from "groq-sdk";
-import ollama from 'ollama';
 import cliProgress from 'cli-progress';
 import { spawn } from 'child_process';
 
@@ -20,7 +20,7 @@ export class conversation {
     }
 
     async addFileMessage(role, filePath) {
-        this.messages.push({ role, content:filePath, filePath });
+        this.messages.push({ role, content: filePath, filePath });
     }
 
     async lastMessage() {
@@ -149,10 +149,61 @@ export async function setupLLM() {
     }
 }
 
+export async function llmSettings() {
+    // pull the current settings from the files
+    // pull the available models from each service
 
+    const currentService = await readFile('./.aiCoder/ai-service.txt');
 
-export async function setupLLMapiKey(overwrite = false) {
-    const llmAPIkeyFileName = `./.aiCoder/${await selectAIservice()}-api-key.txt`;
+    const settingsObject = {
+        openai: {
+            model: await readFile(`./.aiCoder/openai-model.txt`),
+            apiKey: await readFile(`./.aiCoder/openai-api-key.txt`),
+            models: await getOpenAIModels(),
+            active: currentService === 'openai',
+        },
+        groq: {
+            model: await readFile(`./.aiCoder/groq-model.txt`),
+            apiKey: await readFile(`./.aiCoder/groq-api-key.txt`),
+            models: await getGroqModels(),
+            active: currentService === 'groq',
+        },
+        ollama: {
+            model: await readFile(`./.aiCoder/ollama-model.txt`),
+            apiKey: await readFile(`./.aiCoder/ollama-api-key.txt`),
+            models: await getOllamaModels(),
+            active: currentService === 'ollama',
+        },
+
+    }
+
+    return settingsObject;
+    // return an object with the settings and options
+}
+
+export async function llmSettingsUpdate(settings) {
+    // write the new settings to the files
+    await writeFile(`./.aiCoder/openai-model.txt`, settings.openai.model);
+    await writeFile(`./.aiCoder/openai-api-key.txt`, settings.openai.apiKey);
+
+    await writeFile(`./.aiCoder/groq-model.txt`, settings.groq.model);
+    await writeFile(`./.aiCoder/groq-api-key.txt`, settings.groq.apiKey);
+
+    await writeFile(`./.aiCoder/ollama-model.txt`, settings.ollama.model);
+    await writeFile(`./.aiCoder/ollama-api-key.txt`, settings.ollama.apiKey);
+
+    await writeFile(`./.aiCoder/ai-service.txt`,
+        settings.openai.active ? 'openai' : settings.groq.active ? 'groq' : 'ollama'
+    );
+
+    return { success: true };
+}
+
+export async function setupLLMapiKey(overwrite = false, service = '') {
+    if (service === '') {
+        service = await selectAIservice();
+    }
+    const llmAPIkeyFileName = `./.aiCoder/${service}-api-key.txt`;
 
     if (readFile(llmAPIkeyFileName) && !overwrite) {
         return readFile(llmAPIkeyFileName);
@@ -359,7 +410,7 @@ export async function getGroqResponse(messages) {
 
 
 async function getGroqModels() {
-    const groq = new Groq({ apiKey: await setupLLMapiKey() });
+    const groq = new Groq({ apiKey: await readFile('./.aiCoder/groq-api-key.txt') });
     try {
         const response = await groq.models.list();
         const models = response.data;
@@ -404,7 +455,7 @@ async function getOpenAIResponse(messages) {
 
 
 async function getOpenAIModels() {
-    const apiKey = await setupLLMapiKey();
+    const apiKey = await readFile('./.aiCoder/openai-api-key.txt');
     let openai = new OpenAI({ apiKey });
     try {
         const response = await openai.models.list();

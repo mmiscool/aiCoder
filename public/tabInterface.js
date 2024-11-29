@@ -45,7 +45,7 @@ export class tabInterface {
         tabButton.style.border = "none";
         tabButton.style.backgroundColor = this.colors.tabButtonBackground;
         tabButton.style.cursor = "pointer";
-        tabButton.style.outline = "none";
+        tabButton.style.outline = "1px solid black";
         tabButton.style.padding = "10px";
         tabButton.style.transition = "background-color 0.3s";
 
