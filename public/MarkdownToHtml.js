@@ -1,5 +1,5 @@
 // MarkdownToHtml.js
-// A class-based Markdown to HTML converter with proper indentation for lists
+// A class-based Markdown to HTML converter with inline JavaScript syntax highlighting
 
 export class MarkdownToHtml {
     constructor(targetElement, markdown) {
@@ -14,11 +14,16 @@ export class MarkdownToHtml {
 
         this.codeBlockStyles = {
             backgroundColor: "black",
-            color: "cyan",
-            padding: "10px",
+            color: "white",
+            padding: "0px",
             whiteSpace: "pre-wrap",
             fontFamily: "monospace",
             borderRadius: "4px",
+            overflowX: "auto",
+            maxWidth: "100%",
+            margin: "0px",
+            padding: "0px",
+            display: "inline-block",
         };
 
         if (markdown) {
@@ -104,15 +109,46 @@ export class MarkdownToHtml {
     }
 
     createCodeBlockElement(content, language) {
-        const pre = document.createElement("code");
-        // 
+        const pre = document.createElement("pre");
+        const code = document.createElement("code");
 
-        pre.textContent = content;
+        code.textContent = content; // No extra wrapping or element creation
         this.applyStyles(pre, this.codeBlockStyles);
+
+        // Add the language class for CSS-based styling
         if (language) {
-            pre.setAttribute("data-language", language);
+            code.classList.add(`language-${language.toLowerCase()}`);
+        } else {
+            code.classList.add("language-plaintext");
         }
+
+        pre.appendChild(code);
         return pre;
+    }
+
+
+    highlightJavaScript(code) {
+        // Regex patterns for JavaScript syntax
+        const patterns = [
+            { regex: /(\/\/.*$)/gm, class: "comment" }, // Single-line comment
+            { regex: /(["'`])(?:\\.|[^\1\\])*?\1/g, class: "string" }, // String literals
+            { regex: /\b(const|let|var|if|else|for|while|function|return|class|new|this|super|import|export|default|extends)\b/g, class: "keyword" }, // Keywords
+            { regex: /\b\d+(\.\d+)?\b/g, class: "number" }, // Numbers
+            { regex: /\b(true|false|null|undefined)\b/g, class: "literal" }, // Literals
+        ];
+
+        let highlighted = this.escapeHtml(code);
+
+        patterns.forEach(({ regex, class: className }) => {
+            highlighted = highlighted.replace(regex, (match) => `<span class="${className}">${match}</span>`);
+        });
+
+        return highlighted;
+    }
+
+    escapeHtml(text) {
+        const map = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
+        return text.replace(/[&<>"']/g, (char) => map[char]);
     }
 
     createHeadingElement(line) {
@@ -152,28 +188,23 @@ export class MarkdownToHtml {
 
         let match;
         while ((match = regex.exec(line)) !== null) {
-            // Add text before the current match
             if (match.index > lastIndex) {
                 elements.push(document.createTextNode(line.slice(lastIndex, match.index)));
             }
 
             if (match[2]) {
-                // Bold (**text**)
                 const strong = document.createElement("strong");
                 strong.textContent = match[2];
                 elements.push(strong);
             } else if (match[3]) {
-                // Italic (*text*)
                 const em = document.createElement("em");
                 em.textContent = match[3];
                 elements.push(em);
             } else if (match[4]) {
-                // Inline code (`text`)
                 const code = document.createElement("code");
                 code.textContent = match[4];
                 elements.push(code);
             } else if (match[5] && match[6]) {
-                // Link [text](url)
                 const a = document.createElement("a");
                 a.textContent = match[5];
                 a.href = match[6];
@@ -183,7 +214,6 @@ export class MarkdownToHtml {
             lastIndex = regex.lastIndex;
         }
 
-        // Add remaining text after the last match
         if (lastIndex < line.length) {
             elements.push(document.createTextNode(line.slice(lastIndex)));
         }

@@ -1,5 +1,3 @@
-
-
 export class tabInterface {
     constructor() {
         // Define color variables

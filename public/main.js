@@ -191,7 +191,9 @@ class generateChatDiv {
         this.submitButton.style.marginBottom = '10px';
         this.submitButton.addEventListener('click', () => {
             this.addMessage(this.userInput.value);
+            this.userInput.value = '';
             this.callLLM();
+
 
         });
         this.container.appendChild(this.submitButton);
@@ -201,7 +203,7 @@ class generateChatDiv {
     }
 
     async pullMessages() {
-      
+
         const response = await doAjax('/pullMessages', {});
         this.chatMessageDiv.innerHTML = '';
         response.forEach(async message => {
@@ -214,11 +216,11 @@ class generateChatDiv {
                 //slightly transparent blue
                 individualMessageDiv.style.backgroundColor = 'rgba(0, 0, 255, 0.2)';
             }
-            if (message.role === 'system' ) {
+            if (message.role === 'system') {
                 individualMessageDiv.style.backgroundColor = 'rgba(255, 0, 0, 0.1)';
-                
+
             }
-            if (message.role === 'assistant'){
+            if (message.role === 'assistant') {
                 individualMessageDiv.style.backgroundColor = 'rgba(0, 255, 0, 0.2)';
             }
 
@@ -235,8 +237,11 @@ class generateChatDiv {
 
             this.chatMessageDiv.appendChild(individualMessageDiv);
             this.submitButton.scrollIntoView();
-   
+
         });
+
+
+        addCodeToolbars();
 
     }
 
@@ -274,5 +279,75 @@ async function doAjax(urlToCall, body) {
 }
 
 
+function addCodeToolbars() {
+    // Query all <code> elements on the page
+    //const codeElements = document.querySelectorAll('code');
+    // all elements that have the "language-javascript" class
+    const codeElements = document.querySelectorAll('.language-javascript');
 
+    codeElements.forEach((codeElement) => {
+        // Create a wrapper to hold the code and toolbar
+        const wrapper = document.createElement('div');
+        wrapper.style.position = 'relative';
+        wrapper.style.display = 'inline-block'; // Preserve inline flow of <code> elements
 
+        // Create the toolbar div
+        const toolbar = document.createElement('div');
+        toolbar.style.position = 'absolute';
+        toolbar.style.top = '0px';
+        toolbar.style.right = '0px';
+        toolbar.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+        toolbar.style.color = 'white';
+        toolbar.style.padding = '2px';
+        toolbar.style.borderRadius = '4px';
+        toolbar.style.zIndex = '10';
+        toolbar.style.display = 'flex';
+        toolbar.style.gap = '3px';
+
+        // Example buttons for the toolbar
+        const copyButton = document.createElement('button');
+        copyButton.textContent = '📋';
+        // tooltip
+        copyButton.title = 'Copy code to clipboard';
+        copyButton.style.cursor = 'pointer';
+        copyButton.style.background = 'none';
+        copyButton.style.border = '1px solid white';
+        copyButton.style.color = 'white';
+        copyButton.style.padding = '2px 5px';
+        copyButton.style.borderRadius = '3px';
+        copyButton.addEventListener('click', () => {
+            navigator.clipboard.writeText(codeElement.textContent);
+            alert('Code copied to clipboard!');
+        });
+
+        const editButton = document.createElement('button');
+        editButton.textContent = '🤖✎⚡';
+        editButton.style.cursor = 'pointer';
+        editButton.style.background = 'none';
+        editButton.style.border = '1px solid white';
+        editButton.style.color = 'white';
+        editButton.style.padding = '2px 5px';
+        editButton.style.borderRadius = '3px';
+        editButton.addEventListener('click', async () => {
+            codeElement.style.color = 'red';
+            const codeString = codeElement.textContent;
+            await doAjax('/applySnippet', { snippet: codeString });
+            codeElement.style.color = 'cyan';
+        });
+
+        // Add buttons to the toolbar
+        toolbar.appendChild(copyButton);
+        toolbar.appendChild(editButton);
+
+        // Wrap the <code> element with the wrapper
+        const parent = codeElement.parentNode;
+        parent.insertBefore(wrapper, codeElement);
+        wrapper.appendChild(codeElement);
+
+        // Append the toolbar to the wrapper
+        wrapper.appendChild(toolbar);
+    });
+}
+
+// Call the function to add toolbars to all <code> elements
+addCodeToolbars();

@@ -8,9 +8,9 @@ import mime from 'mime'; // Install this package with `npm install mime`
 import WebSocket, { WebSocketServer } from 'ws'; // WebSocket support
 
 import { intelligentlyMergeSnippets } from './intelligentMerge.js';
-import { conversation, setupLLM } from './llmCall.js';
+import { callLLM, conversation, setupLLM } from './llmCall.js';
 import { readFile, readOrLoadFromDefault, writeFile, getScriptFolderPath } from './fileIO.js';
-import { aiAssistedCodeChanges, implementSpecificClassMethod, loopAIcodeGeneration } from './aiAssistedCodeChanges.js';
+import { aiAssistedCodeChanges, applySnippets, implementSpecificClassMethod, loopAIcodeGeneration } from './aiAssistedCodeChanges.js';
 
 import { spawn } from 'child_process';
 import { getMethodsWithArguments, getStubMethods, showListOfClassesAndFunctions } from './classListing.js';
@@ -23,6 +23,41 @@ let webUIConversation = new conversation();
 
 
 
+class serverFunctions {
+    async addMessage(parsedBody) {
+        console.log('addMessage', parsedBody.message);
+        // Assuming `webUIConversation.addMessage` exists
+        await webUIConversation.addMessage("user", parsedBody.message);
+        return { success: true };
+
+    }
+    async pullMessages() {
+        const response = await webUIConversation.getMessages();
+        return response;
+    }
+
+    async newChat() {
+        webUIConversation = new conversation();
+        webUIConversation.addFileMessage("system", './.aiCoder/default-system-prompt.md');
+        webUIConversation.addFileMessage("user", ctx.targetFile);
+        webUIConversation.addFileMessage("system", './.aiCoder/snippet-production-prompt.md');
+        return webUIConversation.getMessages();
+    }
+    async callLLM() {
+        console.log('callLLM');
+        await webUIConversation.callLLM();
+        const response = await webUIConversation.getMessages();
+        return response;
+    }
+    async applySnippet(parsedBody) {
+        await applySnippets([parsedBody.snippet], true);
+        return { success: true };
+    }
+    async pullMethodsList() {
+        const response = await getMethodsWithArguments(await readFile(ctx.targetFile));
+        return response;
+    }
+};
 
 
 
@@ -36,6 +71,8 @@ export function setupServer() {
     ctx.appData.message = "Hello, world!";
     ctx.appData.serveDirectory = path.resolve(getScriptFolderPath() + "/../public"); // Directory to serve files from
 
+    ctx.serverFunctions = new serverFunctions();
+    ctx.serverFunctions.newChat();
 
 
     const server = http.createServer(async (req, res) => {
@@ -69,53 +106,12 @@ export function setupServer() {
                 }
             }
 
-            // API endpoints
-            if (pathname === '/addMessage') {
-                console.log('addMessage', parsedBody.message);
-                // Assuming `webUIConversation.addMessage` exists
-                await webUIConversation.addMessage("user", parsedBody.message);
-                res.statusCode = 200;
-                res.setHeader('Content-Type', 'application/json');
-                res.end(JSON.stringify({ success: true }));
-                return;
-            }
 
-            if (pathname === '/pullMessages') {
-                const response = await webUIConversation.getMessages();
-                res.statusCode = 200;
-                res.setHeader('Content-Type', 'application/json');
-                res.end(JSON.stringify(response));
-                return;
-            }
-
-            if (pathname === '/newChat') {
-                webUIConversation = new conversation();
-                webUIConversation.addFileMessage("system", './.aiCoder/default-system-prompt.md');
-                webUIConversation.addFileMessage("user", ctx.targetFile);
-                webUIConversation.addFileMessage("system", './.aiCoder/snippet-production-prompt.md');
-
-
-                const response = webUIConversation.getMessages();
-                res.statusCode = 200;
-                res.setHeader('Content-Type', 'application/json');
-                res.end(JSON.stringify(response));
-                return;
-            }
-
-            if (pathname === '/callLLM') {
-                console.log('callLLM');
-                await webUIConversation.callLLM();
-                const response = await webUIConversation.getMessages();
-                res.statusCode = 200;
-                res.setHeader('Content-Type', 'application/json');
-                res.end(JSON.stringify(response));
-                return;
-            }
-
-
-
-            if (pathname === '/pullMethodsList') {
-                const response = await getMethodsWithArguments(await readFile(ctx.targetFile));
+            // try to call the method in the serverFunctions class if the pathname matches the method name
+            // remove the leading slash from the pathname
+            const pathnameWithoutSlash = pathname.substring(1);
+            if (pathnameWithoutSlash in serverFunctions.prototype) {
+                const response = await serverFunctions.prototype[pathnameWithoutSlash](parsedBody);
                 res.statusCode = 200;
                 res.setHeader('Content-Type', 'application/json');
                 res.end(JSON.stringify(response));
@@ -208,3 +204,6 @@ async function readCurrentFile(filePath) {
     const fileContent = await readFile(filePath, 'utf8');
     return fileContent;
 }
+
+
+
