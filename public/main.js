@@ -214,10 +214,13 @@ class generateChatDiv {
                 //slightly transparent blue
                 individualMessageDiv.style.backgroundColor = 'rgba(0, 0, 255, 0.2)';
             }
-            if (message.role === 'system' || message.role === 'assistant') {
+            if (message.role === 'system' ) {
+                individualMessageDiv.style.backgroundColor = 'rgba(255, 0, 0, 0.1)';
+                
+            }
+            if (message.role === 'assistant'){
                 individualMessageDiv.style.backgroundColor = 'rgba(0, 255, 0, 0.2)';
             }
-
 
 
             const roleDiv = document.createElement('div');
@@ -231,7 +234,7 @@ class generateChatDiv {
             individualMessageDiv.appendChild(contentDiv);
 
             this.chatMessageDiv.appendChild(individualMessageDiv);
-            individualMessageDiv.scrollIntoView();
+            this.submitButton.scrollIntoView();
    
         });
 
