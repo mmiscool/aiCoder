@@ -5,7 +5,6 @@ import esprima from 'esprima';
 import estraverse from 'estraverse';
 
 import { appendFile, readFile, writeFile, } from './fileIO.js';
-import { printDebugMessage } from './debugging.js';
 import { createBackup } from './backupSystem.js';
 
 

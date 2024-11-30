@@ -1,8 +1,7 @@
 import fileSelector from 'inquirer-file-selector';
 import fs from 'fs';
 import path from 'path';
-import { printDebugMessage } from './debugging.js';
-import { selectListHeight, printAndPause } from './terminalHelpers.js';
+import { selectListHeight, printAndPause, printDebugMessage } from './terminalHelpers.js';
 import { swapToGitRoot } from './findGitRoot.js';
 
 export let filePathArg = process.argv[2];

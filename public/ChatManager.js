@@ -153,6 +153,8 @@ export class ChatManager {
         await this.pullMessages();
     }
 
+    
+
     async addCodeToolbars() {
         // Query all <code> elements on the page
 

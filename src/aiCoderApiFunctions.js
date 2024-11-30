@@ -3,7 +3,7 @@ import { getMethodsWithArguments } from "./classListing.js";
 import { readFile, readOrLoadFromDefault, writeFile } from "./fileIO.js";
 import { conversation, llmSettings, llmSettingsUpdate } from "./llmCall.js";
 import { ctx } from "./main.js";
-import { launchNano } from "./terminalHelpers.js";
+import { launchNano, printAndPause } from "./terminalHelpers.js";
 
 
 let webUIConversation = new conversation();
@@ -62,7 +62,7 @@ You will not change the plan title if it already has one.
     }
 
     async callLLM() {
-        console.log('callLLM');
+        printAndPause('callLLM');
         await webUIConversation.callLLM();
         const response = await webUIConversation.getMessages();
         return response;
@@ -75,7 +75,6 @@ You will not change the plan title if it already has one.
 
     async getMethodsList() {
         const response = await getMethodsWithArguments(await readFile(ctx.targetFile));
-        //console.log('getMethodsList', response);
         return response;
     }
 

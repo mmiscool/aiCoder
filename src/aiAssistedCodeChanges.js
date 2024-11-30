@@ -32,8 +32,8 @@ export async function aiAssistedCodeChanges(premade_llmInstructionPrompt = null,
     // Loop for conversation with the AI
     while (true) {
 
-        console.log(`Editing: '${ctx.targetFile}'`);
-        console.log("q to quit, Enter to continue");
+        printAndPause(`Editing: '${ctx.targetFile}'`);
+        printAndPause("q to quit, Enter to continue");
         let llmInstructionPrompt = premade_llmInstructionPrompt || await input("What would you like me to do?");
 
         if (llmInstructionPrompt === '') break;
@@ -109,7 +109,7 @@ export async function applySnippets(snippets, skipApprovingChanges = false) {
 
     // append the snippets to the code
     //await appendFile(ctx.targetFile, '\n\n\n\n\n' + cleanedSnippets);
-    console.log('Changes applied');
+    printAndPause('Changes applied');
 
     const manipulator = new codeManipulator(ctx.targetFile);
     await manipulator.mergeCode(cleanedSnippets);

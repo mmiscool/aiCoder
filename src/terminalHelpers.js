@@ -6,11 +6,10 @@ import fileSelector from 'inquirer-file-selector';
 import { marked } from 'marked';
 import TerminalRenderer from 'marked-terminal';
 
-import { printDebugMessage } from './debugging.js';
 
 import fs from 'fs';
 import path from 'path';
-import { ctx } from './main.js';
+import { ctx, debugMode } from './main.js';
 
 
 export async function clearTerminal() {
@@ -95,14 +94,14 @@ export async function confirmAction(message, defaultValue = true) {
 }
 
 
-export function launchNano(filePath, lineNumber=null) {
+export function launchNano(filePath, lineNumber = null) {
   console.log('launchNano', filePath, lineNumber);
 
   // convert file path to absolute path
   filePath = path.resolve(filePath);
 
 
-  const stringCommand =  `code -g ${filePath}:${lineNumber}:1`; ;
+  const stringCommand = `code -g ${filePath}:${lineNumber}:1`;;
   console.log('stringCommand', stringCommand);
   return exec(stringCommand, (error) => {
     if (error) {
@@ -272,5 +271,14 @@ async function countdown(seconds) {
 
   // Move to a new line after completion
   console.log('\nCountdown completed!');
+}
+export async function printDebugMessage(message) {
+  if (debugMode) {
+    const stack = new Error().stack;
+    const callerLine = stack.split("\n")[2];
+    const functionName = callerLine.match(/at (\S+)/)[1];
+    console.log(`Called inside function: ${functionName}`);
+    console.log(message);
+  }
 }
 
