@@ -95,25 +95,22 @@ export async function confirmAction(message, defaultValue = true) {
 }
 
 
-export function launchNano(filePath) {
-  if (isCommandAvailable('code')) return spawn('code', [filePath], { stdio: 'inherit' });
+export function launchNano(filePath, lineNumber=null) {
+  console.log('launchNano', filePath, lineNumber);
+
+  // convert file path to absolute path
+  filePath = path.resolve(filePath);
 
 
-  return new Promise((resolve, reject) => {
-    const nano = spawn('nano', [filePath], { stdio: 'inherit' });
-
-    nano.on('exit', (code) => {
-      if (code === 0) {
-        resolve();
-      } else {
-        reject(new Error(`Nano exited with code ${code}`));
-      }
-    });
-
-    nano.on('error', (err) => {
-      reject(new Error(`Failed to start nano: ${err.message}`));
-    });
+  const stringCommand =  `code -g ${filePath}:${lineNumber}:1`; ;
+  console.log('stringCommand', stringCommand);
+  return exec(stringCommand, (error) => {
+    if (error) {
+      console.error('Error opening the file with VSCode:', error);
+    }
   });
+
+
 }
 
 

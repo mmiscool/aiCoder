@@ -9,6 +9,7 @@ let ctx = {};
 
 async function setup() {
     const tabs = new tabInterface();
+    ctx.tabs = tabs;
     const chatTab = tabs.createTab("Chat");
     ctx.chat = new ChatManager(chatTab, ctx);
 

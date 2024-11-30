@@ -15,7 +15,7 @@ export async function readFile(filePath) {
         return await fs.readFileSync(filePath, 'utf8');
     }
     catch (error) {
-        //console.log('Error reading file:', error);
+        console.log('Error reading file:', error);
         return null;
     }
 

@@ -51,7 +51,8 @@ export async function showListOfClassesAndFunctions(onlyStubs = true) {
 
 
 
-export function getMethodsWithArguments(code) { 
+export function getMethodsWithArguments(code) {
+
   const ast = acorn.parse(code, { sourceType: 'module', ecmaVersion: 'latest' });
   const classInfo = new Map();
 
@@ -65,6 +66,9 @@ export function getMethodsWithArguments(code) {
       node.body.body.forEach(classElement => {
         if (classElement.type === 'MethodDefinition' && classElement.key.type === 'Identifier') {
           const methodName = classElement.key.name;
+          const startCharacterLocation  = classElement.start;
+          const lineNumber = code.substring(0, startCharacterLocation).split('\n').length;
+
 
           // Collect method arguments
           const args = classElement.value.params.map(param => {
@@ -82,10 +86,10 @@ export function getMethodsWithArguments(code) {
                 !classElement.value.body.body[0].argument)); // Single "return;" statement
 
           // Debugging output for each method
-          console.debug(`Class: ${className}, Method: ${methodName}, Args: ${args}, IsStub: ${isStub}`);
+          //console.debug(`Class: ${className}, Method: ${methodName}, Args: ${args}, IsStub: ${isStub}`);
 
           // Include all methods, no filter for onlyStubs
-          methods.push({ name: methodName, args, isStub });
+          methods.push({ name: methodName, args, isStub, lineNumber });
         }
       });
 

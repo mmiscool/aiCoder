@@ -1,10 +1,9 @@
 import { doAjax } from "./doAjax.js";
 import { MarkdownToHtml } from "./MarkdownToHtml.js";
-import {VoiceRecognitionInput} from "./VoiceRecognitionInput.js";
 
 
 
-let ctx={};
+let ctx = {};
 
 export class ChatManager {
     constructor(container, app_ctx) {
@@ -45,8 +44,9 @@ export class ChatManager {
         this.userInput.style.height = '100px';
         this.userInput.style.marginBottom = '10px';
         this.userInput.style.padding = '5px';
+        // set a hint that shows in the empty field. 
+        this.userInput.placeholder = "Tell me what you want, what you really really want...";
         this.container.appendChild(this.userInput);
-        new VoiceRecognitionInput(this.userInput);
 
         // add button to submit user input
         this.submitButton = document.createElement('button');
@@ -62,6 +62,7 @@ export class ChatManager {
 
 
         this.pullMessages();
+        this.setInput("")
     }
 
 
@@ -124,6 +125,11 @@ export class ChatManager {
         this.addCodeToolbars();
     }
 
+    async setInput(newValue) {
+        this.userInput.value = newValue;
+        this.userInput.focus();
+    }
+
     async addMessage(message) {
         await doAjax('/addMessage', { message });
         await this.pullMessages();
@@ -133,7 +139,7 @@ export class ChatManager {
         await doAjax('/newChat', {});
         this.chatMode = 'chat';
         await this.pullMessages();
-        
+
     }
 
     async newPlanChat() {
@@ -189,7 +195,7 @@ export class ChatManager {
             }
 
             console.log('this.chatMode', this.chatMode);
-            console.log("should be making buttons");    
+            console.log("should be making buttons");
 
             const copyButton = document.createElement('button');
             copyButton.textContent = '📋';
@@ -212,6 +218,8 @@ export class ChatManager {
                     const codeString = codeElement.textContent;
                     await doAjax('/applySnippet', { snippet: codeString });
                     codeElement.style.color = 'cyan';
+                    editButton.disabled = true;
+                    editButton.style.display = "none";
                 });
 
                 // Add buttons to the toolbar

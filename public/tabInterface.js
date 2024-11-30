@@ -89,6 +89,24 @@ export class tabInterface {
         return tabContent; // Return the newly created content element
     }
 
+    switchToTab(tabName) {
+        // case insensitive search
+        const idx = this.tabs.findIndex(tab => tab.name.toLowerCase() === tabName.toLowerCase());
+        if (idx !== -1) {
+            this.activeTab = idx;
+            this.showActiveTab();
+            this.tabBar.childNodes.forEach((btn, idx) => {
+                if (idx === this.activeTab) {
+                    btn.style.backgroundColor = this.colors.activeTabBackground;
+                    btn.style.borderBottom = `2px solid ${this.colors.activeTabBorder}`;
+                } else {
+                    btn.style.backgroundColor = this.colors.tabButtonBackground;
+                    btn.style.borderBottom = this.colors.inactiveTabBorder;
+                }
+            });
+        }
+    }
+
     showActiveTab() {
         // Clear the content area
         this.contentArea.innerHTML = "";

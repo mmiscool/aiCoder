@@ -3,6 +3,7 @@ import { getMethodsWithArguments } from "./classListing.js";
 import { readFile, readOrLoadFromDefault, writeFile } from "./fileIO.js";
 import { conversation, llmSettings, llmSettingsUpdate } from "./llmCall.js";
 import { ctx } from "./main.js";
+import { launchNano } from "./terminalHelpers.js";
 
 
 let webUIConversation = new conversation();
@@ -72,8 +73,9 @@ You will not change the plan title if it already has one.
         return { success: true };
     }
 
-    async pullMethodsList() {
+    async getMethodsList() {
         const response = await getMethodsWithArguments(await readFile(ctx.targetFile));
+        //console.log('getMethodsList', response);
         return response;
     }
 
@@ -102,6 +104,11 @@ You will not change the plan title if it already has one.
 
     async savePlan(parsedBody) {
         await writeFile('./.aiCoder/default-plan-prompt.md', parsedBody.plan);
+        return { success: true };
+    }
+
+    async gotoLineNumber(parsedBody) {
+        await launchNano(ctx.targetFile, parsedBody.lineNumber);
         return { success: true };
     }
 }

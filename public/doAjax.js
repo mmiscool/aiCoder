@@ -41,11 +41,11 @@ export async function doAjax(urlToCall, body) {
         responseJson = { error: error.message };
     }
 
-    
+
     overlay.style.opacity = '0';
-    setTimeout(() => {
-        overlay.style.display = 'none';
-        overlay.style.opacity = '1';
-    }, 200);
+
+    overlay.style.display = 'none';
+    overlay.style.opacity = '1';
+
     return responseJson;
 }
