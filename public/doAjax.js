@@ -7,6 +7,6 @@ export async function doAjax(urlToCall, body) {
         body: JSON.stringify(body)
     });
     const responseJson = await response.json();
-    console.log(responseJson);
+    //console.log(responseJson);
     return responseJson;
 }

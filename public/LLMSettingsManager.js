@@ -1,7 +1,10 @@
 import { doAjax } from './doAjax.js';
 
+let ctx = {};
+
 export class LLMSettingsManager {
-    constructor(container) {
+    constructor(container, app_ctx) {
+        ctx = app_ctx;
         this.container = container;
         this.settingsDiv = null;
         this.llmSettings = null;
@@ -51,7 +54,6 @@ export class LLMSettingsManager {
     }
 
     createLLMConfig(llm, settings) {
-        console.log(llm, settings);
         const llmDiv = document.createElement('div');
         llmDiv.style.marginBottom = '10px';
         llmDiv.style.border = '1px solid #ccc';

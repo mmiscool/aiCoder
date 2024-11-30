@@ -1,7 +1,10 @@
 import { doAjax } from './doAjax.js';
 
+let ctx = {};
+
 export class ProjectSettingsManager {
-    constructor(container) {
+    constructor(container, app_ctx) {
+        ctx = app_ctx;
         this.container = container;
         this.promptsDiv = null;
         this.systemPrompts = null;

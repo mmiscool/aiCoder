@@ -22,7 +22,7 @@ export class aiCoderApiFunctions {
         return { success: true };
 
     }
-    
+
     async pullMessages() {
         const response = await webUIConversation.getMessages();
         return response;
@@ -39,7 +39,16 @@ export class aiCoderApiFunctions {
 
     async newPlanChat() {
         webUIConversation = new conversation();
-        webUIConversation.addFileMessage("system", './.aiCoder/default-system-prompt.md');
+        webUIConversation.addMessage("system", `
+You are an AI coding tool. You are working on the requirements and plan for a code project.
+
+You will will not be writing code directly, but you will be creating a structured markdown file that will be used to generate code.
+
+Your response will be a markdown file that will be used to generate code. It must be complete and correct.
+Never actually write code. Only write the plan for the code.
+
+You will not change the plan title if it already has one. 
+`);
         webUIConversation.addFileMessage("user", './.aiCoder/default-plan-prompt.md', "Plan to be edited:");
         return webUIConversation.getMessages();
     }
@@ -78,8 +87,14 @@ export class aiCoderApiFunctions {
     }
 
     async updateSystemPrompts(parsedBody) {
+        await writeFile('./.aiCoder/default-plan-prompt.md', parsedBody.default_plan_prompt);
         await writeFile('./.aiCoder/default-system-prompt.md', parsedBody.default_system_prompt);
         await writeFile('./.aiCoder/snippet-production-prompt.md', parsedBody.snippet_production_prompt);
+        return { success: true };
+    }
+
+    async savePlan(parsedBody) {
+        await writeFile('./.aiCoder/default-plan-prompt.md', parsedBody.plan);
         return { success: true };
     }
 }

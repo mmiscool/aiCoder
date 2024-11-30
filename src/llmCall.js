@@ -28,8 +28,6 @@ export class conversation {
     }
 
     async callLLM() {
-        // console.log(this.messages);
-        //await pressEnterToContinue();
         let llmResponse = await callLLM(this.messages);
         llmResponse = llmResponse.trim();
         await this.addMessage('assistant', llmResponse);
@@ -77,8 +75,6 @@ export async function callLLM(messages) {
         await throttle();
         response = await getGroqResponse(messages);
     } else if (llmToUse === 'ollama') {
-        // console.log(messages);
-        // await pressEnterToContinue();
         response = await getOllamaResponse(messages);
     }
     else {
