@@ -9,10 +9,27 @@ export class ProjectSettingsManager {
     }
 
     async init() {
+        this.container.innerHTML = '';
         this.addSaveButton();
+        this.addRefreshButton();
         this.systemPrompts = await this.fetchPrompts();
         this.createPromptsDiv();
         
+    }
+
+    async addRefreshButton() {
+        const refreshButton = document.createElement('button');
+        refreshButton.textContent = '🔄';
+        refreshButton.title = 'Refresh settings';
+        refreshButton.style.padding = '10px';
+        refreshButton.style.margin = '10px';
+        refreshButton.style.backgroundColor = 'blue';
+        refreshButton.addEventListener('click', () => this.refresh());
+        this.container.appendChild(refreshButton);
+    }
+
+    async refresh() {
+        this.init();
     }
 
     async fetchPrompts() {
@@ -104,5 +121,7 @@ export class ProjectSettingsManager {
 
         console.log(updatedPrompts); // Log the updated data for debugging
         await doAjax('/updateSystemPrompts', updatedPrompts); // Send updated prompts back to the server
+    
+        await this.init(); // Reinitialize the settings manager
     }
 }

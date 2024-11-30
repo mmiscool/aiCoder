@@ -22,6 +22,7 @@ export class aiCoderApiFunctions {
         return { success: true };
 
     }
+    
     async pullMessages() {
         const response = await webUIConversation.getMessages();
         return response;
@@ -31,20 +32,30 @@ export class aiCoderApiFunctions {
         webUIConversation = new conversation();
         webUIConversation.addFileMessage("system", './.aiCoder/default-system-prompt.md');
         webUIConversation.addFileMessage("user", './.aiCoder/default-plan-prompt.md');
-        webUIConversation.addFileMessage("user", ctx.targetFile);
+        webUIConversation.addFileMessage("user", ctx.targetFile, "// Code file to be edited");
         webUIConversation.addFileMessage("system", './.aiCoder/snippet-production-prompt.md');
         return webUIConversation.getMessages();
     }
+
+    async newPlanChat() {
+        webUIConversation = new conversation();
+        webUIConversation.addFileMessage("system", './.aiCoder/default-system-prompt.md');
+        webUIConversation.addFileMessage("user", './.aiCoder/default-plan-prompt.md', "Plan to be edited:");
+        return webUIConversation.getMessages();
+    }
+
     async callLLM() {
         console.log('callLLM');
         await webUIConversation.callLLM();
         const response = await webUIConversation.getMessages();
         return response;
     }
+
     async applySnippet(parsedBody) {
         await applySnippets([parsedBody.snippet], true);
         return { success: true };
     }
+
     async pullMethodsList() {
         const response = await getMethodsWithArguments(await readFile(ctx.targetFile));
         return response;
@@ -71,6 +82,5 @@ export class aiCoderApiFunctions {
         await writeFile('./.aiCoder/snippet-production-prompt.md', parsedBody.snippet_production_prompt);
         return { success: true };
     }
-
 }
 

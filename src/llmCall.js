@@ -19,8 +19,8 @@ export class conversation {
         this.messages.push({ role, content });
     }
 
-    async addFileMessage(role, filePath) {
-        this.messages.push({ role, content: filePath, filePath });
+    async addFileMessage(role, filePath, description = '') {
+        this.messages.push({ role, content: filePath, filePath , description});
     }
 
     async lastMessage() {
@@ -63,7 +63,8 @@ export async function callLLM(messages) {
     // for each message in the array, check if it is a file path and if it is read the file and add the content to the messages array
     for (let i = 0; i < messages.length; i++) {
         if (messages[i].filePath) {
-            messages[i].content = await readFile(messages[i].filePath);
+            messages[i].content = messages[i].description + "\n\n"
+            messages[i].content += await readFile(messages[i].filePath);
         }
     }
 

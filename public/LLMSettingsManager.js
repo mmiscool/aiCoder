@@ -9,9 +9,26 @@ export class LLMSettingsManager {
     }
 
     async init() {
+        this.container.innerHTML = '';
         this.addSaveButton();
+        this.addRefreshButton();
         this.llmSettings = await this.fetchSettings();
         this.createSettingsDiv();
+    }
+
+    async addRefreshButton() {
+        const refreshButton = document.createElement('button');
+        refreshButton.textContent = '🔄';
+        refreshButton.title = 'Refresh settings';
+        refreshButton.style.padding = '10px';
+        refreshButton.style.margin = '10px';
+        refreshButton.style.backgroundColor = 'blue';
+        refreshButton.addEventListener('click', () => this.refresh());
+        this.container.appendChild(refreshButton);
+    }
+
+    async refresh() {
+        this.init();
     }
 
     async fetchSettings() {
@@ -141,5 +158,7 @@ export class LLMSettingsManager {
 
         console.log(newSettings);
         await doAjax('/llmSettingsUpdate', newSettings);
+
+        await this.init();
     }
 }
