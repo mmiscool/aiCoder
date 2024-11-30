@@ -28,7 +28,13 @@ export class aiCoderApiFunctions {
         return response;
     }
 
+    async getChatMode() {
+        if (this.chatMode == undefined) this.chatMode = 'chat';
+        return { chatMode: this.chatMode };
+    }
+
     async newChat() {
+        this.chatMode = 'chat';
         webUIConversation = new conversation();
         webUIConversation.addFileMessage("system", './.aiCoder/default-system-prompt.md');
         webUIConversation.addFileMessage("user", './.aiCoder/default-plan-prompt.md');
@@ -38,6 +44,7 @@ export class aiCoderApiFunctions {
     }
 
     async newPlanChat() {
+        this.chatMode = 'plan';
         webUIConversation = new conversation();
         webUIConversation.addMessage("system", `
 You are an AI coding tool. You are working on the requirements and plan for a code project.

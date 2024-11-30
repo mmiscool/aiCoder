@@ -1,5 +1,7 @@
 import { doAjax } from "./doAjax.js";
 import { MarkdownToHtml } from "./MarkdownToHtml.js";
+import {VoiceRecognitionInput} from "./VoiceRecognitionInput.js";
+
 
 
 let ctx={};
@@ -44,6 +46,7 @@ export class ChatManager {
         this.userInput.style.marginBottom = '10px';
         this.userInput.style.padding = '5px';
         this.container.appendChild(this.userInput);
+        new VoiceRecognitionInput(this.userInput);
 
         // add button to submit user input
         this.submitButton = document.createElement('button');
@@ -61,7 +64,10 @@ export class ChatManager {
         this.pullMessages();
     }
 
+
     async pullMessages() {
+        console.log(await doAjax('/getChatMode'));
+        this.chatMode = (await doAjax('/getChatMode')).chatMode
         const response = await doAjax('/pullMessages', {});
         this.chatMessageDiv.innerHTML = '';
         response.forEach(async (message) => {
@@ -142,18 +148,16 @@ export class ChatManager {
     }
 
     async addCodeToolbars() {
-        console.log('addCodeToolbars');
         // Query all <code> elements on the page
-        //const codeElements = document.querySelectorAll('code');
-        // all elements that have the "language-javascript" class
 
-        let codeElements;
-        if (this.chatMode === 'plan') codeElements = document.querySelectorAll('.language-markdown');
+        let codeElements = [];
+        // gather all elements that have the "language-javascript" class
+        if (this.chatMode === 'plan') codeElements = await document.querySelectorAll('.language-markdown');
 
-        if (this.chatMode === 'chat') codeElements = document.querySelectorAll('.language-javascript');
+        if (this.chatMode === 'chat') codeElements = await document.querySelectorAll('.language-javascript');
 
         console.log('codeElements', codeElements);
-        if (!codeElements) return;
+        if (codeElements.length === 0) return;
 
         codeElements.forEach((codeElement) => {
             // Create a wrapper to hold the code and toolbar
@@ -175,33 +179,34 @@ export class ChatManager {
             toolbar.style.display = 'flex';
             toolbar.style.gap = '3px';
 
+            const buttonStyles = {
+                cursor: 'pointer',
+                background: 'none',
+                border: '1px solid white',
+                color: 'white',
+                padding: '2px 5px',
+                borderRadius: '3px',
+            }
 
+            console.log('this.chatMode', this.chatMode);
+            console.log("should be making buttons");    
 
             const copyButton = document.createElement('button');
             copyButton.textContent = '📋';
             copyButton.title = 'Copy code to clipboard';
-            copyButton.style.cursor = 'pointer';
-            copyButton.style.background = 'none';
-            copyButton.style.border = '1px solid white';
-            copyButton.style.color = 'white';
-            copyButton.style.padding = '2px 5px';
-            copyButton.style.borderRadius = '3px';
+            Object.assign(copyButton.style, buttonStyles);
             copyButton.addEventListener('click', () => {
                 navigator.clipboard.writeText(codeElement.textContent);
                 //alert('Code copied to clipboard!');
             });
             toolbar.appendChild(copyButton);
 
-
+            console.log('this.chatMode', this.chatMode);
             if (this.chatMode === 'chat') {
                 const editButton = document.createElement('button');
                 editButton.textContent = '🤖✎⚡';
-                editButton.style.cursor = 'pointer';
-                editButton.style.background = 'none';
-                editButton.style.border = '1px solid white';
-                editButton.style.color = 'white';
-                editButton.style.padding = '2px 5px';
-                editButton.style.borderRadius = '3px';
+                editButton.title = 'Apply snippet';
+                Object.assign(editButton.style, buttonStyles);
                 editButton.addEventListener('click', async () => {
                     codeElement.style.color = 'red';
                     const codeString = codeElement.textContent;
