@@ -3,6 +3,12 @@
 [![semantic versioning](https://img.shields.io/badge/semantic%20versioning-2.0.0-green.svg)](https://semver.org)
 > All notable changes to this project will be documented in this file
 
+## [1.0.15](https://github.com/mmiscool/aiCoder/compare/v1.0.14...v1.0.15) (2024-11-30)
+
+### 🤖 Build System
+
+* latest and greatest. ([7d95ea8](https://github.com/mmiscool/aiCoder/commit/7d95ea84e124318acf9597c6025ef878d3bdc4cd))
+
 ## [1.0.14](https://github.com/mmiscool/aiCoder/compare/v1.0.13...v1.0.14) (2024-11-30)
 
 ### 🤖 Build System
