@@ -178,7 +178,7 @@ export class ChatManager {
             const toolbar = document.createElement('div');
             toolbar.style.position = 'absolute';
             toolbar.style.top = '0px';
-            toolbar.style.right = '0px';
+            toolbar.style.left = '0px';
             toolbar.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
             toolbar.style.color = 'white';
             toolbar.style.padding = '2px';
@@ -222,6 +222,11 @@ export class ChatManager {
                     codeElement.style.color = 'cyan';
                     editButton.disabled = true;
                     editButton.style.display = "none";
+                    // find the next button with the textContent of '🤖✎⚡' and 
+                    // focus it. The button it focuses needs to be lower in the page than this one.
+                    const nextButton = document.querySelector(`button[title="Apply snippet"]:not([disabled])`);
+                    if (nextButton) nextButton.focus();
+                   
                 });
 
                 // Add buttons to the toolbar
