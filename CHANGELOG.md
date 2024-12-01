@@ -3,6 +3,12 @@
 [![semantic versioning](https://img.shields.io/badge/semantic%20versioning-2.0.0-green.svg)](https://semver.org)
 > All notable changes to this project will be documented in this file
 
+## [1.0.17](https://github.com/mmiscool/aiCoder/compare/v1.0.16...v1.0.17) (2024-12-01)
+
+### 🤖 Build System
+
+* make auto apply code buttons justify right. ([ba69426](https://github.com/mmiscool/aiCoder/commit/ba6942678e0eac1b33378e454248c883b0a52600))
+
 ## [1.0.16](https://github.com/mmiscool/aiCoder/compare/v1.0.15...v1.0.16) (2024-11-30)
 
 ### 🤖 Build System
