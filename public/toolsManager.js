@@ -100,6 +100,6 @@ export class toolsManager {
         ctx.tabs.switchToTab('Chat');
         await doAjax('/gotoLineNumber', { lineNumber });
         await ctx.chat.newChat();
-        await ctx.chat.setInput(`Modify the ${methodName} method in the ${className} class. \n`);
+        await ctx.chat.setInput(`Modify the ${methodName} method in the ${className} class.\nImprove it.`);
     }
 }
