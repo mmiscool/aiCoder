@@ -1,6 +1,6 @@
 import { applySnippets } from "./aiAssistedCodeChanges.js";
 import { getMethodsWithArguments } from "./classListing.js";
-import { readFile, readOrLoadFromDefault, writeFile } from "./fileIO.js";
+import { getAllFiles, readFile, readOrLoadFromDefault, writeFile } from "./fileIO.js";
 import { conversation, llmSettings, llmSettingsUpdate } from "./llmCall.js";
 import { ctx } from "./main.js";
 import { launchNano, printAndPause } from "./terminalHelpers.js";
@@ -110,6 +110,19 @@ Do not be lazy. Give me the complete plan as part of your response.
     async gotoLineNumber(parsedBody) {
         await launchNano(ctx.targetFile, parsedBody.lineNumber);
         return { success: true };
+    }
+
+    async setTargetFile(parsedBody) {
+        ctx.targetFile = parsedBody.targetFile;
+        return { success: true };
+    }
+
+    async getTargetFile() {
+        return { targetFile: ctx.targetFile };
+    }
+
+    async getFilesList() {
+        return { files: await getAllFiles("./") };
     }
 }
 

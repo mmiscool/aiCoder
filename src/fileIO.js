@@ -95,3 +95,35 @@ export function getScriptFolderPath() {
     return __dirname;
 }
 
+
+
+
+
+
+
+
+export function getAllFiles(folderPath) {
+    const result = [];
+
+    function readDirRecursively(currentPath) {
+        const items = fs.readdirSync(currentPath, { withFileTypes: true });
+        items.forEach(item => {
+            const itemPath = path.join(currentPath, item.name);
+            const relativePath = path.relative(folderPath, itemPath);
+            if (item.isDirectory()) {
+                readDirRecursively(itemPath);
+            } else {
+                if (relativePath.startsWith('.aiCoder')) return;
+                if (relativePath.startsWith('node_modules')) return;
+                if (relativePath.startsWith('.git')) return;
+
+
+
+                result.push("./" + relativePath);
+            }
+        });
+    }
+
+    readDirRecursively(folderPath);
+    return result;
+}

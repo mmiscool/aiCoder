@@ -10,6 +10,31 @@ export class ChatManager {
         ctx = app_ctx;
         this.chatMode = 'chat';
         this.container = container;
+
+        // add an input element that displays the target file path
+        this.targetFileInput = document.createElement('input');
+        this.targetFileInput.type = 'text';
+        this.targetFileInput.style.width = '100%';
+        this.targetFileInput.style.marginBottom = '10px';
+        this.targetFileInput.style.padding = '5px';
+        this.targetFileInput.style.fontFamily = 'monospace';
+        this.targetFileInput.style.fontSize = '16px';
+        this.targetFileInput.style.color = 'blue';
+        this.targetFileInput.style.border = '1px solid #ccc';
+        this.targetFileInput.style.borderRadius = '5px';
+        this.targetFileInput.style.backgroundColor = '#f9f9f9';
+        this.targetFileInput.style.textAlign = 'center';
+        this.targetFileInput.style.fontWeight = 'bold';
+        this.targetFileInput.style.textTransform = 'uppercase';
+        this.targetFileInput.style.letterSpacing = '1px';
+        this.targetFileInput.style.boxShadow = '0 0 5px rgba(0, 0, 0, 0.1)';
+        this.targetFileInput.style.transition = '0.3s';
+        this.targetFileInput.style.outline = 'none';
+        this.container.appendChild(this.targetFileInput);
+
+        this.getTargetFile();
+
+
         this.newChatButton = document.createElement('button');
         this.newChatButton.textContent = 'New Chat';
 
@@ -65,6 +90,11 @@ export class ChatManager {
         this.setInput("")
     }
 
+    async getTargetFile() {
+        const response = await doAjax('/getTargetFile', {});
+        this.targetFileInput.value = response.targetFile;
+        return response.targetFile;
+    }
 
     async pullMessages() {
         console.log(await doAjax('/getChatMode'));
