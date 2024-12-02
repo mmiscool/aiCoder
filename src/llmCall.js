@@ -7,7 +7,6 @@ import { input, clearTerminal, printAndPause, menuPrompt, confirmAction, pressEn
 import Anthropic from '@anthropic-ai/sdk';
 import cliProgress from 'cli-progress';
 import { spawn } from 'child_process';
-import { testCAllAnthropic } from "./test.js";
 
 let throttleTime = 20;
 let lastCallTime = 0;
@@ -521,14 +520,6 @@ async function getClaudeResponse(messages, retry = true) {
         });
 
 
-
-        console.log(formattedMessages);
-        // //console.log(systemMessage);
-
-        // responseText = testCAllAnthropic(messages);
-        // return responseText;
-
-
         // Make the API call with streaming
         const stream = anthropic.messages.stream({
             model: await selectModel(), // Replace with your preferred model, e.g., "claude-3-5-sonnet-20241022"
@@ -539,14 +530,6 @@ async function getClaudeResponse(messages, retry = true) {
 
         // Process the streaming response
         for await (const chunk of stream) {
-            //console.log('chunk:', chunk);
-            // format of chunk
-            // chunk: {
-            //     type: 'content_block_delta',
-            //     index: 0,
-            //     delta: { type: 'text_delta', text: ' Connected face collection\n   -' }
-            //   } 
-
 
             //check if the chunk type is delta
             if (chunk.type !== 'content_block_delta') {
