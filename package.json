@@ -16,6 +16,7 @@
   "description": "A tool to make AI coding tasks easy",
   "type": "module",
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.1",
     "@ast-grep/napi": "^0.30.0",
     "@babel/generator": "^7.26.0",
     "@babel/parser": "^7.26.1",

@@ -4,8 +4,10 @@ import ollama from 'ollama';
 import fs from 'fs';
 import { readFile, writeFile } from "./fileIO.js"
 import { input, clearTerminal, printAndPause, menuPrompt, confirmAction, pressEnterToContinue, } from "./terminalHelpers.js";
+import Anthropic from '@anthropic-ai/sdk';
 import cliProgress from 'cli-progress';
 import { spawn } from 'child_process';
+import { testCAllAnthropic } from "./test.js";
 
 let throttleTime = 20;
 let lastCallTime = 0;
@@ -20,7 +22,7 @@ export class conversation {
     }
 
     async addFileMessage(role, filePath, description = '') {
-        this.messages.push({ role, content: filePath, filePath , description});
+        this.messages.push({ role, content: filePath, filePath, description });
     }
 
     async lastMessage() {
@@ -76,6 +78,9 @@ export async function callLLM(messages) {
         response = await getGroqResponse(messages);
     } else if (llmToUse === 'ollama') {
         response = await getOllamaResponse(messages);
+    }
+    else if (llmToUse === 'anthropic') {
+        response = await getClaudeResponse(messages);
     }
     else {
         await printAndPause('This feature is not yet implemented.', 1.5);
@@ -136,6 +141,8 @@ export async function setupLLM() {
                 await writeFile(`./.aiCoder/${llmToUse}-model.txt`, 'llama-3.1-70b-versatile');
             } else if (llmToUse === 'ollama') {
                 await writeFile(`./.aiCoder/${llmToUse}-model.txt`, 'granite3-dense:latest');
+            } else if (llmToUse === 'anthropic') {
+                await writeFile(`./.aiCoder/${llmToUse}-model.txt`, 'claude-3.0');
             }
         }
 
@@ -171,6 +178,12 @@ export async function llmSettings() {
             models: await getOllamaModels(),
             active: currentService === 'ollama',
         },
+        anthropic: {
+            model: await readFile(`./.aiCoder/anthropic-model.txt`),
+            apiKey: await readFile(`./.aiCoder/anthropic-api-key.txt`),
+            models: await getClaudeModels(),
+            active: currentService === 'anthropic',
+        }
 
     }
 
@@ -189,9 +202,15 @@ export async function llmSettingsUpdate(settings) {
     await writeFile(`./.aiCoder/ollama-model.txt`, settings.ollama.model);
     await writeFile(`./.aiCoder/ollama-api-key.txt`, settings.ollama.apiKey);
 
+    await writeFile(`./.aiCoder/anthropic-model.txt`, settings.anthropic.model);
+    await writeFile(`./.aiCoder/anthropic-api-key.txt`, settings.anthropic.apiKey);
+
     await writeFile(`./.aiCoder/ai-service.txt`,
-        settings.openai.active ? 'openai' : settings.groq.active ? 'groq' : 'ollama'
-    );
+        settings.openai.active ? 'openai' :
+            settings.groq.active ? 'groq' :
+                settings.ollama.active ? 'ollama' :
+                    settings.anthropic.active ? 'anthropic' : '');
+
 
     return { success: true };
 }
@@ -254,7 +273,7 @@ export async function selectAIservice(overwrite = false) {
     if (fs.existsSync('./.aiCoder/ai-service.txt') && !overwrite) {
         return fs.readFileSync('./.aiCoder/ai-service.txt', 'utf8');
     } else {
-        const services = ['openai', 'groq', 'ollama'];
+        const services = ['openai', 'groq', 'ollama', 'anthropic'];
         let selectedService = await menuPrompt({
             message: "Select the service you want to use:",
             choices: services,
@@ -469,4 +488,113 @@ async function getOpenAIModels() {
     }
 
     return [];
+}
+
+
+
+
+
+// Anthropic related functions -----------------------------------------------------------------------------------------------
+async function getClaudeResponse(messages, retry = true) {
+    const apiKey = await setupLLMapiKey(); // Replace with your method for retrieving the API key
+    const anthropic = new Anthropic({ apiKey });
+
+    let responseText = '';
+
+
+    try {
+        let systemMessage = '';
+        // Prepare the user and assistant messages. Remove any system messages.
+        // take the text of the system message and add it to the systemMessage variable. 
+        // Keep only the role and content fields of the messages array
+        let formattedMessages = messages.filter((message) => {
+            if (message.role === 'system') {
+                systemMessage += message.content;
+                return false;
+            }
+            return true;
+        }).map((message) => {
+            return {
+                role: message.role,
+                content: message.content
+            };
+        });
+
+
+
+        console.log(formattedMessages);
+        // //console.log(systemMessage);
+
+        // responseText = testCAllAnthropic(messages);
+        // return responseText;
+
+
+        // Make the API call with streaming
+        const stream = anthropic.messages.stream({
+            model: await selectModel(), // Replace with your preferred model, e.g., "claude-3-5-sonnet-20241022"
+            max_tokens: 8192, // Adjust the max tokens based on your requirements
+            system: systemMessage, // Add the system message here
+            messages: formattedMessages, // Use only user and assistant messages
+        })
+
+        // Process the streaming response
+        for await (const chunk of stream) {
+            //console.log('chunk:', chunk);
+            // format of chunk
+            // chunk: {
+            //     type: 'content_block_delta',
+            //     index: 0,
+            //     delta: { type: 'text_delta', text: ' Connected face collection\n   -' }
+            //   } 
+
+
+            //check if the chunk type is delta
+            if (chunk.type !== 'content_block_delta') {
+                continue;
+            }
+
+            const convertedToJSON = await JSON.stringify(chunk);
+            //console.log('convertedToJSON:', convertedToJSON);
+            const convertedBack = await JSON.parse(convertedToJSON);
+
+            const text = convertedBack.delta.text; // Extract the text from the chunk
+            responseText += text; // Append to the complete response
+
+            //print the text to the console in real time
+            process.stdout.write(text);
+        }
+        //console.log('stream:', stream);
+    } catch (error) {
+        console.log('Error during Claude response retrieval:', error);
+
+        // if (retry) {
+        //     // Retry logic with a delay
+        //     for (let i = 0; i < 3; i++) {
+        //         await printAndPause('Retrying...', 5); // Wait for 5 seconds before retrying
+        //         responseText = await getClaudeResponse(messages, false); // Retry without recursion
+        //         if (responseText !== '') {
+        //             break; // Exit loop if response is successful
+        //         }
+        //     }
+        // }
+    }
+
+    console.log("responseText:", responseText);
+    return responseText;
+}
+
+
+
+async function getClaudeModels() {
+    // Predefined list of Claude models based on Anthropic's documentation
+    const models = [
+        'claude-3-5-sonnet-20241022',
+        'claude-3-5-haiku-20241022',
+        'claude-3-opus-20240229',
+        'claude-3-sonnet-20240229',
+        'claude-3-haiku-20240307',
+        // Add more models as needed
+    ];
+
+    return models;
 }

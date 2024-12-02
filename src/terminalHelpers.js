@@ -5,21 +5,27 @@ import { spawn, exec } from "child_process";
 import fileSelector from 'inquirer-file-selector';
 import { marked } from 'marked';
 import TerminalRenderer from 'marked-terminal';
-
-
-import fs from 'fs';
 import path from 'path';
 import { ctx, debugMode } from './main.js';
 
 
-export async function clearTerminal() {
 
+
+
+
+
+
+
+
+
+export async function clearTerminal() {
+  return console.log("----------------------------------------------------------------------------");
+ 
   if (ctx.ws) {
     ctx.ws.send("clear");
   }
 
-  //return console.log("----------------------------------------------------------------------------");
-  // Clears the screen buffer entirely, including scrollback history
+ // Clears the screen buffer entirely, including scrollback history
   await process.stdout.write('\u001b[3J\u001b[2J\u001b[1J\u001b[H');
   // Clears the screen buffer up to the current line
   await process.stdout.write('\u001b[2J\u001b[1J\u001b[H');

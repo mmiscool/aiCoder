@@ -56,6 +56,7 @@ Your response will be a markdown file that will be used to generate code. It mus
 Never actually write code. Only write the plan for the code.
 
 You will not change the plan title if it already has one. 
+Do not be lazy. Give me the complete plan as part of your response.
 `);
         webUIConversation.addFileMessage("user", './.aiCoder/default-plan-prompt.md', "Plan to be edited:");
         return webUIConversation.getMessages();

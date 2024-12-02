@@ -5,6 +5,9 @@ import url from 'url';
 import fs from 'fs/promises';
 import path from 'path';
 import mime from 'mime'; // Install this package with `npm install mime`
+import { exec } from 'child_process';
+import { access } from 'fs';
+import { constants } from 'fs/promises';
 import WebSocket, { WebSocketServer } from 'ws'; // WebSocket support
 
 import { intelligentlyMergeSnippets } from './intelligentMerge.js';
@@ -137,6 +140,9 @@ export function setupServer() {
     server.listen(PORT, () => {
         console.log(`Server is running at http://localhost:${PORT}`);
         console.log(`Serving files from: ${ctx.appData.serveDirectory}`);
+
+        // Open the browser to the server URL
+        //openBrowser(`http://localhost:${PORT}`);
     });
 }
 
@@ -165,3 +171,93 @@ async function readCurrentFile(filePath) {
 
 
 
+/**
+ * Launches the default browser to the specified URL.
+ * Supports Linux, macOS, Windows, and WSL.
+ * @param {string} url - The URL to open in the browser.
+ */
+function openBrowser(url) {
+    if (!url || typeof url !== 'string') {
+        console.error('Please provide a valid URL.');
+        return;
+    }
+
+    const platform = process.platform;
+
+    let command;
+
+    if (platform === 'win32') {
+        // Windows
+        command = `start "" "${url}"`;
+    } else if (platform === 'darwin') {
+        // macOS
+        command = `open "${url}"`;
+    } else if (platform === 'linux') {
+        // Detect if running in WSL
+        exec('uname -r', (err, stdout) => {
+            if (err) {
+                console.error('Failed to detect WSL:', err);
+                return;
+            }
+
+            if (stdout.toLowerCase().includes('microsoft')) {
+                // WSL detected
+                command = `explorer.exe "${url}"`;
+            } else {
+                // Native Linux
+                const linuxCommands = [
+                    'xdg-open',
+                    'gnome-open',
+                    'kde-open',
+                    'firefox',
+                    'google-chrome',
+                    'chromium',
+                ];
+
+                let foundCommand = false;
+
+                // Check each command's availability and use the first one found
+                for (const cmd of linuxCommands) {
+                    try {
+                        access(`/usr/bin/${cmd}`, constants.X_OK, (err) => {
+                            if (!err) {
+                                command = `${cmd} "${url}"`;
+                                foundCommand = true;
+                            }
+                        });
+                        if (foundCommand) break;
+                    } catch (error) {
+                        continue;
+                    }
+                }
+
+                if (!command) {
+                    console.error('No suitable command found to open the browser.');
+                    return;
+                }
+            }
+
+            // Execute the determined command
+            if (command) {
+                exec(command, (error) => {
+                    if (error) {
+                        console.error('Failed to open browser:', error);
+                    }
+                });
+            }
+        });
+        return; // Exit here to avoid running exec() prematurely
+    } else {
+        console.error('Unsupported platform:', platform);
+        return;
+    }
+
+    // Execute the determined command
+    if (command) {
+        exec(command, (error) => {
+            if (error) {
+                console.error('Failed to open browser:', error);
+            }
+        });
+    }
+}
