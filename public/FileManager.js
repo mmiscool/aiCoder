@@ -75,9 +75,8 @@ export class FileManager {
 
                 ctx.chat.getTargetFile();
 
-
-            }
-            );
+                ctx.tabs.switchToTab('Chat');
+            });
 
         });
     }
