@@ -53,10 +53,10 @@ export class ChatManager {
         this.submitButton.textContent = 'Submit';
         this.submitButton.style.width = '100%';
         this.submitButton.style.marginBottom = '10px';
-        this.submitButton.addEventListener('click', () => {
-            this.addMessage(this.userInput.value);
+        this.submitButton.addEventListener('click', async () => {
+            await this.addMessage(this.userInput.value);
             this.userInput.value = '';
-            this.callLLM();
+            await this.callLLM();
         });
         this.container.appendChild(this.submitButton);
 
@@ -153,7 +153,7 @@ export class ChatManager {
         await this.pullMessages();
     }
 
-    
+
 
     async addCodeToolbars() {
         // Query all <code> elements on the page
@@ -226,7 +226,7 @@ export class ChatManager {
                     // focus it. The button it focuses needs to be lower in the page than this one.
                     const nextButton = document.querySelector(`button[title="Apply snippet"]:not([disabled])`);
                     if (nextButton) nextButton.focus();
-                   
+
                 });
 
                 // Add buttons to the toolbar
