@@ -3,6 +3,12 @@
 [![semantic versioning](https://img.shields.io/badge/semantic%20versioning-2.0.0-green.svg)](https://semver.org)
 > All notable changes to this project will be documented in this file
 
+## [1.0.20](https://github.com/mmiscool/aiCoder/compare/v1.0.19...v1.0.20) (2024-12-02)
+
+### 🤖 Build System
+
+* Added support for Anthropic ([5676cf0](https://github.com/mmiscool/aiCoder/commit/5676cf01529ab6245c6b1a302da8f45a18e4c9ce))
+
 ## [1.0.19](https://github.com/mmiscool/aiCoder/compare/v1.0.18...v1.0.19) (2024-12-01)
 
 ### 🤖 Build System
