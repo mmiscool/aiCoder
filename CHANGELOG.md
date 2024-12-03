@@ -3,6 +3,12 @@
 [![semantic versioning](https://img.shields.io/badge/semantic%20versioning-2.0.0-green.svg)](https://semver.org)
 > All notable changes to this project will be documented in this file
 
+## [1.0.23](https://github.com/mmiscool/aiCoder/compare/v1.0.22...v1.0.23) (2024-12-03)
+
+### 🤖 Build System
+
+* Swap to esprima-next package to support spread operator. ([9dc3eec](https://github.com/mmiscool/aiCoder/commit/9dc3eec5c25556961c7008888c9ff3d6be6087f7))
+
 ## [1.0.22](https://github.com/mmiscool/aiCoder/compare/v1.0.21...v1.0.22) (2024-12-02)
 
 ### 🤖 Build System
