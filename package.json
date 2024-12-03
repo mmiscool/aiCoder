@@ -30,6 +30,7 @@
     "escodegen": "^2.1.0",
     "esm": "^3.2.25",
     "esprima": "^4.0.1",
+    "esprima-next": "^6.0.3",
     "estraverse": "^5.3.0",
     "glob": "^11.0.0",
     "groq-sdk": "^0.7.0",

@@ -1,7 +1,7 @@
 import fs from 'fs';
 import * as acorn from 'acorn-loose';
 import * as escodegen from 'escodegen';
-import esprima from 'esprima';
+import esprima from 'esprima-next';
 import estraverse from 'estraverse';
 
 import { appendFile, readFile, writeFile, } from './fileIO.js';
