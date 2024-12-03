@@ -72,6 +72,7 @@ export class toolsManager {
                     methodItemElement.style.color = 'red';
                     methodItemElement.addEventListener('click', async () => {
                         await this.implementSpecificClassMethod(className, name, lineNumber);
+                        await this.pullMethodsList(showOnlyStubs);
                     });
                 }
                 else {
@@ -79,6 +80,7 @@ export class toolsManager {
                     methodItemElement.addEventListener('click', async () => {
                         await this.addToChatPrompt(className, name, lineNumber);
                         console.log('this is the line number ', lineNumber);
+                        await this.pullMethodsList(showOnlyStubs);
                     });
                 }
 

@@ -1,3 +1,4 @@
+import { ConfirmDialog } from "./confirmDialog.js";
 import { doAjax } from "./doAjax.js";
 import { MarkdownToHtml } from "./MarkdownToHtml.js";
 
@@ -127,7 +128,7 @@ export class ChatManager {
 
 
             const contentDiv = document.createElement('div');
-            new MarkdownToHtml(contentDiv, message.content);
+            const markdown = new MarkdownToHtml(contentDiv, message.content);
             individualMessageDiv.appendChild(contentDiv);
 
             if (this.chatMode === 'plan' && message.role === 'assistant') {
@@ -146,14 +147,39 @@ export class ChatManager {
                 individualMessageDiv.appendChild(savePlanButton);
             }
 
-
-
             this.chatMessageDiv.appendChild(individualMessageDiv);
             this.submitButton.scrollIntoView();
+
+
+            // check if this is the last message
+            if (response.indexOf(message) === response.length - 1) {
+
+                console.log("We are at the last message. ");
+                console.log(response.indexOf(message), response.length - 1);
+                console.log("ctx.autoApplyMode", ctx.autoApplyMode);
+
+
+                individualMessageDiv.scrollIntoView();
+                //check if the last message is from the assistant
+                if (message.role === 'assistant' && ctx.autoApplyMode) {
+                    // check if the last message from the assistant has a code block
+                    if (markdown.codeBlocks.length > 0) {
+                        // for loop over the code blocks and apply them
+                        for (const codeBlock of markdown.codeBlocks) {
+                            const applyCodeBlock = await ConfirmDialog.confirm("Apply code block?", ctx.autoApplyTimeout, true);
+                            if (applyCodeBlock) await doAjax('/applySnippet', { snippet: codeBlock });
+                        }
+
+                    }
+                }
+            }
+
         });
 
         this.addCodeToolbars();
     }
+
+
 
     async setInput(newValue) {
         this.userInput.value = newValue;

@@ -7,6 +7,7 @@ export class MarkdownToHtml {
             throw new Error("Target element must be a valid DOM element.");
         }
         this.targetElement = targetElement;
+        this.codeBlocks = [];
 
         this.listStyles = {
             paddingLeft: "20px", // Add indentation for nested lists
@@ -29,6 +30,9 @@ export class MarkdownToHtml {
         if (markdown) {
             this.render(markdown);
         }
+
+
+
     }
 
     render(markdown) {
@@ -112,7 +116,9 @@ export class MarkdownToHtml {
         const pre = document.createElement("pre");
         const code = document.createElement("code");
 
+
         code.textContent = content; // No extra wrapping or element creation
+        this.codeBlocks.push(content);
         this.applyStyles(pre, this.codeBlockStyles);
 
         // Add the language class for CSS-based styling

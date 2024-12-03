@@ -4,11 +4,14 @@ import { ProjectSettingsManager } from './ProjectSettingsManager.js';
 import { ChatManager } from './ChatManager.js';
 import { toolsManager } from './toolsManager.js';
 import { FileManager } from './FileManager.js';
+import {ConfirmDialog} from './confirmDialog.js';
 
 let ctx = {};
 
 
 async function setup() {
+    ctx.autoApplyMode = await ConfirmDialog.confirm("Automatically apply snippets?", 10, false);
+    ctx.autoApplyTimeout = 3;
     const tabs = new tabInterface();
     ctx.tabs = tabs;
     const chatTab = tabs.createTab("Chat");
@@ -31,6 +34,9 @@ async function setup() {
     document.body.style.display = "flex";
 
     document.body.appendChild(tabs.getElement());
+
+    
+    window.ctx = ctx;
 }
 
 
