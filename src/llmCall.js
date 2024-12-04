@@ -550,16 +550,23 @@ async function getClaudeResponse(messages, retry = true) {
     } catch (error) {
         console.log('Error during Claude response retrieval:', error);
 
-        // if (retry) {
-        //     // Retry logic with a delay
-        //     for (let i = 0; i < 3; i++) {
-        //         await printAndPause('Retrying...', 5); // Wait for 5 seconds before retrying
-        //         responseText = await getClaudeResponse(messages, false); // Retry without recursion
-        //         if (responseText !== '') {
-        //             break; // Exit loop if response is successful
-        //         }
-        //     }
-        // }
+        if (retry) {
+            // Retry logic with a delay
+            for (let i = 0; i < 3; i++) {
+                // this is to deal with the anthropic throttle 
+
+                await new Promise((resolve) => {
+                    setTimeout(resolve, 60000);
+                });
+
+
+
+                responseText = await getClaudeResponse(messages, false); // Retry without recursion
+                if (responseText !== '') {
+                    break; // Exit loop if response is successful
+                }
+            }
+        }
     }
 
     console.log("responseText:", responseText);
