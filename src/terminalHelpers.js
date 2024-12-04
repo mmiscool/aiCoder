@@ -1,8 +1,6 @@
 import { highlight } from 'cli-highlight';
 import inquirer from 'inquirer';
-import { Separator } from '@inquirer/prompts';
 import { exec } from "child_process";
-import fileSelector from 'inquirer-file-selector';
 import { marked } from 'marked';
 import TerminalRenderer from 'marked-terminal';
 import path from 'path';

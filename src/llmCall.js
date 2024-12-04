@@ -4,10 +4,8 @@ import ollama from 'ollama';
 import fs from 'fs';
 import { readFile, writeFile } from "./fileIO.js"
 import {
-    input,
     clearTerminal,
     printAndPause,
-   
     confirmAction,
 } from "./terminalHelpers.js";
 import Anthropic from '@anthropic-ai/sdk';
@@ -176,13 +174,7 @@ export async function setupLLMapiKey(overwrite = false, service = '') {
     if (readFile(llmAPIkeyFileName) && !overwrite) {
         return readFile(llmAPIkeyFileName);
     } else {
-        const apiKey = await input('Enter your LLM API key:');
-        if (apiKey === '') {
-            await printAndPause('No API key entered.', 1.5);
-            return "";
-        }
-        await writeFile(llmAPIkeyFileName, apiKey,);
-        return apiKey;
+        return "";
     }
 }
 
