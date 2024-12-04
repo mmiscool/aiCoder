@@ -277,11 +277,11 @@ export class codeManipulator {
 
 
     async readFile() {
-        return fs.readFileSync(this.filePath, 'utf8');
+        return readFile(this.filePath);
     }
 
     async writeFile(newCode) {
-        fs.writeFileSync(this.filePath, newCode, 'utf8');
+        writeFile(this.filePath, newCode, );
     }
 }
 

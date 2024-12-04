@@ -145,6 +145,22 @@ export class ChatManager {
 
                 });
                 individualMessageDiv.appendChild(savePlanButton);
+
+
+                // button to append to plan
+                const appendPlanButton = document.createElement('button');
+                appendPlanButton.textContent = '📝 Append to plan';
+                appendPlanButton.style.cursor = 'pointer';
+                appendPlanButton.style.background = 'none';
+                appendPlanButton.style.border = '1px solid white';
+                appendPlanButton.style.color = 'white';
+                appendPlanButton.style.padding = '2px 5px';
+                appendPlanButton.style.borderRadius = '3px';
+                appendPlanButton.addEventListener('click', async () => {
+                    await doAjax('/savePlan', { plan: message.content , append: true });
+
+                });
+                individualMessageDiv.appendChild(appendPlanButton);
             }
 
             this.chatMessageDiv.appendChild(individualMessageDiv);

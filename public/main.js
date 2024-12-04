@@ -4,7 +4,7 @@ import { ProjectSettingsManager } from './ProjectSettingsManager.js';
 import { ChatManager } from './ChatManager.js';
 import { toolsManager } from './toolsManager.js';
 import { FileManager } from './FileManager.js';
-import {ConfirmDialog} from './confirmDialog.js';
+import { ConfirmDialog } from './confirmDialog.js';
 
 let ctx = {};
 
@@ -35,7 +35,7 @@ async function setup() {
 
     document.body.appendChild(tabs.getElement());
 
-    
+
     window.ctx = ctx;
 }
 

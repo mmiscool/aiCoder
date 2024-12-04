@@ -1,6 +1,6 @@
 import { applySnippets } from "./aiAssistedCodeChanges.js";
 import { getMethodsWithArguments } from "./classListing.js";
-import { getAllFiles, readFile, readOrLoadFromDefault, writeFile } from "./fileIO.js";
+import { appendFile, getAllFiles, readFile, readOrLoadFromDefault, writeFile } from "./fileIO.js";
 import { conversation, llmSettings, llmSettingsUpdate } from "./llmCall.js";
 import { ctx } from "./main.js";
 import { launchNano, printAndPause } from "./terminalHelpers.js";
@@ -103,7 +103,12 @@ Do not be lazy. Give me the complete plan as part of your response.
     }
 
     async savePlan(parsedBody) {
-        await writeFile('./.aiCoder/default-plan-prompt.md', parsedBody.plan);
+        if (parsedBody.append) {
+            await appendFile('./.aiCoder/default-plan-prompt.md', parsedBody.plan, true);
+        } else {
+            await writeFile('./.aiCoder/default-plan-prompt.md', parsedBody.plan);
+        }
+
         return { success: true };
     }
 
