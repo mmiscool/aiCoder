@@ -1,9 +1,11 @@
-import { applySnippets } from "./aiAssistedCodeChanges.js";
+import { applySnippets } from "./intelligentMerge.js"
 import { getMethodsWithArguments } from "./classListing.js";
 import { appendFile, getAllFiles, readFile, readOrLoadFromDefault, writeFile } from "./fileIO.js";
+import { intelligentlyMergeSnippets } from "./intelligentMerge.js";
 import { conversation, llmSettings, llmSettingsUpdate } from "./llmCall.js";
 import { ctx } from "./main.js";
 import { launchNano, printAndPause } from "./terminalHelpers.js";
+import { prependClassStructure } from './classListing.js';
 
 
 let webUIConversation = new conversation();
@@ -18,7 +20,6 @@ readOrLoadFromDefault('./.aiCoder/snippet-validation-prompt.md', '/prompts/snipp
 export class aiCoderApiFunctions {
     async addMessage(parsedBody) {
         console.log('addMessage', parsedBody.message);
-        // Assuming `webUIConversation.addMessage` exists
         await webUIConversation.addMessage("user", parsedBody.message);
         return { success: true };
 
@@ -117,6 +118,11 @@ Do not be lazy. Give me the complete plan as part of your response.
         return { success: true };
     }
 
+    async mergeAndFormat(parsedBody) {
+        await intelligentlyMergeSnippets(ctx.targetFile);
+        return { success: true };
+    }
+
     async setTargetFile(parsedBody) {
         ctx.targetFile = parsedBody.targetFile;
         return { success: true };
@@ -128,6 +134,12 @@ Do not be lazy. Give me the complete plan as part of your response.
 
     async getFilesList() {
         return { files: await getAllFiles("./") };
+    }
+
+
+    async prependClassStructure() {
+        await prependClassStructure();
+        return { success: true };
     }
 }
 

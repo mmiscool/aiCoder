@@ -3,10 +3,16 @@ import Groq from "groq-sdk";
 import ollama from 'ollama';
 import fs from 'fs';
 import { readFile, writeFile } from "./fileIO.js"
-import { input, clearTerminal, printAndPause, menuPrompt, confirmAction, pressEnterToContinue, } from "./terminalHelpers.js";
+import {
+    input,
+    clearTerminal,
+    printAndPause,
+   
+    confirmAction,
+} from "./terminalHelpers.js";
 import Anthropic from '@anthropic-ai/sdk';
 import cliProgress from 'cli-progress';
-import { spawn } from 'child_process';
+import { spawn } from 'child_process';``
 
 let throttleTime = 20;
 let lastCallTime = 0;
@@ -98,59 +104,6 @@ export async function callLLM(messages) {
 }
 
 
-export async function setupLLM() {
-    while (true) {
-        await clearTerminal();
-        console.log("Current LLM settings:");
-        // read the current settings from the files and display them
-        console.log(`
-    AI service: ${await readFile('./.aiCoder/ai-service.txt')}
-    Model:      ${await readFile(`./.aiCoder/${await readFile('./.aiCoder/ai-service.txt')}-model.txt`)}
-    API key:    ${await readFile(`./.aiCoder/${await readFile('./.aiCoder/ai-service.txt')}-api-key.txt`) ? 'set' : 'not set'}
-                  `);
-
-
-
-        const settingToChange = await menuPrompt(
-            {
-                message: "Select the LLM setting you want to change:",
-                choices: [
-                    'API key',
-                    'Model',
-                    'AI service',
-                    'Reset to default model for AI service',
-                    '-',
-                    'back'],
-
-            }
-        );
-
-        if (settingToChange === 'API key') {
-            await setupLLMapiKey(true);
-        } else if (settingToChange === 'Model') {
-            await selectModel(true);
-        } else if (settingToChange === 'AI service') {
-            await selectAIservice(true);
-        } else if (settingToChange === 'Reset to default model for AI service') {
-
-            const llmToUse = await selectAIservice();
-            if (llmToUse === 'openai') {
-                await writeFile(`./.aiCoder/${llmToUse}-model.txt`, 'gpt-4o');
-            } else if (llmToUse === 'groq') {
-                await writeFile(`./.aiCoder/${llmToUse}-model.txt`, 'llama-3.1-70b-versatile');
-            } else if (llmToUse === 'ollama') {
-                await writeFile(`./.aiCoder/${llmToUse}-model.txt`, 'granite3-dense:latest');
-            } else if (llmToUse === 'anthropic') {
-                await writeFile(`./.aiCoder/${llmToUse}-model.txt`, 'claude-3.0');
-            }
-        }
-
-
-        else {
-            break;
-        }
-    }
-}
 
 export async function llmSettings() {
     // pull the current settings from the files
@@ -240,53 +193,14 @@ export async function selectModel(overwrite = false) {
     const llmModelFileName = `./.aiCoder/${await selectAIservice()}-model.txt`;
     if (readFile(llmModelFileName) && !overwrite) {
         return readFile(llmModelFileName);
-    } else {
-        const llmToUse = await selectAIservice();
-        let models = [];
-        if (llmToUse === 'openai') {
-            models = await getOpenAIModels();
-        } else if (llmToUse === 'groq') {
-            models = await getGroqModels();
-        } else if (llmToUse === 'ollama') {
-            models = await getOllamaModels();
-        }
-
-        let selectedModel = await menuPrompt({
-            message: "Select the model you want to use:",
-            choices: models,
-            default: await readFile(llmModelFileName),
-        });
-
-        if (selectedModel === '') {
-            await printAndPause('No model selected.', 1.5);
-            return "";
-        }
-
-        writeFile(llmModelFileName, selectedModel);
-        return selectedModel;
-    }
+    } 
 }
 
 
 export async function selectAIservice(overwrite = false) {
     if (fs.existsSync('./.aiCoder/ai-service.txt') && !overwrite) {
         return fs.readFileSync('./.aiCoder/ai-service.txt', 'utf8');
-    } else {
-        const services = ['openai', 'groq', 'ollama', 'anthropic'];
-        let selectedService = await menuPrompt({
-            message: "Select the service you want to use:",
-            choices: services,
-            default: await readFile('./.aiCoder/ai-service.txt'),
-        });
-
-        if (selectedService === '') {
-            await printAndPause('No service selected.', 1.5);
-            return "";
-        }
-
-        fs.writeFileSync('./.aiCoder/ai-service.txt', selectedService, 'utf8');
-        return selectedService;
-    }
+    } 
 }
 
 // ollama related functions -----------------------------------------------------------------------------------------------
@@ -430,8 +344,6 @@ async function getGroqModels() {
         const response = await groq.models.list();
         const models = response.data;
 
-        //await printAndPause(models, 20);
-
         // filter list to only include models that have an id that is shorter than 13 characters
         const listOfModels = models.filter(model => model.id.length < 25).map(model => model.id);
 
@@ -475,8 +387,6 @@ async function getOpenAIModels() {
     try {
         const response = await openai.models.list();
         const models = response.data;
-
-        //await printAndPause(models, 20);
 
         // filter list to only include models that have an id that is shorter than 13 characters
         const listOfModels = models.filter(model => model.id.length < 15).map(model => model.id);

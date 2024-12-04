@@ -3,11 +3,11 @@ import path from 'path';
 import crypto from 'crypto';
 import { convertToRelativePath, createFolderIfNotExists } from './fileIO.js';
 import inquirer from 'inquirer';
-import { input, Separator } from '@inquirer/prompts';
+import { Separator } from '@inquirer/prompts';
 
 //import { ctx.targetFile } from './fileSelector.js';
 import { ctx } from './main.js';
-import { clearTerminal, pressEnterToContinue, printAndPause, selectListHeight } from './terminalHelpers.js';
+import { clearTerminal, printAndPause, selectListHeight } from './terminalHelpers.js';
 
 
 // make a folder including any parent folders if they don't exist

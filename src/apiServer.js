@@ -5,19 +5,8 @@ import url from 'url';
 import fs from 'fs/promises';
 import path from 'path';
 import mime from 'mime'; // Install this package with `npm install mime`
-import { exec } from 'child_process';
-import { access } from 'fs';
-import { constants } from 'fs/promises';
 import WebSocket, { WebSocketServer } from 'ws'; // WebSocket support
-
-import { intelligentlyMergeSnippets } from './intelligentMerge.js';
-import { callLLM, conversation, setupLLM } from './llmCall.js';
-import { readFile, readOrLoadFromDefault, writeFile, getScriptFolderPath } from './fileIO.js';
-import { aiAssistedCodeChanges, implementSpecificClassMethod, loopAIcodeGeneration } from './aiAssistedCodeChanges.js';
-
-import { spawn } from 'child_process';
-import { getStubMethods, showListOfClassesAndFunctions } from './classListing.js';
-import { printAndPause } from './terminalHelpers.js';
+import {  getScriptFolderPath } from './fileIO.js';
 import { aiCoderApiFunctions } from './aiCoderApiFunctions.js';
 
 
@@ -28,8 +17,6 @@ import { aiCoderApiFunctions } from './aiCoderApiFunctions.js';
 export function setupServer() {
     // ctx variables
     ctx.appData = {};
-    ctx.appData.counter = 0;
-    ctx.appData.message = "Hello, world!";
     ctx.appData.serveDirectory = path.resolve(getScriptFolderPath() + "/../public"); // Directory to serve files from
 
     ctx.aiCoderApiFunctions = new aiCoderApiFunctions();
@@ -146,118 +133,3 @@ export function setupServer() {
     });
 }
 
-// Dynamically call a function by its name with arguments
-async function callFunctionByName(functionName, args) {
-    console.log(`Calling function: ${functionName} with args:`, args);
-    try {
-        const func = eval(functionName); // Dynamically resolve the function
-        if (typeof func === 'function') {
-            // If args is an array, use spread operator; otherwise, assume no arguments
-            return Array.isArray(args) ? await func(...args) : await func();
-        } else {
-            throw new Error(`"${functionName}" is not a function.`);
-        }
-    } catch (error) {
-        console.error(`Error in callFunctionByName: ${error.message}`);
-        throw error; // Propagate the error for proper handling
-    }
-}
-
-// Example server-side function
-async function readCurrentFile(filePath) {
-    const fileContent = await readFile(filePath, 'utf8');
-    return fileContent;
-}
-
-
-
-/**
- * Launches the default browser to the specified URL.
- * Supports Linux, macOS, Windows, and WSL.
- * @param {string} url - The URL to open in the browser.
- */
-function openBrowser(url) {
-    if (!url || typeof url !== 'string') {
-        console.error('Please provide a valid URL.');
-        return;
-    }
-
-    const platform = process.platform;
-
-    let command;
-
-    if (platform === 'win32') {
-        // Windows
-        command = `start "" "${url}"`;
-    } else if (platform === 'darwin') {
-        // macOS
-        command = `open "${url}"`;
-    } else if (platform === 'linux') {
-        // Detect if running in WSL
-        exec('uname -r', (err, stdout) => {
-            if (err) {
-                console.error('Failed to detect WSL:', err);
-                return;
-            }
-
-            if (stdout.toLowerCase().includes('microsoft')) {
-                // WSL detected
-                command = `explorer.exe "${url}"`;
-            } else {
-                // Native Linux
-                const linuxCommands = [
-                    'xdg-open',
-                    'gnome-open',
-                    'kde-open',
-                    'firefox',
-                    'google-chrome',
-                    'chromium',
-                ];
-
-                let foundCommand = false;
-
-                // Check each command's availability and use the first one found
-                for (const cmd of linuxCommands) {
-                    try {
-                        access(`/usr/bin/${cmd}`, constants.X_OK, (err) => {
-                            if (!err) {
-                                command = `${cmd} "${url}"`;
-                                foundCommand = true;
-                            }
-                        });
-                        if (foundCommand) break;
-                    } catch (error) {
-                        continue;
-                    }
-                }
-
-                if (!command) {
-                    console.error('No suitable command found to open the browser.');
-                    return;
-                }
-            }
-
-            // Execute the determined command
-            if (command) {
-                exec(command, (error) => {
-                    if (error) {
-                        console.error('Failed to open browser:', error);
-                    }
-                });
-            }
-        });
-        return; // Exit here to avoid running exec() prematurely
-    } else {
-        console.error('Unsupported platform:', platform);
-        return;
-    }
-
-    // Execute the determined command
-    if (command) {
-        exec(command, (error) => {
-            if (error) {
-                console.error('Failed to open browser:', error);
-            }
-        });
-    }
-}

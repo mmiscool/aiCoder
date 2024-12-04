@@ -1,25 +1,46 @@
 import fs from 'fs';
-import * as acorn from 'acorn-loose';
+
 import * as escodegen from 'escodegen';
 import esprima from 'esprima-next';
 import estraverse from 'estraverse';
-
-import { appendFile, readFile, writeFile, } from './fileIO.js';
+import { ctx } from './main.js';
+import { appendFile, readFile, readOrLoadFromDefault, writeFile, } from './fileIO.js';
 import { createBackup } from './backupSystem.js';
 
 
 import {
     clearTerminal,
-    pressEnterToContinue,
     printAndPause,
+    printCodeToTerminal,
 } from './terminalHelpers.js';
+
 
 export async function intelligentlyMergeSnippets(filename) {
     const manipulator = new codeManipulator(filename);
     await manipulator.mergeCode("   ");
-
-    //await printAndPause('Completed merging classes and functions', 3);
 }
+
+
+export async function applySnippets(snippets) {
+    // loop through the snippets and ask the user if they want to apply the changes
+    for (let i = 0; i < snippets.length; i++) {
+        // clear the terminal
+        await clearTerminal();
+        await printCodeToTerminal(snippets[i]);
+
+        snippets.splice(i, 1);
+        i--;
+    }
+
+    let cleanedSnippets = await snippets.join('\n\n\n\n\n', true);
+    printAndPause('Changes applied');
+
+    const manipulator = new codeManipulator(ctx.targetFile);
+    await manipulator.mergeCode(cleanedSnippets);
+}
+
+
+
 
 
 export class codeManipulator {
@@ -128,7 +149,7 @@ export class codeManipulator {
             attachComment: true
         });
 
-        await clearTerminal();
+        //await clearTerminal();
 
         // remove trailing comments from the original code except for the last one under the particular node. Do this for the entire AST
         estraverse.traverse(existingAST, {
@@ -205,7 +226,7 @@ export class codeManipulator {
 
 
         const mergedCode = escodegen.generate(existingAST, { comment: true });
-        clearTerminal();
+        await clearTerminal();
         console.log(mergedCode);
         await this.writeFile(mergedCode);
     }
@@ -284,4 +305,11 @@ export class codeManipulator {
         writeFile(this.filePath, newCode, );
     }
 }
+
+readOrLoadFromDefault('./.aiCoder/default-system-prompt.md', '/prompts/default-system-prompt.md');
+readOrLoadFromDefault('./.aiCoder/snippet-production-prompt.md', '/prompts/snippet-production-prompt.md');
+readOrLoadFromDefault('./.aiCoder/snippet-validation-prompt.md', '/prompts/snippet-validation-prompt.md');
+
+
+
 

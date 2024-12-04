@@ -1,5 +1,5 @@
 import fs from 'fs';
-import path, { relative, dirname } from 'path';
+import path, { dirname } from 'path';
 import { createBackup } from './backupSystem.js';
 import { pressEnterToContinue, printAndPause, printDebugMessage } from './terminalHelpers.js';
 import { fileURLToPath } from 'url';
@@ -37,7 +37,6 @@ export async function writeFile(filePath, content, makeBackup = false) {
     if (makeBackup) await createBackup(filePath);
     await fs.writeFileSync(filePath, content, 'utf8');
     await printAndPause(`File written: ${filePath}`);
-    await printAndPause(`Content: ${content}`, 10);
 }
 
 export async function appendFile(filePath, content, makeBackup = false) {

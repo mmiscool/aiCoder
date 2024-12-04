@@ -1,17 +1,17 @@
-import * as acorn from 'acorn-loose';
-import { confirmAction } from './terminalHelpers.js';
+
 import { readFile, writeFile, } from './fileIO.js';
-import { filePathArg, } from './fileSelector.js';
+import { ctx } from './main.js';
+import * as acorn from 'acorn';
 
 
-export async function showListOfClassesAndFunctions(onlyStubs = true) {
+export async function prependClassStructure(onlyStubs = true) {
   onlyStubs = true;
-  const list = await getMethodsWithArguments(await readFile(filePathArg), onlyStubs);
+  const list = await getMethodsWithArguments(await readFile(ctx.targetFile), onlyStubs);
   console.log(list);
 
   // Prompt if the user wants to include function names in the list
-  const includeFunctions = true; //await confirmAction('Include function names in the list?', false);
-
+  const includeFunctions = true; 
+  
   // Build the output of classes and methods
   let listOfClasses = '';
 
@@ -36,16 +36,12 @@ export async function showListOfClassesAndFunctions(onlyStubs = true) {
 
   console.log(listOfClasses);
 
-  // Prompt if the user wants to prepend the list to the file
-  const prependToFile = await confirmAction('Prepend the list to the file?', false);
 
-  if (prependToFile) {
-    // Read the file
-    const fileContent = await readFile(filePathArg);
+  const fileContent = await readFile(ctx.targetFile);
 
-    // Prepend the list to the file content
-    await writeFile(filePathArg, listOfClasses + '\n\n' + fileContent);
-  }
+  // Prepend the list to the file content
+  await writeFile(ctx.targetFile, listOfClasses + '\n\n' + fileContent);
+
 }
 
 
@@ -66,7 +62,7 @@ export function getMethodsWithArguments(code) {
       node.body.body.forEach(classElement => {
         if (classElement.type === 'MethodDefinition' && classElement.key.type === 'Identifier') {
           const methodName = classElement.key.name;
-          const startCharacterLocation  = classElement.start;
+          const startCharacterLocation = classElement.start;
           const lineNumber = code.substring(0, startCharacterLocation).split('\n').length;
 
 

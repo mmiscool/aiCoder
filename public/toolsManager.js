@@ -2,11 +2,22 @@ import { doAjax } from "./doAjax.js";
 
 let ctx;
 
+const buttonStyle = {
+    display: 'block',
+    margin: '5px',
+    padding: '5px',
+    borderRadius: '5px',
+    textAlign: 'center',
+    cursor: 'pointer',
+}
+
+
+
 export class toolsManager {
     constructor(container, app_ctx) {
         ctx = app_ctx;
         this.container = container;
-        this.container.style.padding = '10px';
+        this.container.style.padding = '5px';
         this.container.style.border = '1px solid #ccc';
         this.container.style.flex = '1';
         this.container.style.flexDirection = 'column';
@@ -21,31 +32,47 @@ export class toolsManager {
         const toolBar = document.createElement('div');
         toolBar.style.display = 'flex';
         toolBar.style.flexDirection = 'row';
-        toolBar.style.justifyContent = 'space-between';
-        toolBar.style.marginBottom = '10px';
+        //toolBar.style.justifyContent = 'space-between';
+        toolBar.style.margin = '0px';
 
-        const pullMethodsListButton = document.createElement('button');
-        pullMethodsListButton.textContent = 'Pull Methods List';
-        pullMethodsListButton.addEventListener('click', () => {
-            this.pullMethodsList();
+        const pullMethodsListButton = await this.makeToolBarButton('Methods List', async () => {
+            await this.pullMethodsList();
         });
         toolBar.appendChild(pullMethodsListButton);
 
-        const pullStubsListButton = document.createElement('button');
-        pullStubsListButton.textContent = 'Pull Stubs List';
-        pullStubsListButton.addEventListener('click', () => {
-            this.pullMethodsList(true);
+        const pullStubsListButton = await this.makeToolBarButton('Stubs List', async () => {
+            await this.pullMethodsList(true);
         });
         toolBar.appendChild(pullStubsListButton);
 
-        const implementAllStubsButton = document.createElement('button');
-        implementAllStubsButton.textContent = 'Implement All Stubs';
-        implementAllStubsButton.addEventListener('click', async () => {
+        const implementAllStubsButton = await this.makeToolBarButton('Implement All Stubs', async () => {
             await this.implementAllStubs();
         });
         toolBar.appendChild(implementAllStubsButton);
 
+        // button to call the mergeAndFormat api endpoint
+        const mergeAndFormatButton = await this.makeToolBarButton('Merge and Format', async () => {
+            await doAjax('/mergeAndFormat', {});
+        });
+        toolBar.appendChild(mergeAndFormatButton);
+
+        // button to call the prependClassStructure api endpoint
+        const prependClassStructureButton = await this.makeToolBarButton('Prepend Class Structure', async () => {
+            await doAjax('/prependClassStructure', {});
+        });
+        toolBar.appendChild(prependClassStructureButton);
+
+
+
         this.container.appendChild(toolBar);
+    }
+
+    async makeToolBarButton(title, handler) {
+        const button = document.createElement('button');
+        button.textContent = title;
+        Object.assign(button.style, buttonStyle);
+        button.addEventListener('click', handler);
+        return button;
     }
 
     async pullMethodsList(showOnlyStubs = false) {
