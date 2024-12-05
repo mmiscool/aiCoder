@@ -10,22 +10,36 @@ import {
 } from "./terminalHelpers.js";
 import Anthropic from '@anthropic-ai/sdk';
 import cliProgress from 'cli-progress';
-import { spawn } from 'child_process';``
+import { spawn } from 'child_process'; ``
 
 let throttleTime = 20;
 let lastCallTime = 0;
 
 export class conversation {
-    constructor() {
+    constructor(id = null, targetFile = null) {
         this.messages = [];
+        this.title = '';
+        this.targetFile = targetFile;
+
+        if (id) {
+            this.id = id;
+            this.loadConversation(id);
+        } else {
+            //generate a unique id for the conversation based on the current time in the format
+            // of yyyy-mm-dd-hh-mm-ss
+            this.id = new Date().toISOString().replace(/[-:.]/g, '').replace('T', '_').split('.')[0];
+        }
+
     }
 
     async addMessage(role, content) {
         this.messages.push({ role, content });
+        this.storeConversation();
     }
 
     async addFileMessage(role, filePath, description = '') {
         this.messages.push({ role, content: filePath, filePath, description });
+        this.storeConversation();
     }
 
     async lastMessage() {
@@ -42,7 +56,68 @@ export class conversation {
     async getMessages() {
         return this.messages;
     }
+
+    async getConversation() {
+        return {
+            messages: this.messages,
+            title: this.title,
+            id: this.id,
+            targetFile: this.targetFile
+        }
+    }
+
+    async clearMessages() {
+        this.messages = [];
+        this.storeConversation();
+    }
+
+    async storeConversation(id = this.id) {
+        // write the conversation to a file
+        const conversationObject = {
+            messages: this.messages,
+            title: this.title,
+            id: this.id,
+            targetFile: this.targetFile
+        };
+        const conversationJSON = JSON.stringify(conversationObject);
+        const filePath = `./.aiCoder/conversations/${id}.json`;
+        await writeFile(filePath, conversationJSON);
+
+    }
+
+    async loadConversation(id = this.id) {
+        // load the conversation from a file  
+        const filePath = `./.aiCoder/conversations/${id}.json`;
+
+        const conversationJSON = await readFile(filePath);
+        const conversationObject = JSON.parse(conversationJSON);
+        this.messages = conversationObject.messages;
+        this.title = conversationObject.title;
+        this.id = conversationObject.id;
+        this.targetFile = conversationObject.targetFile;
+    }
 }
+
+
+
+export async function listConversations() {
+    // load all the conversations from the conversation folder
+    const conversationFolder = './.aiCoder/conversations';
+    if (!fs.existsSync
+        (conversationFolder)) {
+        fs.mkdirSync(conversationFolder);
+    }
+
+    const conversationFiles = fs.readdirSync(conversationFolder);
+    for (const file of conversationFiles) {
+        const conversationId = file.split('.')[0];
+        const newConversation = new conversation(conversationId);
+        this.conversations.push(newConversation);
+    }
+
+    return this.conversations;
+}
+
 
 
 async function throttle() {
@@ -185,14 +260,14 @@ export async function selectModel(overwrite = false) {
     const llmModelFileName = `./.aiCoder/${await selectAIservice()}-model.txt`;
     if (readFile(llmModelFileName) && !overwrite) {
         return readFile(llmModelFileName);
-    } 
+    }
 }
 
 
 export async function selectAIservice(overwrite = false) {
     if (fs.existsSync('./.aiCoder/ai-service.txt') && !overwrite) {
         return fs.readFileSync('./.aiCoder/ai-service.txt', 'utf8');
-    } 
+    }
 }
 
 // ollama related functions -----------------------------------------------------------------------------------------------
