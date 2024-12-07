@@ -21,21 +21,9 @@ export async function intelligentlyMergeSnippets(filename) {
 }
 
 
-export async function applySnippets(snippets) {
-    // loop through the snippets and ask the user if they want to apply the changes
-    for (let i = 0; i < snippets.length; i++) {
-        // clear the terminal
-        await clearTerminal();
-        await printCodeToTerminal(snippets[i]);
-
-        snippets.splice(i, 1);
-        i--;
-    }
-
+export async function applySnippets(targetFile, snippets) {
     let cleanedSnippets = await snippets.join('\n\n\n\n\n', true);
-    printAndPause('Changes applied');
-
-    const manipulator = new codeManipulator(ctx.targetFile);
+    const manipulator = await new codeManipulator(targetFile);
     await manipulator.mergeCode(cleanedSnippets);
 }
 
@@ -139,7 +127,6 @@ export class codeManipulator {
         // read the existing file and append the new code to it
         await appendFile(this.filePath, "\n\n\n" + newCode);
 
-
         let existingAST = await this.parse();
         const newAST = await esprima.parseScript(newCode, {
             tolerant: true,
@@ -225,9 +212,10 @@ export class codeManipulator {
 
 
 
-        const mergedCode = escodegen.generate(existingAST, { comment: true });
+        const mergedCode = await escodegen.generate(existingAST, { comment: true });
         await clearTerminal();
-        console.log(mergedCode);
+        //console.log(mergedCode);
+        console.log(this);
         await this.writeFile(mergedCode);
     }
 

@@ -6,11 +6,11 @@ import fs from 'fs/promises';
 import path from 'path';
 import mime from 'mime'; // Install this package with `npm install mime`
 import WebSocket, { WebSocketServer } from 'ws'; // WebSocket support
-import {  getScriptFolderPath } from './fileIO.js';
+import { getScriptFolderPath } from './fileIO.js';
 import { aiCoderApiFunctions } from './aiCoderApiFunctions.js';
 
 
-
+export let wss;
 
 
 
@@ -20,7 +20,7 @@ export function setupServer() {
     ctx.appData.serveDirectory = path.resolve(getScriptFolderPath() + "/../public"); // Directory to serve files from
 
     ctx.aiCoderApiFunctions = new aiCoderApiFunctions();
-    ctx.aiCoderApiFunctions.newChat();
+    //ctx.aiCoderApiFunctions.newChat();
 
 
     const server = http.createServer(async (req, res) => {
@@ -102,7 +102,7 @@ export function setupServer() {
 
 
     // WebSocket server
-    const wss = new WebSocketServer({ server });
+    wss = new WebSocketServer({ server });
 
     wss.on('connection', (ws) => {
         console.log('WebSocket connection established.');
@@ -124,7 +124,8 @@ export function setupServer() {
 
     // Start the server
     const PORT = 5000;
-    server.listen(PORT, () => {
+    const HOST = '0.0.0.0';
+    server.listen(PORT, HOST, () => {
         console.log(`Server is running at http://localhost:${PORT}`);
         console.log(`Serving files from: ${ctx.appData.serveDirectory}`);
 

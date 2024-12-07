@@ -8,33 +8,91 @@ let ctx = {};
 
 export class ChatManager {
     constructor(container, app_ctx) {
+        this.setup(container, app_ctx);
+    }
+
+    async setup(container, app_ctx) {
         ctx = app_ctx;
         this.chatMode = 'chat';
         this.container = container;
+
+        // ad an input element that displays the conversation title
+        this.conversationTitleInput = document.createElement('input');
+        this.conversationTitleInput.type = 'text';
+        this.conversationTitleInput.style.width = '100%';
+
+
+        //make it so that on change it saves the title
+        this.conversationTitleInput.addEventListener('change', async () => {
+            const conversationId = this.conversationPicker.value;
+            await doAjax('/setConversationTitle', { id: conversationId, title: this.conversationTitleInput.value });
+            await this.loadConversationsList();
+        });
+
+
 
         // add an input element that displays the target file path
         this.targetFileInput = document.createElement('input');
         this.targetFileInput.type = 'text';
         this.targetFileInput.style.width = '100%';
-        this.targetFileInput.style.marginBottom = '10px';
-        this.targetFileInput.style.padding = '5px';
-        this.targetFileInput.style.fontFamily = 'monospace';
-        this.targetFileInput.style.fontSize = '16px';
-        this.targetFileInput.style.color = 'blue';
-        this.targetFileInput.style.border = '1px solid #ccc';
-        this.targetFileInput.style.borderRadius = '5px';
-        this.targetFileInput.style.backgroundColor = '#f9f9f9';
-        this.targetFileInput.style.textAlign = 'center';
-        this.targetFileInput.style.fontWeight = 'bold';
-        this.targetFileInput.style.textTransform = 'uppercase';
-        this.targetFileInput.style.letterSpacing = '1px';
-        this.targetFileInput.style.boxShadow = '0 0 5px rgba(0, 0, 0, 0.1)';
-        this.targetFileInput.style.transition = '0.3s';
-        this.targetFileInput.style.outline = 'none';
-        this.container.appendChild(this.targetFileInput);
 
-        this.getTargetFile();
 
+        // make a div to hold the conversation title and target file input elements
+        // have the labels for the fields to the left of the input fields
+        // have the input fields take up the rest of the space
+        // each field should be on its own line
+
+        const titleDiv = document.createElement('div');
+        titleDiv.style.display = 'flex';
+        titleDiv.style.flexDirection = 'row';
+        titleDiv.style.justifyContent = 'right';
+        titleDiv.style.margin = '10px';
+
+
+        const titleLabel = document.createElement('label');
+        titleLabel.textContent = 'Title:';
+        titleLabel.style.width = '100px';
+
+        titleDiv.appendChild(titleLabel);
+        titleDiv.appendChild(this.conversationTitleInput);
+
+        const targetFileDiv = document.createElement('div');
+        targetFileDiv.style.display = 'flex';
+        targetFileDiv.style.flexDirection = 'row';
+        targetFileDiv.style.justifyContent = 'right';
+        targetFileDiv.style.margin = '10px';
+
+
+        const targetFileLabel = document.createElement('label');
+        targetFileLabel.textContent = 'Target File:';
+        targetFileLabel.style.width = '100px';
+        targetFileDiv.appendChild(targetFileLabel);
+        targetFileDiv.appendChild(this.targetFileInput);
+
+        this.container.appendChild(titleDiv);
+        this.container.appendChild(targetFileDiv);
+
+
+
+
+        //this.container.appendChild(this.conversationTitleInput);
+        //this.container.appendChild(this.targetFileInput);
+
+        this.conversationPicker = document.createElement('select');
+        this.conversationPicker.style.margin = '10px';
+        this.conversationPicker.addEventListener('change', async () => {
+            const selectedId = this.conversationPicker.value;
+            if (selectedId) {
+                await this.loadConversation(selectedId);
+            }
+        });
+        this.container.appendChild(this.conversationPicker);
+
+        await this.loadConversationsList();
+        // Call loadConversation with the selected conversation ID if any
+        if (this.conversationPicker.value) {
+            this.loadConversation(this.conversationPicker.value);
+        }
 
         this.newChatButton = document.createElement('button');
         this.newChatButton.textContent = 'New Chat';
@@ -86,23 +144,69 @@ export class ChatManager {
         });
         this.container.appendChild(this.submitButton);
 
+        this.setInput("");
 
-        this.pullMessages();
+        // Call loadConversation with the selected conversation ID if any
+        //alert('this.conversationPicker.value: ' + this.conversationPicker.value);
+        if (this.conversationPicker.value) {
+            this.loadConversation(this.conversationPicker.value);
+        } else {
+            // set the conversation picker to the first conversation
+            this.conversationPicker.selectedIndex = 0;
+            alert('this.conversationPicker.value: ' + this.conversationPicker.value);
+            if (this.conversationPicker.value) {
+                this.loadConversation(this.conversationPicker.value);
+            }
+        }
+
         this.setInput("")
     }
 
-    async getTargetFile() {
-        const response = await doAjax('/getTargetFile', {});
-        this.targetFileInput.value = response.targetFile;
-        return response.targetFile;
+    async setTargetFile(targetFile) {
+        this.targetFileInput.value = targetFile;
     }
 
-    async pullMessages() {
-        console.log(await doAjax('/getChatMode'));
-        this.chatMode = (await doAjax('/getChatMode')).chatMode
-        const response = await doAjax('/pullMessages', {});
+    async loadConversationsList() {
+        const conversations = await doAjax('/getConversationsList', {});
+        console.log('conversations', conversations);
+        // format the conversations list
+        // [
+        //     {
+        //         "id": "20241206_051509050Z",
+        //         "title": "",
+        //         "lastModified": "2024-12-06T05:15:09.050Z"
+        //     },
+
+        // ]
+
+        // sort the conversations by lastModified
+        conversations.sort((a, b) => {
+            return new Date(b.lastModified) - new Date(a.lastModified);
+        });
+
+        // clear the conversation picker
+        this.conversationPicker.innerHTML = '';
+
+        // add an option for each conversation
+        conversations.forEach((conversation) => {
+            const option = document.createElement('option');
+            option.value = conversation.id;
+            option.textContent = conversation.title || conversation.id;
+            this.conversationPicker.appendChild(option);
+        });
+
+
+    }
+
+    async loadConversation(conversationId) {
+        console.log('conversationId', conversationId);
+        const response = await doAjax('/pullMessages', { id: conversationId });
+        ctx.fileManager.currentFile = response.targetFile;
+        this.setTargetFile(response.targetFile);
+        this.conversationTitleInput.value = response.title;
+        console.log('response.messages', response.messages);
         this.chatMessageDiv.innerHTML = '';
-        response.forEach(async (message) => {
+        response.messages.forEach(async (message) => {
             const individualMessageDiv = document.createElement('div');
             individualMessageDiv.style.border = '1px solid black';
             individualMessageDiv.style.padding = '10px';
@@ -157,7 +261,7 @@ export class ChatManager {
                 appendPlanButton.style.padding = '2px 5px';
                 appendPlanButton.style.borderRadius = '3px';
                 appendPlanButton.addEventListener('click', async () => {
-                    await doAjax('/savePlan', { plan: message.content , append: true });
+                    await doAjax('/savePlan', { plan: message.content, append: true });
 
                 });
                 individualMessageDiv.appendChild(appendPlanButton);
@@ -168,10 +272,10 @@ export class ChatManager {
 
 
             // check if this is the last message
-            if (response.indexOf(message) === response.length - 1) {
+            if (response.messages.indexOf(message) === response.messages.length - 1) {
 
                 console.log("We are at the last message. ");
-                console.log(response.indexOf(message), response.length - 1);
+                console.log(response.messages.indexOf(message), response.messages.length - 1);
                 console.log("ctx.autoApplyMode", ctx.autoApplyMode);
 
 
@@ -183,7 +287,7 @@ export class ChatManager {
                         // for loop over the code blocks and apply them
                         for (const codeBlock of markdown.codeBlocks) {
                             const applyCodeBlock = await ConfirmDialog.confirm("Apply code block?", ctx.autoApplyTimeout, true);
-                            if (applyCodeBlock) await doAjax('/applySnippet', { snippet: codeBlock });
+                            if (applyCodeBlock) await doAjax('/applySnippet', { snippet: codeBlock, targetFile: this.targetFileInput.value });
                         }
 
                     }
@@ -203,29 +307,33 @@ export class ChatManager {
     }
 
     async addMessage(message) {
-        await doAjax('/addMessage', { message });
-        await this.pullMessages();
+        const conversationId = this.conversationPicker.value;
+        await doAjax('/addMessage', { id: conversationId, message });
+        await this.loadConversation(conversationId); // Fix method call
     }
 
-    async newChat() {
-        await doAjax('/newChat', {});
+    async newChat(title = false) {
+        const targetFile = this.targetFileInput.value;
+        const response = await doAjax('/newChat', { targetFile, title });
         this.chatMode = 'chat';
-        await this.pullMessages();
-
+        await this.loadConversationsList();
+        this.conversationPicker.value = response.id;
+        await this.loadConversation(response.id); // Fix method call
     }
 
-    async newPlanChat() {
-        await doAjax('/newPlanChat', {});
+    async newPlanChat(title = false) {
+        const response = await doAjax('/newPlanChat', { title });
+        await this.loadConversationsList();
         this.chatMode = 'plan';
-        await this.pullMessages();
+        this.conversationPicker.value = response.id;
+        await this.loadConversation(response.id); // Fix method call
     }
 
     async callLLM() {
-        await doAjax('/callLLM', {});
-        await this.pullMessages();
+        const conversationId = this.conversationPicker.value;
+        await doAjax('/callLLM', { id: conversationId });
+        await this.loadConversation(conversationId); // Fix method call
     }
-
-
 
     async addCodeToolbars() {
         // Query all <code> elements on the page
@@ -244,7 +352,6 @@ export class ChatManager {
             const wrapper = document.createElement('div');
             wrapper.style.position = 'relative';
             wrapper.style.display = 'inline-block'; // Preserve inline flow of <code> elements
-
 
             // Create the toolbar div
             const toolbar = document.createElement('div');
@@ -281,7 +388,6 @@ export class ChatManager {
             });
             toolbar.appendChild(copyButton);
 
-            console.log('this.chatMode', this.chatMode);
             if (this.chatMode === 'chat') {
                 const editButton = document.createElement('button');
                 editButton.textContent = '🤖✎⚡';
@@ -290,22 +396,18 @@ export class ChatManager {
                 editButton.addEventListener('click', async () => {
                     codeElement.style.color = 'red';
                     const codeString = codeElement.textContent;
-                    await doAjax('/applySnippet', { snippet: codeString });
+                    await doAjax('/applySnippet', { snippet: codeString, targetFile: this.targetFileInput.value });
                     codeElement.style.color = 'cyan';
-                    editButton.disabled = true;
-                    editButton.style.display = "none";
+                    //editButton.disabled = true;
+                    //editButton.style.display = "none";
                     // find the next button with the textContent of '🤖✎⚡' and 
                     // focus it. The button it focuses needs to be lower in the page than this one.
                     const nextButton = document.querySelector(`button[title="Apply snippet"]:not([disabled])`);
                     if (nextButton) nextButton.focus();
-
                 });
-
-                // Add buttons to the toolbar
 
                 toolbar.appendChild(editButton);
             }
-
 
             // Wrap the <code> element with the wrapper
             const parent = codeElement.parentNode;

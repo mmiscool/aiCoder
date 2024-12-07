@@ -8,6 +8,7 @@ export class FileManager {
         this.container = container;
         this.filesListDiv = null;
         this.filesList = null;
+        this.currentFile = null;
         this.init();
     }
 
@@ -64,17 +65,8 @@ export class FileManager {
             parentDiv.appendChild(fileDiv);
 
             fileDiv.addEventListener('click', async () => {
-                const response = await doAjax('/getFileContent', { filePath: file });
-
-                // set the target file by calling setTargetFile with an 
-                // object containing the targetFile property
-                await doAjax('/setTargetFile', { targetFile: file });
-
-                // update the target file in the context
-                ctx.targetFile = file;
-
-                ctx.chat.getTargetFile();
-
+                ctx.chat.setTargetFile(file);
+                this.currentFile = file;
                 ctx.tabs.switchToTab('Chat');
             });
 

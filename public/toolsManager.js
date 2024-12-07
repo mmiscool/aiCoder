@@ -52,13 +52,13 @@ export class toolsManager {
 
         // button to call the mergeAndFormat api endpoint
         const mergeAndFormatButton = await this.makeToolBarButton('Merge and Format', async () => {
-            await doAjax('/mergeAndFormat', {});
+            await doAjax('/mergeAndFormat', {targetFile: ctx.fileManager.currentFile});
         });
         toolBar.appendChild(mergeAndFormatButton);
 
         // button to call the prependClassStructure api endpoint
         const prependClassStructureButton = await this.makeToolBarButton('Prepend Class Structure', async () => {
-            await doAjax('/prependClassStructure', {});
+            await doAjax('/prependClassStructure', { targetFile: ctx.fileManager.currentFile });
         });
         toolBar.appendChild(prependClassStructureButton);
 
@@ -77,7 +77,7 @@ export class toolsManager {
 
     async pullMethodsList(showOnlyStubs = false) {
         this.showToolBar();
-        const listOfMethods = await doAjax('/getMethodsList', {});
+        const listOfMethods = await doAjax('/getMethodsList', { targetFile: ctx.fileManager.currentFile });
         // the response contains 
         for (const className in listOfMethods) {
             //console.log(className);
@@ -119,16 +119,16 @@ export class toolsManager {
 
     async implementSpecificClassMethod(className, methodName, lineNumber) {
         ctx.tabs.switchToTab('Chat');
-        await doAjax('/gotoLineNumber', { lineNumber });
-        await ctx.chat.newChat();
+        await doAjax('/gotoLineNumber', { lineNumber, targetFile: ctx.fileManager.currentFile });
+        await ctx.chat.newChat(`Implement ${methodName}.${className}`);
         await ctx.chat.addMessage(`Write the ${methodName} method in the ${className} class.`);
         await ctx.chat.callLLM();
     }
 
     async addToChatPrompt(className, methodName, lineNumber) {
         ctx.tabs.switchToTab('Chat');
-        await doAjax('/gotoLineNumber', { lineNumber });
-        await ctx.chat.newChat();
+        await doAjax('/gotoLineNumber', { lineNumber, targetFile: ctx.fileManager.currentFile });
+        await ctx.chat.newChat(`Modify ${methodName}.${className}`);
         await ctx.chat.setInput(`Modify the ${methodName} method in the ${className} class.\nImprove it.`);
     }
 }

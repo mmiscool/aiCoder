@@ -21,6 +21,16 @@ document.body.appendChild(overlay);
 
 
 
+// add a div to the overlay that displays the messages from the server. 
+
+const messageDiv = document.createElement('div');
+messageDiv.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+messageDiv.style.padding = '10px';
+messageDiv.style.borderRadius = '5px';
+overlay.appendChild(messageDiv);
+
+
+
 
 export async function doAjax(urlToCall, body) {
     overlay.style.display = 'flex';
@@ -44,3 +54,46 @@ export async function doAjax(urlToCall, body) {
 
     return responseJson;
 }
+
+
+
+
+
+
+
+  class WebSocketClient {
+    constructor() {
+      this.url = `ws://${window.location.host}`;
+      this.socket = null;
+    }
+  
+    connect() {
+      this.socket = new WebSocket(this.url);
+  
+      // Event listener for when the connection is opened
+      this.socket.addEventListener('open', () => {
+        console.log('WebSocket connection opened.');
+      });
+  
+      // Event listener for when a message is received
+      this.socket.addEventListener('message', (event) => {
+        console.log('Message received:', event.data);
+        messageDiv.textContent += event.data;
+      });
+  
+      // Event listener for when the connection is closed
+      this.socket.addEventListener('close', () => {
+        console.log('WebSocket connection closed.');
+      });
+  
+      // Event listener for when there's an error
+      this.socket.addEventListener('error', (error) => {
+        console.error('WebSocket error:', error);
+      });
+    }
+  }
+  
+  // Usage example
+  const client = new WebSocketClient();
+  client.connect();
+  

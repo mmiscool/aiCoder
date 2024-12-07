@@ -5,7 +5,7 @@ import { marked } from 'marked';
 import TerminalRenderer from 'marked-terminal';
 import path from 'path';
 import { ctx, debugMode } from './main.js';
-
+import { wss } from './apiServer.js';
 
 
 
@@ -42,7 +42,7 @@ function getCallerInfo(level = 3) {
 
 
 export async function clearTerminal() {
-  
+
   return console.log("----------------------------------------------------------------------------");
 
   if (ctx.ws) {
@@ -71,6 +71,9 @@ export async function printCodeToTerminal(jsCode) {
 
 export async function printAndPause(message, secondsToPause = 2) {
   await getCallerInfo();
+  wss.clients.forEach(client => {
+    client.send(message);
+  });
   return console.log(message);
   console.log(message);
   if (secondsToPause > 4) {
@@ -80,6 +83,14 @@ export async function printAndPause(message, secondsToPause = 2) {
   }
 }
 
+
+export async function printToTerminal(message) {
+  process.stdout.write(message); // Real-time printing to console
+  // send via websocket
+  wss.clients.forEach(client => {
+    client.send(message);
+  });
+}
 
 export async function selectListHeight() {
   return process.stdout.rows - 2;
