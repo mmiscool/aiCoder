@@ -7,6 +7,15 @@ With **aiCoder** as your coding co-pilot, you’ll streamline development, refin
 
 The real magic? aiCoder’s advanced merging keeps your code intact, seamlessly integrating new snippets with precision and reliability.
 
+# Standard workflow
+ * launch aiCoder in the directory of your project. 
+ * Visit http://localhost:5000 to access the web UI
+ * Use the "New Plan Chat" to discuss and create the requirements for your project. You can save the plan and the plan will be used when implimenting the project. 
+ * Use the "Files" tab to select the target file to work on. 
+ * Use the "New Chat" button to start a conversation with the file. 
+ * Make your code change request. 
+ * Review the snippets that are provided and click the '🤖✎⚡' button to automatically merge the code snippet in to the code file. 
+
 ## SCREEN SHOTS OF THE NEW UI
 ![NEW UI](<./images/CHAT.png>)
 
