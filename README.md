@@ -8,11 +8,13 @@ With **aiCoder** as your coding co-pilot, you’ll streamline development, refin
 The real magic? aiCoder’s advanced merging keeps your code intact, seamlessly integrating new snippets with precision and reliability.
 
 ## SCREEN SHOTS OF THE NEW UI
-![NEW UI](<./images/newUI.png>)
+![NEW UI](<./images/CHAT.png>)
+
+![FILE SELECTOR](<./images/FILE-SELECTOR.png>)
 
 ![NEW TOOLS](<./images/TOOLS.png>)
 
-![NEW LLM SETTINGS](<./images/LLM_SETUP.png>)
+![NEW LLM SETTINGS](<./images/SETTINGS.png>)
 
 
 ## UNSTABLE
@@ -36,43 +38,11 @@ Getting started is a breeze! Just run the above command to install `aiCoder` glo
 
 ## USAGE
 Dive into your project folder using your terminal and launch the ```aiCoder``` command to start the magic. 
+Open the browser to http://localhost:5000/
 ```
 cd myProjectFolder
-aiCoder
+aicoder
 ```
-
-It will prompt you to select a file. You can also call ```aiCoder ./fileName.js``` to skip this step. 
-```
-? Select a file:
-/home/user/projects/aiCoder/
-├── src/
-├── LICENSE
-├── package-lock.json
-├── package.json
-└── README.md
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-↑↓ navigate, <enter> select or open directory
-<backspace> go back
-```
-
-
-A dynamic menu will appear, offering a variety of exciting options. Use the arrow keys to navigate through the possibilities. 
-```
-Current file: (BREP.js)
-? Select an action: (Use arrow keys)
-❯ Make AI assisted code changes
-  Identify missing or incomplete functionality and add it
-  Merge and format classes
- ──────────────
-  Project settings
-  Restore file from backup
- ──────────────
-  Select a different file
-  Exit
-```
-
-## Setup openAI API key
-Select this option to input your openAI API key. This will be stored in the file ```./.aiCoder/openai-key.txt``` in the current directory. 
 
 ## Make AI assisted code changes
 This tool will ask you what you want to achieve. You can request changes or describe issues you're facing with the current code file.
@@ -96,27 +66,11 @@ This feature is highly valuable, and you can easily create your own pre-made pro
 # Project settings
 The settings for aiCoder are stored per project in a folder `./.aiCoder/`. This folder also contains backups of files modified by the tool, stored in `./.aiCoder/backups/`.
 
-```
-? Settings: (Use arrow keys)
-❯ Setup LLM
-  Edit pre-made prompts
-  Edit default system prompt
-  skip approving changes (this session only)
- ──────────────
-  Back to main menu
-```
-## Setup LLM
-Provides a menu to configure the LLM you want to use. 
-```
-? Select the LLM setting you want to change: (Use arrow keys)
-❯ API key
-  Model
-  AI service
- ──────────────
-  back
-```
 
-## Edit pre-made prompts
+## LLM settings
+Provides a menu to configure the LLM you want to use. 
+
+## Project settings
 This option will launch the nano text editor and open the ```./aiCoder/premade-prompts.txt``` file. You can add your own pre-made prompts in this file. Each prompt needs to be a single line of text.
 
 You can add comments to this file by starting a line with a ```#``` character and these lines will be ignored. 
@@ -134,20 +88,7 @@ Ollama seems to provide better results than groq at this time.
 ## Backup Functionality
 Whenever a file is modified by aiCoder, a backup of the original file is created in the `./.aiCoder/backups/` folder. The backup file names include a timestamp to help identify different versions.
 
-## ⭯ Restore file from backup
-You can restore a file from its backup by selecting the `Restore file from backup` option in the menu. This will list all the available backup versions for the selected file, and you can choose which version to restore.
 
-```
-Current file: (BREP.js)
-✔ Select an action: Restore file from backup
-Restoring file from backup: BREP.js
-? Select a backup version to restore:
-❯ .aiCoder/backups/BREP.js_backup_2024-10-29T01-10-21.732Z
-  .aiCoder/backups/BREP.js_backup_2024-10-29T03-14-57.722Z
-  .aiCoder/backups/BREP.js_backup_2024-10-29T03-15-22.568Z
-  .aiCoder/backups/BREP.js_backup_2024-10-29T05-58-19.764Z
-
-```
 
 
 
