@@ -73,20 +73,34 @@ export class ChatManager {
         this.container.appendChild(targetFileDiv);
 
 
+        // div to hold the conversation picker
 
+        const conversationPickerDiv = document.createElement('div');
+        conversationPickerDiv.style.display = 'flex';
+        conversationPickerDiv.style.flexDirection = 'row';
+        conversationPickerDiv.style.justifyContent = 'right';
+        conversationPickerDiv.style.margin = '10px';
 
-        //this.container.appendChild(this.conversationTitleInput);
-        //this.container.appendChild(this.targetFileInput);
+        const conversationPickerLabel = document.createElement('label');
+        conversationPickerLabel.textContent = 'Select Conversation:';
+        conversationPickerLabel.style.width = '100px';
+        conversationPickerDiv.appendChild(conversationPickerLabel);
 
         this.conversationPicker = document.createElement('select');
         this.conversationPicker.style.margin = '10px';
+        this.conversationPicker.style.width = '100%';
         this.conversationPicker.addEventListener('change', async () => {
             const selectedId = this.conversationPicker.value;
             if (selectedId) {
                 await this.loadConversation(selectedId);
             }
         });
-        this.container.appendChild(this.conversationPicker);
+        conversationPickerDiv.appendChild(this.conversationPicker);
+
+
+        this.container.appendChild(conversationPickerDiv);
+
+
 
         await this.loadConversationsList();
         // Call loadConversation with the selected conversation ID if any

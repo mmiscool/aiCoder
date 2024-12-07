@@ -304,8 +304,6 @@ export class conversation {
             fs.unlinkSync(filePath);
         }
     }
-
-
 }
 
 

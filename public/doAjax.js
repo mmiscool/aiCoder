@@ -27,6 +27,10 @@ const messageDiv = document.createElement('div');
 messageDiv.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
 messageDiv.style.padding = '10px';
 messageDiv.style.borderRadius = '5px';
+// format as preformatted text
+messageDiv.style.whiteSpace = 'pre-wrap';
+// font size
+messageDiv.style.fontSize = '16px';
 overlay.appendChild(messageDiv);
 
 
