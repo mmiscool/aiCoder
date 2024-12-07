@@ -10,8 +10,8 @@ export async function prependClassStructure(onlyStubs = true) {
   console.log(list);
 
   // Prompt if the user wants to include function names in the list
-  const includeFunctions = true; 
-  
+  const includeFunctions = true;
+
   // Build the output of classes and methods
   let listOfClasses = '';
 
@@ -93,7 +93,7 @@ export function getMethodsWithArguments(code) {
     }
   });
 
-  // Sort classes based on dependency hierarchy and alphabetically within each level
+  // Sort classes based on dependency hierarchy only (no alphabetical sorting)
   const sortedClasses = [];
   const processedClasses = new Set();
 
@@ -113,8 +113,8 @@ export function getMethodsWithArguments(code) {
     processedClasses.add(className);
   }
 
-  // Sort classes alphabetically before building the hierarchy
-  Array.from(classInfo.keys()).sort().forEach(addClassAndSubclasses);
+  // Process classes in the order they appear in the original code
+  Array.from(classInfo.keys()).forEach(addClassAndSubclasses);
 
   // Convert sorted classes into the final output format
   const result = {};

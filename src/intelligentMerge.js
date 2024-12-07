@@ -28,9 +28,6 @@ export async function applySnippets(targetFile, snippets) {
 }
 
 
-
-
-
 export class codeManipulator {
     constructor(filePath) {
         this.filePath = filePath;
@@ -42,6 +39,16 @@ export class codeManipulator {
             variables: {}, // Track first occurrence and latest definition of root-level variables
             functions: {}, // Track latest occurrence of root-level functions
         };
+
+        // Helper function to determine if a method is empty
+        function isMethodEmpty(method) {
+            // MethodDefinition nodes have a `.value` which is a FunctionExpression or similar.
+            // Check if the body is empty.
+            if (method.value && method.value.body && method.value.body.body) {
+                return method.value.body.body.length === 0;
+            }
+            return true;
+        }
 
         estraverse.traverse(ast, {
             enter(node, parent) {
@@ -60,8 +67,29 @@ export class codeManipulator {
                     node.body.body.forEach((method) => {
                         if (method.type === 'MethodDefinition') {
                             const methodName = method.key.name;
-                            // Replace or store the latest occurrence of the method
-                            definitions.classes[className].methods[methodName] = method;
+                            const newMethodEmpty = isMethodEmpty(method);
+
+                            // If we already have a recorded method, decide if we override it
+                            if (definitions.classes[className].methods[methodName]) {
+                                const existingMethod = definitions.classes[className].methods[methodName];
+                                const existingMethodEmpty = isMethodEmpty(existingMethod);
+
+                                // Replacement logic:
+                                // 1. If the new method is empty and the existing one is not empty, do NOT override.
+                                // 2. If the existing is empty and the new is non-empty, override.
+                                // 3. If both are empty, overriding with empty doesn't matter, but it's safe to just override.
+                                // 4. If both are non-empty, override to keep the latest definition.
+
+                                if (newMethodEmpty && !existingMethodEmpty) {
+                                    // Don't override a non-empty method with an empty one
+                                    return;
+                                }
+                                // Otherwise, override
+                                definitions.classes[className].methods[methodName] = method;
+                            } else {
+                                // No existing method stored, just store this one
+                                definitions.classes[className].methods[methodName] = method;
+                            }
                         }
                     });
                 } else if (node.type === 'VariableDeclaration' && parent.type === 'Program') {
@@ -130,15 +158,12 @@ export class codeManipulator {
         let existingAST = await this.parse();
         const newAST = await esprima.parseScript(newCode, {
             tolerant: true,
-            //comment: true,
             range: true,
             loc: true,
             attachComment: true
         });
 
-        //await clearTerminal();
-
-        // remove trailing comments from the original code except for the last one under the particular node. Do this for the entire AST
+        // remove trailing comments from the original code except for the last one under the particular node
         estraverse.traverse(existingAST, {
             enter: (node) => {
                 if (node.trailingComments) {
@@ -147,13 +172,9 @@ export class codeManipulator {
             }
         });
 
-
-
         await this.cleanUpDuplicates(existingAST);
 
-
-
-        // iterate over the AST and remove adjacent duplicate leading comments. Test if the comments are the same and if they are, remove the duplicate
+        // iterate over the AST and remove adjacent duplicate leading comments
         estraverse.traverse(existingAST, {
             enter: (node) => {
                 if (node.leadingComments) {
@@ -177,7 +198,7 @@ export class codeManipulator {
             }
         });
 
-        // if a comment includes  "New method:" remove the string "New method:" from the comment in a case insensitive way.
+        // if a comment includes "New method:" remove the string "New method:" (case insensitive)
         estraverse.traverse(existingAST, {
             enter: (node) => {
                 if (node.leadingComments) {
@@ -194,7 +215,6 @@ export class codeManipulator {
         });
 
         // Modify all comments to include a single space between the // and the comment text.
-        // Also console.log the comment text
         estraverse.traverse(existingAST, {
             enter: (node) => {
                 if (node.leadingComments) {
@@ -210,19 +230,11 @@ export class codeManipulator {
             }
         });
 
-
-
         const mergedCode = await escodegen.generate(existingAST, { comment: true });
         await clearTerminal();
-        //console.log(mergedCode);
         console.log(this);
         await this.writeFile(mergedCode);
     }
-
-
-
-
-
 
     async removeClass(classNameToRemove) {
         const existingAST = this.parse();
@@ -271,28 +283,25 @@ export class codeManipulator {
         await this.writeFile(updatedCode);
     }
 
-
     async parse() {
         return await esprima.parseScript(await this.readFile(), {
             tolerant: true,
-            //comment: true,
             range: true,
             loc: true,
             attachComment: true
         });
     }
 
-
-
-
     async readFile() {
         return readFile(this.filePath);
     }
 
     async writeFile(newCode) {
-        writeFile(this.filePath, newCode, );
+        writeFile(this.filePath, newCode);
     }
 }
+
+
 
 readOrLoadFromDefault('./.aiCoder/default-system-prompt.md', '/prompts/default-system-prompt.md');
 readOrLoadFromDefault('./.aiCoder/snippet-production-prompt.md', '/prompts/snippet-production-prompt.md');
