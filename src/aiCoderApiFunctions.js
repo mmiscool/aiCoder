@@ -41,7 +41,7 @@ export class aiCoderApiFunctions {
         console.log('pullMessages', parsedBody);
         const webUIConversation = await new conversation(parsedBody.id);
         await webUIConversation.loadConversation();
-       // console.log('webUIConversation', webUIConversation);
+        // console.log('webUIConversation', webUIConversation);
         const response = await webUIConversation.getMessages();
         return webUIConversation;
     }
@@ -152,6 +152,17 @@ export class aiCoderApiFunctions {
         await prependClassStructure(parsedBody.targetFile); // Fix missing parameter
         return { success: true };
     }
+
+
+
+    async readFile(parsedBody) {
+        return { fileContent: await readFile(parsedBody.targetFile) };
+    }
+
+    async writeFile(parsedBody) {
+        await writeFile(parsedBody.targetFile, parsedBody.fileContent);
+        return { success: true };
+    }
 }
 
 
@@ -210,6 +221,16 @@ export class conversation {
     async setTitle(title) {
         this.title = title;
         await this.storeConversation();
+    }
+
+    async generateTitle() {
+        // ask the LLM to generate the title. 
+        await this.addMessage('user', 'Generate a title for this conversation. Respond with a single line of text.');
+        const title = await this.callLLM();
+        //Remove the last 2 messages from the conversation
+        await this.messages.pop();
+        await this.messages.pop();
+        await this.setTitle(title);
     }
 
     async setTargetFile(targetFile) {
@@ -304,6 +325,8 @@ export class conversation {
             fs.unlinkSync(filePath);
         }
     }
+
+
 }
 
 

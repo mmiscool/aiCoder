@@ -43,6 +43,18 @@ npm i aicodertool -g
    
 After installation, you’re all set! Just run the `aiCoder` command in any project directory.
 
+If you want to use local Ollama as your LLM provider install it with the following commands. 
+```
+# Install Ollama 
+curl -fsSL https://ollama.com/install.sh | sh
+
+# Pull the preferred model
+ollama pull granite3-dense
+```
+
+You can find and install additional models to test with 
+https://ollama.com/search
+
 ## Usage
 Launch `aiCoder` from within your project folder:
 ```

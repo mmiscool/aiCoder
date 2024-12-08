@@ -16,7 +16,7 @@ export class ChatManager {
         this.chatMode = 'chat';
         this.container = container;
         // check localStorage for the autoApplyMode setting if it exists
-        this.autoApplyMode = false; 
+        this.autoApplyMode = false;
 
         // ad an input element that displays the conversation title
         this.conversationTitleInput = document.createElement('input');
@@ -119,7 +119,7 @@ export class ChatManager {
         this.autoApplyCheckbox.type = 'checkbox';
         this.autoApplyCheckbox.style.margin = '10px';
         this.autoApplyCheckbox.style.justifyContent = 'left';
-        
+
         this.autoApplyCheckbox.addEventListener('change', () => {
             this.autoApplyMode = this.autoApplyCheckbox.checked;
             localStorage.setItem('autoApplyMode', this.autoApplyMode);
@@ -155,6 +155,36 @@ export class ChatManager {
 
         this.chatMessageDiv = document.createElement('div');
         this.container.appendChild(this.chatMessageDiv);
+
+
+        this.promptsDialog = document.createElement('dialog');
+        this.promptsDialog.style.position = 'absolute';
+        this.promptsDialog.style.top = '50%';
+        this.promptsDialog.style.bottom = '15%';
+        this.promptsDialog.style.right = '15%';
+        this.promptsDialog.style.left = '15%';
+        
+
+
+        this.promptsDialog.style.padding = '40px';
+        this.promptsDialog.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+        this.promptsDialog.style.zIndex = '1000';
+        this.promptsDialog.addEventListener('click', () => {
+            this.promptsDialog.close();
+        });
+        document.body.appendChild(this.promptsDialog);
+
+        this.promptsDialog.close();
+
+        // button to display the list of custom prompts
+        this.customPromptsButton = document.createElement('button');
+        this.customPromptsButton.textContent = 'Custom Prompts';
+        this.customPromptsButton.style.margin = '10px';
+        this.customPromptsButton.addEventListener('click', () => {
+            this.displayPremadePromptsList();
+        });
+        this.container.appendChild(this.customPromptsButton);
+
 
         // add label for user input
         this.userInputLabel = document.createElement('label');
@@ -310,6 +340,41 @@ export class ChatManager {
                 individualMessageDiv.appendChild(appendPlanButton);
             }
 
+
+            if (message.role === 'user') {
+                // make a button that adds the users prompt to the custom prompt list
+                const addPromptButton = document.createElement('button');
+                addPromptButton.textContent = '📝 Add to prompts'
+                addPromptButton.style.cursor = 'pointer';
+                addPromptButton.style.background = 'none';
+                addPromptButton.style.border = '1px solid white';
+                addPromptButton.style.color = 'white';
+
+                addPromptButton.style.padding = '2px 5px';
+
+                addPromptButton.style.borderRadius = '3px';
+                addPromptButton.addEventListener('click', async () => {
+                    //await doAjax('/storeCustomPrompts', { prompt: message.content });
+                    const prompt = message.content;
+                    // get the current list of prompts
+                    const customPromptsJSON = await doAjax('/readFile', { targetFile: './.aiCoder/customPrompts.json' });
+                    let customPrompts = JSON.parse(customPromptsJSON.fileContent);
+                    if (!customPrompts) customPrompts = [];
+                    console.log('prompts', customPrompts);
+                    // check if the prompt is already in the list
+                    if (!customPrompts.includes(prompt)) {
+                        customPrompts.push(prompt);
+                        await doAjax('/writeFile', {
+                            targetFile: './.aiCoder/customPrompts.json',
+                            fileContent: JSON.stringify(customPrompts),
+                        });
+                    }
+
+                });
+
+                individualMessageDiv.appendChild(addPromptButton);
+            }
+
             this.chatMessageDiv.appendChild(individualMessageDiv);
             this.submitButton.scrollIntoView();
 
@@ -347,6 +412,40 @@ export class ChatManager {
         this.addCodeToolbars();
     }
 
+
+    async displayPremadePromptsList() {
+        const customPromptsJSON = await doAjax('/readFile', { targetFile: './.aiCoder/customPrompts.json' });
+        let customPrompts = JSON.parse(customPromptsJSON.fileContent);
+        if (!customPrompts) customPrompts = [];
+        console.log('prompts', customPrompts);
+        // create a modal dialog that displays the list of prompts.
+        // Make the dialog as an overlay that covers the whole screen.
+        // Add a close button to the dialog.
+        // display the list of prompts in a scrollable div.
+        // clicking on a prompt should add it to the user input field.
+
+        this.promptsDialog.showModal();
+
+        this.promptsDialog.innerHTML = '';
+
+
+        // loop over the prompts and add them to the dialog
+        for (const prompt of customPrompts) {
+            const promptDiv = document.createElement('div');
+            promptDiv.textContent = prompt;
+            promptDiv.style.padding = '10px';
+            promptDiv.style.border = '1px solid black';
+            promptDiv.style.backgroundColor = 'rgba(0, 100, 0, 0.7)';
+            promptDiv.style.margin = '10px';
+            promptDiv.style.cursor = 'pointer';
+            promptDiv.addEventListener('click', () => {
+                this.setInput(prompt);
+                promptsDialog.close();
+            });
+            this.promptsDialog.appendChild(promptDiv);
+        }
+
+    }
 
 
     async setInput(newValue) {
