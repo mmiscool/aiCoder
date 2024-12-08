@@ -1,0 +1,5 @@
+[
+"Find the first class method that is incomplete or a stub. Implement it.",
+"Look for class methods that are referenced but not implemented. Implement them.",
+"Generate the classes and stub methods required to implement the plan. "
+]

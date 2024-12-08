@@ -15,7 +15,7 @@ readOrLoadFromDefault('./.aiCoder/default-plan-prompt.md', '/prompts/default-pla
 readOrLoadFromDefault('./.aiCoder/snippet-production-prompt.md', '/prompts/snippet-production-prompt.md');
 readOrLoadFromDefault('./.aiCoder/snippet-validation-prompt.md', '/prompts/snippet-validation-prompt.md');
 readOrLoadFromDefault('./.aiCoder/plan-edit-prompt.md', '/prompts/plan-edit-prompt.md');
-
+readOrLoadFromDefault('./.aiCoder/customPrompts.json', '/prompts/customPrompts.json');
 
 
 
