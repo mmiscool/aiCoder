@@ -3,6 +3,12 @@
 [![semantic versioning](https://img.shields.io/badge/semantic%20versioning-2.0.0-green.svg)](https://semver.org)
 > All notable changes to this project will be documented in this file
 
+## [1.0.31](https://github.com/mmiscool/aiCoder/compare/v1.0.30...v1.0.31) (2024-12-08)
+
+### 🤖 Build System
+
+* added ability to store reusable prompts. ([5177767](https://github.com/mmiscool/aiCoder/commit/5177767e0834481eb418fb8999842850a6996f10))
+
 ## [1.0.30](https://github.com/mmiscool/aiCoder/compare/v1.0.29...v1.0.30) (2024-12-08)
 
 ### 🤖 Build System
