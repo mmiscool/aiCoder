@@ -230,7 +230,28 @@ export class codeManipulator {
             }
         });
 
-        const mergedCode = await escodegen.generate(existingAST, { comment: true });
+        const mergedCode = await escodegen.generate(existingAST, {
+            comment: true,
+            
+            format: {
+                indent: {
+                    style: '    ',
+                    base: 0,
+                    adjustMultilineComment: false
+                },
+                newline: '\n',
+                space: ' ',
+                json: false,
+                renumber: false,
+                hexadecimal: false,
+                quotes: 'single',
+                escapeless: false,
+                compact: false,
+                parentheses: true,
+                semicolons: true,
+                safeConcatenation: true,
+            },
+        });
         await clearTerminal();
         console.log(this);
         await this.writeFile(mergedCode);

@@ -10,7 +10,6 @@ let ctx = {};
 
 
 async function setup() {
-    ctx.autoApplyMode = await ConfirmDialog.confirm("Automatically apply snippets?", 10, false);
     ctx.autoApplyTimeout = 3;
     const tabs = new tabInterface();
     ctx.tabs = tabs;

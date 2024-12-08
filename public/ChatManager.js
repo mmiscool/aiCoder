@@ -15,6 +15,8 @@ export class ChatManager {
         ctx = app_ctx;
         this.chatMode = 'chat';
         this.container = container;
+        // check localStorage for the autoApplyMode setting if it exists
+        this.autoApplyMode = false; 
 
         // ad an input element that displays the conversation title
         this.conversationTitleInput = document.createElement('input');
@@ -101,6 +103,31 @@ export class ChatManager {
         this.container.appendChild(conversationPickerDiv);
 
 
+        // checkboxes for auto apply mode
+        const autoApplyDiv = document.createElement('div');
+        autoApplyDiv.style.display = 'flex';
+        autoApplyDiv.style.flexDirection = 'row';
+        autoApplyDiv.style.justifyContent = 'left';
+        autoApplyDiv.style.margin = '10px';
+
+        const autoApplyLabel = document.createElement('label');
+        autoApplyLabel.textContent = 'Auto Apply Mode:';
+        //autoApplyLabel.style.width = '200';
+        autoApplyDiv.appendChild(autoApplyLabel);
+
+        this.autoApplyCheckbox = document.createElement('input');
+        this.autoApplyCheckbox.type = 'checkbox';
+        this.autoApplyCheckbox.style.margin = '10px';
+        this.autoApplyCheckbox.style.justifyContent = 'left';
+        
+        this.autoApplyCheckbox.addEventListener('change', () => {
+            this.autoApplyMode = this.autoApplyCheckbox.checked;
+            localStorage.setItem('autoApplyMode', this.autoApplyMode);
+        });
+        autoApplyDiv.appendChild(this.autoApplyCheckbox);
+
+        this.container.appendChild(autoApplyDiv);
+
 
         await this.loadConversationsList();
         // Call loadConversation with the selected conversation ID if any
@@ -163,16 +190,18 @@ export class ChatManager {
         // Call loadConversation with the selected conversation ID if any
         //alert('this.conversationPicker.value: ' + this.conversationPicker.value);
         if (this.conversationPicker.value) {
-            this.loadConversation(this.conversationPicker.value);
+            await this.loadConversation(this.conversationPicker.value);
         } else {
             // set the conversation picker to the first conversation
             this.conversationPicker.selectedIndex = 0;
             alert('this.conversationPicker.value: ' + this.conversationPicker.value);
             if (this.conversationPicker.value) {
-                this.loadConversation(this.conversationPicker.value);
+                await this.loadConversation(this.conversationPicker.value);
             }
         }
 
+        this.autoApplyMode = localStorage.getItem('autoApplyMode') === 'true';
+        this.autoApplyCheckbox.checked = this.autoApplyMode;
         this.setInput("")
     }
 
@@ -290,18 +319,23 @@ export class ChatManager {
 
                 console.log("We are at the last message. ");
                 console.log(response.messages.indexOf(message), response.messages.length - 1);
-                console.log("ctx.autoApplyMode", ctx.autoApplyMode);
+
 
 
                 individualMessageDiv.scrollIntoView();
                 //check if the last message is from the assistant
-                if (message.role === 'assistant' && ctx.autoApplyMode) {
+                if (message.role === 'assistant' && this.autoApplyMode) {
                     // check if the last message from the assistant has a code block
                     if (markdown.codeBlocks.length > 0) {
                         // for loop over the code blocks and apply them
                         for (const codeBlock of markdown.codeBlocks) {
                             const applyCodeBlock = await ConfirmDialog.confirm("Apply code block?", ctx.autoApplyTimeout, true);
-                            if (applyCodeBlock) await doAjax('/applySnippet', { snippet: codeBlock, targetFile: this.targetFileInput.value });
+                            if (applyCodeBlock) {
+                                await doAjax('/applySnippet', { snippet: codeBlock, targetFile: this.targetFileInput.value });
+                                ctx.tools.pullMethodsList();
+                                // switch to tools
+                                ctx.tabs.switchToTab('Tools');
+                            }
                         }
 
                     }
@@ -418,6 +452,7 @@ export class ChatManager {
                     // focus it. The button it focuses needs to be lower in the page than this one.
                     const nextButton = document.querySelector(`button[title="Apply snippet"]:not([disabled])`);
                     if (nextButton) nextButton.focus();
+                    ctx.tools.pullMethodsList();
                 });
 
                 toolbar.appendChild(editButton);

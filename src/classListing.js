@@ -1,12 +1,11 @@
+import { readFile, writeFile } from './fileIO.js';
+import * as esprima from 'esprima';
 
-import { readFile, writeFile, } from './fileIO.js';
-import { ctx } from './main.js';
-import * as acorn from 'acorn';
+export async function prependClassStructure(targetFile, onlyStubs = false) {
+  // You can toggle onlyStubs = true or false as needed
 
-
-export async function prependClassStructure(onlyStubs = true) {
-  onlyStubs = true;
-  const list = await getMethodsWithArguments(await readFile(ctx.targetFile), onlyStubs);
+  const fileContent = await readFile(targetFile);
+  const list = await getMethodsWithArguments(fileContent, onlyStubs);
   console.log(list);
 
   // Prompt if the user wants to include function names in the list
@@ -34,37 +33,38 @@ export async function prependClassStructure(onlyStubs = true) {
     listOfClasses += `}\n\n`; // Double newline for separation between classes
   }
 
-  console.log(listOfClasses);
-
-
-  const fileContent = await readFile(ctx.targetFile);
+  //console.log(listOfClasses);
 
   // Prepend the list to the file content
-  await writeFile(ctx.targetFile, listOfClasses + '\n\n' + fileContent);
-
+  await writeFile(targetFile, listOfClasses + '\n\n' + fileContent);
 }
 
 
-
-
-export function getMethodsWithArguments(code) {
-
-  const ast = acorn.parse(code, { sourceType: 'module', ecmaVersion: 'latest' });
+export function getMethodsWithArguments(code, onlyStubs = false) {
+  //console.log(code);
+  // Parse the code using esprima
+  const ast = esprima.parseModule(code, {
+    sourceType: 'module',
+    tolerant: true,
+    range: true,
+    loc: true,
+    attachComment: true
+  });
   const classInfo = new Map();
 
   // Collect information on each class, its methods, and arguments
   ast.body.forEach(node => {
-    if (node.type === 'ClassDeclaration') {
+    if (node.type === 'ClassDeclaration' && node.id && node.id.name) {
       const className = node.id.name;
       const parentClassName = node.superClass && node.superClass.name ? node.superClass.name : null;
-      const methods = [];
+      let methods = [];
 
       node.body.body.forEach(classElement => {
         if (classElement.type === 'MethodDefinition' && classElement.key.type === 'Identifier') {
           const methodName = classElement.key.name;
           const startCharacterLocation = classElement.start;
-          const lineNumber = code.substring(0, startCharacterLocation).split('\n').length;
-
+          console.log(classElement.loc);
+          const lineNumber = classElement.loc.start.line;
 
           // Collect method arguments
           const args = classElement.value.params.map(param => {
@@ -74,32 +74,32 @@ export function getMethodsWithArguments(code) {
           });
 
           // Check if method is a stub
+          const methodBody = classElement.value.body?.body || [];
           const isStub =
-            classElement.value.body &&
-            (classElement.value.body.body.length === 0 || // Empty body
-              (classElement.value.body.body.length === 1 &&
-                classElement.value.body.body[0].type === 'ReturnStatement' &&
-                !classElement.value.body.body[0].argument)); // Single "return;" statement
+            methodBody.length === 0 ||
+            (methodBody.length === 1 &&
+              methodBody[0].type === 'ReturnStatement' &&
+              !methodBody[0].argument);
 
-          // Debugging output for each method
-          //console.debug(`Class: ${className}, Method: ${methodName}, Args: ${args}, IsStub: ${isStub}`);
-
-          // Include all methods, no filter for onlyStubs
           methods.push({ name: methodName, args, isStub, lineNumber });
         }
       });
+
+      // If onlyStubs is true, filter out non-stub methods
+      if (onlyStubs) {
+        methods = methods.filter(m => m.isStub);
+      }
 
       classInfo.set(className, { className, parentClassName, methods });
     }
   });
 
-  // Sort classes based on dependency hierarchy only (no alphabetical sorting)
+  // Sort classes based on dependency hierarchy
   const sortedClasses = [];
   const processedClasses = new Set();
 
   function addClassAndSubclasses(className) {
     if (processedClasses.has(className)) return;
-
     const classData = classInfo.get(className);
     if (!classData) return;
 
@@ -108,11 +108,11 @@ export function getMethodsWithArguments(code) {
       addClassAndSubclasses(classData.parentClassName);
     }
 
-    // Add the current class
     sortedClasses.push(classData);
     processedClasses.add(className);
   }
 
+  //console.log(classInfo);
   // Process classes in the order they appear in the original code
   Array.from(classInfo.keys()).forEach(addClassAndSubclasses);
 
@@ -122,21 +122,20 @@ export function getMethodsWithArguments(code) {
     result[className] = methods;
   });
 
+
+
   return result;
 }
 
-
-
 export async function getStubMethods(code) {
-  // Call the original getMethodsWithArguments function
-  const allMethods = await getMethodsWithArguments(code);
+  // Call the original getMethodsWithArguments function with onlyStubs = true
+  const allMethods = await getMethodsWithArguments(code, true);
 
   // Filter to only include classes and methods where isStub is true
   const stubMethods = {};
 
   for (const [className, methods] of Object.entries(allMethods)) {
-    // Filter methods within the class asynchronously
-    const stubMethodsInClass = await methods.filter(method => method.isStub);
+    const stubMethodsInClass = methods.filter(method => method.isStub);
 
     // Only include the class if it has stub methods
     if (stubMethodsInClass.length > 0) {
