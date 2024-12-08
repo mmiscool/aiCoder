@@ -1,129 +1,142 @@
+
 # aiCoder
 **Harness AI to Craft Your JavaScript Libraries with Ease!**
 
-Sick of endlessly copying and pasting code snippets from ChatGPT into your editor? **aiCoder** is here to transform your coding experience.
+Tired of manually copying and pasting code snippets from ChatGPT into your editor? **aiCoder** is your solution, streamlining the coding process with an AI-powered assistant.
 
-With **aiCoder** as your coding co-pilot, you’ll streamline development, refine your code, and bring your ideas to life through the power of AI. This tool lets you modify code files seamlessly using natural language prompts, intelligently merging AI-suggested changes without altering or disrupting the original code.
+With **aiCoder** as your coding co-pilot, you can simplify development, refine your code, and bring ideas to life through natural language interactions. It intelligently merges AI-suggested changes into your existing code—without disrupting what you’ve already built.
 
-The real magic? aiCoder’s advanced merging keeps your code intact, seamlessly integrating new snippets with precision and reliability.
-
-# Standard workflow
- * launch aiCoder in the directory of your project. 
- * Visit http://localhost:5000 to access the web UI
- * Use the "New Plan Chat" to discuss and create the requirements for your project. You can save the plan and the plan will be used when implimenting the project. 
- * Use the "Files" tab to select the target file to work on. 
- * Use the "New Chat" button to start a conversation with the file. 
- * Make your code change request. 
- * Review the snippets that are provided and click the '🤖✎⚡' button to automatically merge the code snippet in to the code file. 
-
-## SCREEN SHOTS OF THE NEW UI
-![NEW UI](<./images/CHAT.png>)
-
-![FILE SELECTOR](<./images/FILE-SELECTOR.png>)
-
-![NEW TOOLS](<./images/TOOLS.png>)
-
-![NEW LLM SETTINGS](<./images/SETTINGS.png>)
-
+The magic lies in aiCoder’s advanced merging logic, which keeps your original code intact while integrating new snippets precisely and reliably.
 
 ## UNSTABLE
-This project is going to be in a state of flux for a while. Settings and prompt files may need to be recreated after updates as more settings are added and files are renamed. 
+**Note:** This project is under rapid development. Settings and prompt files may need to be recreated as updates are released, since more settings and file renames are on the horizon.
 
+# Standard Workflow
+1. Run `aiCoder` in your project’s directory.
+2. Visit [http://localhost:5000](http://localhost:5000) to access the web UI.
+3. Use **New Plan Chat** to discuss and define your project requirements, then save the plan. The saved plan guides future implementations.
+4. Open the **Files** tab to select the target file you want to modify.
+5. Start a **New Chat** with the selected file.
+6. Request code changes using natural language prompts.
+7. Review the suggested snippets and click **🤖✎⚡** to automatically merge them into the file.
 
-## INSTALLATION 
-Install from NPM.
+# Installation
+
+### From NPM
 ```
 npm i aicodertool -g
 ```
 
-Install from source.
-Clone this repo and navigate to the directory. 
-```
-cd aiCoder
-npm install && npm install -g .
-```
-Getting started is a breeze! Just run the above command to install `aiCoder` globally.
+### From Source
+1. Clone this repository and navigate to the cloned directory.
+2. Run:
+   ```
+   cd aiCoder
+   npm install && npm install -g .
+   ```
+   
+After installation, you’re all set! Just run the `aiCoder` command in any project directory.
 
-
-## USAGE
-Dive into your project folder using your terminal and launch the ```aiCoder``` command to start the magic. 
-Open the browser to http://localhost:5000/
+## Usage
+Launch `aiCoder` from within your project folder:
 ```
 cd myProjectFolder
 aicoder
 ```
+Then open [http://localhost:5000](http://localhost:5000/) in your browser to begin.
 
-## Make AI assisted code changes
-This tool will ask you what you want to achieve. You can request changes or describe issues you're facing with the current code file.
+## Chat Interface
+![NEW UI](./images/CHAT.png)
 
-The LLM response will be displayed in the terminal when received. 
+## aiCoder provides two difrent specialized chat modes:
 
-You can either provide further instructions or simply hit enter to apply the code snippets from the last response to the current file. 
+## New Chat
+Use **New Chat** to interactively modify a selected file. Before starting a conversation, be sure to choose a file from the **Files** tab. The LLM uses a system prompt specifying the snippet format. Correctly formatted snippets can be merged automatically, updating existing functions or class methods without disturbing the rest of the code.
 
-It will then prompt you to either accept or reject each snippet from the response. 
+## New Plan Chat
+Use **New Plan Chat** to refine the project plan document. This plan, combined with the default system prompts, guides the LLM during regular chats.  
+Begin by describing your project goals. You can ask the LLM to produce a detailed outline of all the necessary classes and methods, then save this plan.
 
-## Identify missing or incomplete functionality and add it
-Pre-written instructions for the LLM can be incredibly useful for specific tasks. 
+# Files
+![FILE SELECTOR](./images/FILE-SELECTOR.png)
 
-In this case, we have the pre-made prompt ```Identify missing or incomplete functionality and add it```
+The **Files** tab lets you specify which file you want to modify. Select a target file before starting a chat or using the tools.
 
-This is particularly handy when there are stub functions or missing functionality in a library. The LLM will attempt to identify and generate the missing code. 
+# Tools
+![NEW TOOLS](./images/TOOLS.png)
 
-This feature is highly valuable, and you can easily create your own pre-made prompts to display in the menu. 
+## Methods List
+Displays all detected methods.  
+- **Green** methods: Implemented methods with code.
+- **Red** methods: Stubs that need implementation.
 
+Clicking on a method passes it into a new chat, allowing you to modify or implement it.
 
-# Project settings
-The settings for aiCoder are stored per project in a folder `./.aiCoder/`. This folder also contains backups of files modified by the tool, stored in `./.aiCoder/backups/`.
+## Stubs List
+Shows only stub methods, making it easy to identify and implement missing functionality.
 
+## Merge and Format
+If you’re using ChatGPT or another external LLM, you can copy and paste suggested snippets to the end of the file. They must follow the guidelines in `snippet_production_prompt.md` for automatic merging.
 
-## LLM settings
-Provides a menu to configure the LLM you want to use. 
+## Prepend Class Structure
+Adds a skeleton of all existing classes and methods to the top of the file. You can reorder classes and methods here. After adjusting the structure, run **Merge and Format** to clean up and integrate the changes into the stubs.
 
-## Project settings
-This option will launch the nano text editor and open the ```./aiCoder/premade-prompts.txt``` file. You can add your own pre-made prompts in this file. Each prompt needs to be a single line of text.
+# Project Settings
+Project-specific settings are stored in `./.aiCoder/`. This folder includes backups of modified files stored in `./.aiCoder/backups/`.
 
-You can add comments to this file by starting a line with a ```#``` character and these lines will be ignored. 
+You can customize system prompts for your project in the `./aiCoder/` folder. Access these settings in your IDE or from the **Project Settings** tab.
 
-## Edit default system prompt
-This will allow you to edit the default system prompt. You might want to modify this to adapt it to your specific project. Each time the LLM is called this prompt will be sent before the code and your specific instructions. You can put in instructions about what the end goal of your project is and your preferences about what style of code is generated. 
+## default_plan_prompt
+Describes your project, goals, and requirements. Edit it directly, or use **New Plan Chat** to interactively refine it.
 
-## Selecting and choosing an LLM provider
-This feature has been recently added so your milage may vary. It is recommended to use openai at the moment. 
-Ollama seems to provide better results than groq at this time. 
+## default_system_prompt
+Shapes the LLM’s personality and behavior. If you break it, don’t worry—delete it and restart aiCoder to restore defaults. If you find improvements, consider opening an issue with your suggested changes.
 
-## Skip approving changes (this session only)
+## snippet_production_prompt
+Instructs the LLM on how to format code snippets for seamless merging.  
+**All snippets must conform to the following format:**
+```
+class exampleClass {
+   // ... existing methods
+   exampleMethod(){
+      //example code
+   }
+}
+```
 
+# LLM Settings
+![NEW LLM SETTINGS](./images/SETTINGS.png)
+
+Before using aiCoder, configure your LLM provider and model. After providing an API key, you can view available models.
+
+## Choosing an LLM Provider
+- OpenAI’s `gpt-4o-mini` or `gpt-4o` models work well.
+- Anthropics’s `claude-3-5-haiku` is an option.
+- Groq is less tested and has a smaller context window.
+- Ollama runs locally but may be slower. Its `granite3-dense:8b` model works well enough, though sometimes requires additional prompting to get properly formatted snippets.
 
 ## Backup Functionality
-Whenever a file is modified by aiCoder, a backup of the original file is created in the `./.aiCoder/backups/` folder. The backup file names include a timestamp to help identify different versions.
+Every time aiCoder modifies a file, it creates a backup in `./.aiCoder/backups/`, preserving your original code with timestamped filenames.
 
+# ✅ Current State of the Project
+**Implemented:**
+- Automatic merging of multiple class/function definitions into a single source structure.
+- Ability to prompt for modifications to a single JS file.
+- Automatic backups before modification.
+- Code snippet extraction from LLM responses and a workflow to accept/reject on a per-snippet basis.
+- Custom prompt manager for reusable prompts.
+- Support for various LLM providers.
+- Automatic setup on first use (provider selection, API key, model choice).
+- NPM packaging.
+- Automatic generation of stub methods and their code.
 
+**To Do:**
+- Support multiple files simultaneously.
+- Allow the LLM to suggest adding NPM packages.
+- Add support for HTML, CSS, and MD files by parsing them to ASTs and merging changes.
+- Preserve comments during merges.
 
+# 🌌 Looking Ahead
+aiCoder is more than a tool—it’s your personal AI development partner. By making coding smarter, faster, and more fluid, aiCoder helps you unlock new creative possibilities.
 
-
-# ✅ Current state of this project
-Implemented: 
- * Clean up javascript file with multiple definitions of the same classes and functions updating the first instance of the class with elements of the class later defined in the file (Handy if you just copy and paste LLM snippets to the end of a file and want to automatically intelligently merge them in to the correct location. Works only on JS files at the moment.)
- * Prompt for instructions to modify a single JS file.
- * Backup files before they are modified. This is extremely important to prevent making unintended changes. 
- * Extraction of code snippets from last LLM response and automated workflow to accept or reject on a per snippet basis. 
- * Custom reusable pre-made prompt manager. 
- * Provide options to use other LLMs besides the openAI.
- * Automatic setup on first use (prompt for LLM provider, api key and model selection)
- * Publish as npm package
- * Allow for selection of stub methods and automatically generate the method. 
-Todo: 
- * Make the tool work with multiple files at the same time. 
- * Make it possible for the llm to request adding NPM packages to project.
- * Add support for LLM to work with html, css and md files in addition to js. This will require parsing these files to an AST (abstract syntax tree) and merging ASTs to recreate the file. 
- * Preserve comments when merging. 
-
-
-
-# 🌌 The Future Awaits
-aiCoder is more than just a tool—it's your personal AI code assistant, crafted to make development smarter, faster, and, yes, even a bit more magical.
-
-Start your journey with aiCoder today and redefine what’s possible in coding! 🌟
-
-
-
+Embark on your journey with aiCoder today, and experience a whole new world of coding! 🌟
