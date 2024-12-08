@@ -14,7 +14,8 @@ export async function readFile(filePath) {
         return await fs.readFileSync(filePath, 'utf8');
     }
     catch (error) {
-        console.log('Error reading file:', error);
+        console.log(`File not found: ${filePath}`);
+        //console.log('Error reading file:', error);
         return null;
     }
 
@@ -74,12 +75,15 @@ export async function createFolderIfNotExists(folderPath) {
 
 
 export async function readOrLoadFromDefault(filePath, defaultFilePath) {
+    console.log('Reading or loading from default:', filePath);
     defaultFilePath = await getScriptFolderPath() + defaultFilePath;
     let fileContent = await readFile(filePath);
     if (fileContent === null) {
-        console.log('File not found, creating new file:', filePath);
+        console.log('Creating new file:', filePath);
         fileContent = await readFile(defaultFilePath);
         await writeFile(filePath, fileContent);
+    }else{
+        console.log('File exists:', filePath);
     }
     return fileContent;
 }

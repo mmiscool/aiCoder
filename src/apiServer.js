@@ -59,6 +59,7 @@ export function setupServer() {
             // remove the leading slash from the pathname
             const pathnameWithoutSlash = pathname.substring(1);
             if (pathnameWithoutSlash in aiCoderApiFunctions.prototype) {
+                console.log('Calling method:', pathnameWithoutSlash);
                 const response = await aiCoderApiFunctions.prototype[pathnameWithoutSlash](parsedBody);
                 res.statusCode = 200;
                 res.setHeader('Content-Type', 'application/json');
@@ -77,6 +78,7 @@ export function setupServer() {
                 const mimeType = mime.getType(filePath) || 'application/octet-stream';
                 res.setHeader('Content-Type', mimeType);
 
+                console.log('Serving file:', filePath);
                 // Stream the file to the response
                 const fileContent = await fs.readFile(filePath);
                 res.statusCode = 200;

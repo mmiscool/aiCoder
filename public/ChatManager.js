@@ -461,6 +461,11 @@ export class ChatManager {
 
     async newChat(title = false) {
         const targetFile = this.targetFileInput.value;
+        if (!targetFile) {
+            alert('Please set a target file.');
+            ctx.tabs.switchToTab('Files');
+            return;
+        }
         const response = await doAjax('/newChat', { targetFile, title });
         this.chatMode = 'chat';
         await this.loadConversationsList();

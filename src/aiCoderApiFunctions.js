@@ -10,12 +10,14 @@ import { callLLM } from './llmCall.js';
 
 
 
+console.log('Setting up default files');
 readOrLoadFromDefault('./.aiCoder/default-system-prompt.md', '/prompts/default-system-prompt.md');
 readOrLoadFromDefault('./.aiCoder/default-plan-prompt.md', '/prompts/default-plan-prompt.md');
 readOrLoadFromDefault('./.aiCoder/snippet-production-prompt.md', '/prompts/snippet-production-prompt.md');
 readOrLoadFromDefault('./.aiCoder/snippet-validation-prompt.md', '/prompts/snippet-validation-prompt.md');
 readOrLoadFromDefault('./.aiCoder/plan-edit-prompt.md', '/prompts/plan-edit-prompt.md');
 readOrLoadFromDefault('./.aiCoder/customPrompts.json', '/prompts/customPrompts.json');
+
 
 
 
@@ -311,7 +313,7 @@ export class conversation {
             this.title = conversationObject.title;
             this.id = conversationObject.id;
             this.targetFile = conversationObject.targetFile;
-            return console.log('conversation loaded');
+            return console.log('conversation loaded. wooot');
         } catch (e) {
             console.log('conversation not found');
             return { error: 'conversation not found' };

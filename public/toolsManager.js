@@ -52,19 +52,29 @@ export class toolsManager {
 
         // button to call the mergeAndFormat api endpoint
         const mergeAndFormatButton = await this.makeToolBarButton('Merge and Format', async () => {
-            await doAjax('/mergeAndFormat', {targetFile: ctx.fileManager.currentFile});
+            await this.mergeAndFormat();
         });
         toolBar.appendChild(mergeAndFormatButton);
 
         // button to call the prependClassStructure api endpoint
         const prependClassStructureButton = await this.makeToolBarButton('Prepend Class Structure', async () => {
-            await doAjax('/prependClassStructure', { targetFile: ctx.fileManager.currentFile });
+            await this.prependClassStructur();
         });
         toolBar.appendChild(prependClassStructureButton);
 
 
 
         this.container.appendChild(toolBar);
+    }
+
+    async implementAllStubs() {
+        if (!await this.verifyTargetFileSpecified()) return;
+        await doAjax('/implementAllStubs', { targetFile: ctx.fileManager.currentFile });
+    }
+
+    async mergeAndFormat() {
+        if (!await this.verifyTargetFileSpecified()) return;
+        await doAjax('/mergeAndFormat', { targetFile: ctx.fileManager.currentFile });
     }
 
     async makeToolBarButton(title, handler) {
@@ -75,8 +85,16 @@ export class toolsManager {
         return button;
     }
 
+    async prependClassStructur() {
+        if (!await this.verifyTargetFileSpecified()) return;
+        await doAjax('/prependClassStructure', { targetFile: ctx.fileManager.currentFile });
+    }
+
     async pullMethodsList(showOnlyStubs = false) {
         this.showToolBar();
+        if (!await this.verifyTargetFileSpecified()) return;
+
+
         const listOfMethods = await doAjax('/getMethodsList', { targetFile: ctx.fileManager.currentFile });
         // the response contains 
         for (const className in listOfMethods) {
@@ -130,5 +148,14 @@ export class toolsManager {
         await doAjax('/gotoLineNumber', { lineNumber, targetFile: ctx.fileManager.currentFile });
         await ctx.chat.newChat(`Modify ${methodName}.${className}`);
         await ctx.chat.setInput(`Modify the ${methodName} method in the ${className} class.\nImprove it.`);
+    }
+
+    async verifyTargetFileSpecified() {
+        if (!ctx.fileManager.currentFile) {
+            alert('Please select a file first');
+            ctx.tabs.switchToTab('Files');
+            return false;
+        }
+        return true;
     }
 }
