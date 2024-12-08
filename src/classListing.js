@@ -63,7 +63,7 @@ export function getMethodsWithArguments(code, onlyStubs = false) {
         if (classElement.type === 'MethodDefinition' && classElement.key.type === 'Identifier') {
           const methodName = classElement.key.name;
           const startCharacterLocation = classElement.start;
-          console.log(classElement.loc);
+          //console.log(classElement.loc);
           const lineNumber = classElement.loc.start.line;
 
           // Collect method arguments

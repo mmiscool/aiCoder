@@ -41,7 +41,7 @@ export class aiCoderApiFunctions {
         console.log('pullMessages', parsedBody);
         const webUIConversation = await new conversation(parsedBody.id);
         await webUIConversation.loadConversation();
-        console.log('webUIConversation', webUIConversation);
+       // console.log('webUIConversation', webUIConversation);
         const response = await webUIConversation.getMessages();
         return webUIConversation;
     }
@@ -194,7 +194,7 @@ export class conversation {
         if (id) {
             this.id = id;
             //this.loadConversation(id);
-            console.log('loaded conversation', this);
+            //console.log('loaded conversation', this);
         } else {
             //generate a unique id for the conversation based on the current time in the format
             // of yyyy-mm-dd-hh-mm-ss
