@@ -1,4 +1,3 @@
-
 # aiCoder
 **Harness AI to Craft Your JavaScript Libraries with Ease!**
 
@@ -7,6 +6,13 @@ Tired of manually copying and pasting code snippets from ChatGPT into your edito
 With **aiCoder** as your coding co-pilot, you can simplify development, refine your code, and bring ideas to life through natural language interactions. It intelligently merges AI-suggested changes into your existing code—without disrupting what you’ve already built.
 
 The magic lies in aiCoder’s advanced merging logic, which keeps your original code intact while integrating new snippets precisely and reliably.
+
+## Purpose and Benefits
+**aiCoder** is designed to enhance your coding experience by leveraging the power of AI. It helps you:
+- Save time by automating repetitive coding tasks.
+- Improve code quality with intelligent suggestions.
+- Focus on higher-level design and problem-solving.
+- Seamlessly integrate new features and improvements into your existing codebase.
 
 ## UNSTABLE
 **Note:** This project is under rapid development. Settings and prompt files may need to be recreated as updates are released, since more settings and file renames are on the horizon.
@@ -140,3 +146,13 @@ Every time aiCoder modifies a file, it creates a backup in `./.aiCoder/backups/`
 aiCoder is more than a tool—it’s your personal AI development partner. By making coding smarter, faster, and more fluid, aiCoder helps you unlock new creative possibilities.
 
 Embark on your journey with aiCoder today, and experience a whole new world of coding! 🌟
+
+
+
+## FAQs
+1. **How do I reset my settings?**
+   - Delete the `./.aiCoder/` folder and restart aiCoder. This will recreate the default settings and prompts.
+2. **Can I use aiCoder with other programming languages?**
+   - Currently, aiCoder is optimized for JavaScript. Support for other languages is planned for future releases.
+3. **How do I update aiCoder?**
+   - If installed via npm, run `npm update aicodertool -g`. If installed from source, pull the latest changes from the repository and reinstall.
