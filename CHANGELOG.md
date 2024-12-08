@@ -3,6 +3,12 @@
 [![semantic versioning](https://img.shields.io/badge/semantic%20versioning-2.0.0-green.svg)](https://semver.org)
 > All notable changes to this project will be documented in this file
 
+## [1.0.32](https://github.com/mmiscool/aiCoder/compare/v1.0.31...v1.0.32) (2024-12-08)
+
+### 🤖 Build System
+
+* Added default custom prompts. ([21751cd](https://github.com/mmiscool/aiCoder/commit/21751cd37e0ee7fda7345f845af3358e5dae3840))
+
 ## [1.0.31](https://github.com/mmiscool/aiCoder/compare/v1.0.30...v1.0.31) (2024-12-08)
 
 ### 🤖 Build System
