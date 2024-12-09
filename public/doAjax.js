@@ -40,7 +40,7 @@ messageDiv.style.overflow = 'auto';
 // format as preformatted text
 messageDiv.style.whiteSpace = 'pre-wrap';
 // font size
-messageDiv.style.fontSize = '16px';
+messageDiv.style.fontSize = '12px';
 messageDivContainer.appendChild(messageDiv);
 
 

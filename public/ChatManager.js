@@ -117,7 +117,7 @@ export class ChatManager {
 
         this.autoApplyCheckbox = document.createElement('input');
         this.autoApplyCheckbox.type = 'checkbox';
-        this.autoApplyCheckbox.style.margin = '10px';
+        this.autoApplyCheckbox.style.margin = '0px';
         this.autoApplyCheckbox.style.justifyContent = 'left';
 
         this.autoApplyCheckbox.addEventListener('change', () => {
