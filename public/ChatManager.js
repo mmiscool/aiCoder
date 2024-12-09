@@ -1,7 +1,7 @@
 import { ConfirmDialog } from "./confirmDialog.js";
 import { doAjax } from "./doAjax.js";
 import { MarkdownToHtml } from "./MarkdownToHtml.js";
-
+import { makeElement } from "./domElementFactory.js";
 
 
 let ctx = {};
@@ -163,7 +163,7 @@ export class ChatManager {
         this.promptsDialog.style.bottom = '15%';
         this.promptsDialog.style.right = '15%';
         this.promptsDialog.style.left = '15%';
-        
+
 
 
         this.promptsDialog.style.padding = '10px';
@@ -396,10 +396,19 @@ export class ChatManager {
                         for (const codeBlock of markdown.codeBlocks) {
                             const applyCodeBlock = await ConfirmDialog.confirm("Apply code block?", ctx.autoApplyTimeout, true);
                             if (applyCodeBlock) {
-                                await doAjax('/applySnippet', { snippet: codeBlock, targetFile: this.targetFileInput.value });
-                                ctx.tools.pullMethodsList();
-                                // switch to tools
-                                ctx.tabs.switchToTab('Tools');
+                                const mergeWorked = await doAjax('/applySnippet', { snippet: codeBlock, targetFile: this.targetFileInput.value });
+                                if (mergeWorked) {
+                                    ctx.tools.pullMethodsList();
+                                    // switch to tools
+                                    ctx.tabs.switchToTab('Tools');
+                                } else {
+                                    alert('Merge failed. Please resolve the conflict manually.');
+                                    // set the user input to say that the snippet was formatted incorrectly 
+                                    // and needs to be corrected. 
+
+                                    this.setInput("The last snippet was formatted incorrectly and needs to be corrected. ");
+                                }
+
                             }
                         }
 
@@ -554,8 +563,8 @@ export class ChatManager {
                     //editButton.style.display = "none";
                     // find the next button with the textContent of '🤖✎⚡' and 
                     // focus it. The button it focuses needs to be lower in the page than this one.
-                    const nextButton = document.querySelector(`button[title="Apply snippet"]:not([disabled])`);
-                    if (nextButton) nextButton.focus();
+                    //const nextButton = document.querySelector(`button[title="Apply snippet"]:not([disabled])`);
+                    //if (nextButton) nextButton.focus();
                     ctx.tools.pullMethodsList();
                 });
 

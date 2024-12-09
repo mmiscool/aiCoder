@@ -93,8 +93,8 @@ export class aiCoderApiFunctions {
     }
 
     async applySnippet(parsedBody) {
-        await applySnippets(parsedBody.targetFile, [parsedBody.snippet]);
-        return { success: true };
+        const mergeResult = await applySnippets(parsedBody.targetFile, [parsedBody.snippet]);
+        return { success: mergeResult };
     }
 
     async getMethodsList(parsedBody) {

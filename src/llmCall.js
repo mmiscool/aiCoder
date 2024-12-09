@@ -179,7 +179,7 @@ export async function getOllamaResponse(messages) {
     let responseText = '';
     for await (const part of response) {
         //process.stdout.write(part.message.content);
-        printToTerminal(part.message.content);
+        await printToTerminal(part.message.content);
         responseText += part.message.content;
     }
 
@@ -343,7 +343,7 @@ async function getOpenAIResponse(messages) {
 
     for await (const chunk of resultStream) {
         const content = chunk.choices[0]?.delta?.content || '';
-        printToTerminal(content); // Real-time printing to console
+        await printToTerminal(content); // Real-time printing to console
         responseText += content;
     }
     // clear the console

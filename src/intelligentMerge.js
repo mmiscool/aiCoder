@@ -24,7 +24,7 @@ export async function intelligentlyMergeSnippets(filename) {
 export async function applySnippets(targetFile, snippets) {
     let cleanedSnippets = await snippets.join('\n\n\n\n\n', true);
     const manipulator = await new codeManipulator(targetFile);
-    await manipulator.mergeCode(cleanedSnippets);
+    return await manipulator.mergeCode(cleanedSnippets);
 }
 
 
@@ -151,6 +151,24 @@ export class codeManipulator {
     }
 
     async mergeCode(newCode = '') {
+
+        // test if the new code is syntactically correct
+        try {
+            await esprima.parseScript(newCode, {
+                tolerant: true,
+                range: true,
+                loc: true,
+                attachComment: true
+            });
+        } catch (e) {
+            console.error(e);
+            return false;
+        }
+
+
+
+
+
         await createBackup(this.filePath);
         // read the existing file and append the new code to it
         await appendFile(this.filePath, "\n\n\n" + newCode);
@@ -255,6 +273,7 @@ export class codeManipulator {
         await clearTerminal();
         console.log(this);
         await this.writeFile(mergedCode);
+        return true;
     }
 
     async removeClass(classNameToRemove) {
