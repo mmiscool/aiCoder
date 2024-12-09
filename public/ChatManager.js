@@ -166,8 +166,8 @@ export class ChatManager {
         
 
 
-        this.promptsDialog.style.padding = '40px';
-        this.promptsDialog.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+        this.promptsDialog.style.padding = '10px';
+        this.promptsDialog.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
         this.promptsDialog.style.zIndex = '1000';
         this.promptsDialog.addEventListener('click', () => {
             this.promptsDialog.close();
@@ -344,7 +344,7 @@ export class ChatManager {
             if (message.role === 'user') {
                 // make a button that adds the users prompt to the custom prompt list
                 const addPromptButton = document.createElement('button');
-                addPromptButton.textContent = '📝 Add to prompts'
+                addPromptButton.textContent = '+ Save reusable prompt';
                 addPromptButton.style.cursor = 'pointer';
                 addPromptButton.style.background = 'none';
                 addPromptButton.style.border = '1px solid white';
@@ -366,7 +366,7 @@ export class ChatManager {
                         customPrompts.push(prompt);
                         await doAjax('/writeFile', {
                             targetFile: './.aiCoder/customPrompts.json',
-                            fileContent: JSON.stringify(customPrompts),
+                            fileContent: JSON.stringify(customPrompts, null, 2),
                         });
                     }
 
@@ -426,7 +426,7 @@ export class ChatManager {
 
         this.promptsDialog.showModal();
 
-        this.promptsDialog.innerHTML = '';
+        this.promptsDialog.innerHTML = 'Pre-made Prompts:';
 
 
         // loop over the prompts and add them to the dialog
@@ -435,7 +435,7 @@ export class ChatManager {
             promptDiv.textContent = prompt;
             promptDiv.style.padding = '10px';
             promptDiv.style.border = '1px solid black';
-            promptDiv.style.backgroundColor = 'rgba(0, 100, 0, 0.7)';
+            promptDiv.style.backgroundColor = 'rgba(0, 50, 100, 0.9)';
             promptDiv.style.margin = '10px';
             promptDiv.style.cursor = 'pointer';
             promptDiv.addEventListener('click', () => {
