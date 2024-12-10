@@ -3,6 +3,12 @@
 [![semantic versioning](https://img.shields.io/badge/semantic%20versioning-2.0.0-green.svg)](https://semver.org)
 > All notable changes to this project will be documented in this file
 
+## [1.0.40](https://github.com/mmiscool/aiCoder/compare/v1.0.39...v1.0.40) (2024-12-10)
+
+### 🤖 Build System
+
+* added icons to UI tabs. ([2d5cc46](https://github.com/mmiscool/aiCoder/commit/2d5cc4620b7e59ebf2265bb14a8bc441ad1bc4b0))
+
 ## [1.0.39](https://github.com/mmiscool/aiCoder/compare/v1.0.38...v1.0.39) (2024-12-10)
 
 ### 🤖 Build System
