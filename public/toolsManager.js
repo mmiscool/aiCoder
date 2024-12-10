@@ -29,42 +29,42 @@ export class toolsManager {
 
     async showToolBar() {
         this.container.innerHTML = '';
-        const toolBar = document.createElement('div');
-        toolBar.style.display = 'flex';
-        toolBar.style.flexDirection = 'row';
+        this.toolBar = document.createElement('div');
+        this.toolBar.style.display = 'flex';
+        this.toolBar.style.flexDirection = 'row';
         //toolBar.style.justifyContent = 'space-between';
-        toolBar.style.margin = '0px';
+        this.toolBar.style.margin = '0px';
 
         const pullMethodsListButton = await this.makeToolBarButton('Methods List', async () => {
             await this.pullMethodsList();
         });
-        toolBar.appendChild(pullMethodsListButton);
+        this.toolBar.appendChild(pullMethodsListButton);
 
         const pullStubsListButton = await this.makeToolBarButton('Stubs List', async () => {
             await this.pullMethodsList(true);
         });
-        toolBar.appendChild(pullStubsListButton);
+        this.toolBar.appendChild(pullStubsListButton);
 
         const implementAllStubsButton = await this.makeToolBarButton('Implement All Stubs', async () => {
             await this.implementAllStubs();
         });
-        toolBar.appendChild(implementAllStubsButton);
+        this.toolBar.appendChild(implementAllStubsButton);
 
         // button to call the mergeAndFormat api endpoint
         const mergeAndFormatButton = await this.makeToolBarButton('Merge and Format', async () => {
             await this.mergeAndFormat();
         });
-        toolBar.appendChild(mergeAndFormatButton);
+        this.toolBar.appendChild(mergeAndFormatButton);
 
         // button to call the prependClassStructure api endpoint
         const prependClassStructureButton = await this.makeToolBarButton('Prepend Class Structure', async () => {
             await this.prependClassStructur();
         });
-        toolBar.appendChild(prependClassStructureButton);
+        this.toolBar.appendChild(prependClassStructureButton);
 
 
 
-        this.container.appendChild(toolBar);
+        this.container.appendChild(this.toolBar);
     }
 
     async implementAllStubs() {
@@ -82,6 +82,7 @@ export class toolsManager {
         button.textContent = title;
         Object.assign(button.style, buttonStyle);
         button.addEventListener('click', handler);
+        this.toolBar.appendChild(button);
         return button;
     }
 

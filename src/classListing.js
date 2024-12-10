@@ -145,3 +145,33 @@ export async function getStubMethods(code) {
 
   return stubMethods;
 }
+
+
+export async function getListOfFunctions(code){
+  // we are getting the functions in the application. Not the classes or class methods
+  const ast = esprima.parseModule(code, {
+    sourceType: 'module',
+    tolerant: true,
+    range: true,
+    loc: true,
+    attachComment: true
+  });
+  const functionInfo = new Map();
+
+  // Collect information on each function, its arguments
+  ast.body.forEach(node => {
+    if (node.type === 'FunctionDeclaration' && node.id && node.id.name) {
+      const functionName = node.id.name;
+      let args = [];
+
+      node.params.forEach(param => {
+        if (param.type === 'Identifier') args.push(param.name);
+        if (param.type === 'AssignmentPattern' && param.left.type === 'Identifier') args.push(param.left.name);
+      });
+
+      functionInfo.set(functionName, { functionName, args });
+    }
+  });
+
+  return functionInfo;
+}

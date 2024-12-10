@@ -9,27 +9,9 @@ export function makeElement(tag, attributes = {}) {
     return element;
 }
 
-// Example usage
-const myDiv = makeElement('div', {
-    id: 'myDiv',
-    className: 'container',
-    style: {
-        backgroundColor: 'lightblue',
-        padding: '10px',
-        border: '1px solid #000'
-    },
-    dataset: {
-        custom: 'customValue',
-        tracking: 'abc123'
-    },
-    'aria-label': 'A custom div'
-});
-
-// Append the created element to the DOM
-document.body.appendChild(myDiv);
 
 
-function deepMerge(target, source, seen = new WeakMap()) {
+export function deepMerge(target, source, seen = new WeakMap()) {
     if (seen.has(source)) {
         return target; // Avoid circular references
     }

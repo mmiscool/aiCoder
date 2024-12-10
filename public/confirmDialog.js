@@ -20,9 +20,12 @@ export class ConfirmDialog {
             dialog.style.borderRadius = '8px';
             dialog.style.zIndex = '1000';
             dialog.style.fontSize = '18px'; // Medium font size
-            dialog.style.textAlign = 'center';
+            dialog.style.textAlign = 'left';
+            dialog.style.zIndex = '10000';
 
             messageDiv.textContent = message;
+            // set style to preformatted text
+            messageDiv.style.whiteSpace = 'pre-wrap';
 
             // Countdown indicator
             if (timeoutInSeconds && timeoutInSeconds > 0) {

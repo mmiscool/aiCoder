@@ -241,7 +241,7 @@ export class ChatManager {
 
     async loadConversationsList() {
         const conversations = await doAjax('/getConversationsList', {});
-        console.log('conversations', conversations);
+        //console.log('conversations', conversations);
         // format the conversations list
         // [
         //     {
@@ -277,7 +277,7 @@ export class ChatManager {
         ctx.fileManager.currentFile = response.targetFile;
         this.setTargetFile(response.targetFile);
         this.conversationTitleInput.value = response.title;
-        console.log('response.messages', response.messages);
+        //console.log('response.messages', response.messages);
         this.chatMessageDiv.innerHTML = '';
         response.messages.forEach(async (message) => {
             const individualMessageDiv = document.createElement('div');
@@ -360,7 +360,7 @@ export class ChatManager {
                     const customPromptsJSON = await doAjax('/readFile', { targetFile: './.aiCoder/customPrompts.json' });
                     let customPrompts = JSON.parse(customPromptsJSON.fileContent);
                     if (!customPrompts) customPrompts = [];
-                    console.log('prompts', customPrompts);
+                    //console.log('prompts', customPrompts);
                     // check if the prompt is already in the list
                     if (!customPrompts.includes(prompt)) {
                         customPrompts.push(prompt);
@@ -382,8 +382,8 @@ export class ChatManager {
             // check if this is the last message
             if (response.messages.indexOf(message) === response.messages.length - 1) {
 
-                console.log("We are at the last message. ");
-                console.log(response.messages.indexOf(message), response.messages.length - 1);
+               console.log("We are at the last message. ");
+               console.log(response.messages.indexOf(message), response.messages.length - 1);
 
 
 
@@ -396,19 +396,14 @@ export class ChatManager {
                         for (const codeBlock of markdown.codeBlocks) {
                             const applyCodeBlock = await ConfirmDialog.confirm("Apply code block?", ctx.autoApplyTimeout, true);
                             if (applyCodeBlock) {
-                                const mergeWorked = await doAjax('/applySnippet', { snippet: codeBlock, targetFile: this.targetFileInput.value });
-                                if (mergeWorked) {
-                                    ctx.tools.pullMethodsList();
-                                    // switch to tools
-                                    ctx.tabs.switchToTab('Tools');
-                                } else {
-                                    alert('Merge failed. Please resolve the conflict manually.');
-                                    // set the user input to say that the snippet was formatted incorrectly 
-                                    // and needs to be corrected. 
+                                //const mergeWorked = await doAjax('/applySnippet', { snippet: codeBlock, targetFile: this.targetFileInput.value });
+                                
+                                await this.applySnippet(codeBlock);
 
-                                    this.setInput("The last snippet was formatted incorrectly and needs to be corrected. ");
-                                }
-
+                                // swap to the files tab
+                                ctx.tabs.switchToTab('Tools');
+                                // pull the methods list
+                                ctx.tools.pullMethodsList();
                             }
                         }
 
@@ -426,7 +421,7 @@ export class ChatManager {
         const customPromptsJSON = await doAjax('/readFile', { targetFile: './.aiCoder/customPrompts.json' });
         let customPrompts = JSON.parse(customPromptsJSON.fileContent);
         if (!customPrompts) customPrompts = [];
-        console.log('prompts', customPrompts);
+        //console.log('prompts', customPrompts);
         // create a modal dialog that displays the list of prompts.
         // Make the dialog as an overlay that covers the whole screen.
         // Add a close button to the dialog.
@@ -437,20 +432,53 @@ export class ChatManager {
 
         this.promptsDialog.innerHTML = 'Pre-made Prompts:';
 
-
         // loop over the prompts and add them to the dialog
-        for (const prompt of customPrompts) {
+        // also add a trash can icon to delete the prompt from the list
+        for (const prompt of customPrompts) {   
             const promptDiv = document.createElement('div');
             promptDiv.textContent = prompt;
             promptDiv.style.padding = '10px';
+            // right padding to make room for the trash icon
+            promptDiv.style.paddingRight = '40px';
             promptDiv.style.border = '1px solid black';
             promptDiv.style.backgroundColor = 'rgba(0, 50, 100, 0.9)';
             promptDiv.style.margin = '10px';
             promptDiv.style.cursor = 'pointer';
             promptDiv.addEventListener('click', () => {
                 this.setInput(prompt);
-                promptsDialog.close();
+                this.promptsDialog.close();
             });
+
+            const trashIcon = document.createElement('span');
+            trashIcon.textContent = '🗑️';
+            trashIcon.style.float = 'right';
+            trashIcon.style.cursor = 'pointer';
+            trashIcon.style.padding = '5px';
+            trashIcon.style.border = '1px solid black';
+            trashIcon.style.backgroundColor = 'darkred';
+            trashIcon.style.borderRadius = '5px';
+            trashIcon.style.margin = '-5px';
+            //make bold
+            trashIcon.style.fontWeight = 'bold';
+            // right margin to make the icon float to the right
+            trashIcon.style.marginRight = '-35px';
+
+            trashIcon.addEventListener('click', async (event) => {
+                event.stopPropagation();
+                this.promptsDialog.close();
+                const confirmDelete = await ConfirmDialog.confirm(`Delete prompt: \n "${prompt}"?`, 0, false);
+                if (confirmDelete) {
+                    customPrompts = customPrompts.filter((p) => p !== prompt);
+                    await doAjax('/writeFile', {
+                        targetFile: './.aiCoder/customPrompts.json',
+                        fileContent: JSON.stringify(customPrompts, null, 2),
+                    });
+                    this.displayPremadePromptsList();
+                }
+                this.promptsDialog.showModal();
+            });
+
+            promptDiv.appendChild(trashIcon);
             this.promptsDialog.appendChild(promptDiv);
         }
 
@@ -505,7 +533,7 @@ export class ChatManager {
 
         if (this.chatMode === 'chat') codeElements = await document.querySelectorAll('.language-javascript');
 
-        console.log('codeElements', codeElements);
+        //console.log('codeElements', codeElements);
         if (codeElements.length === 0) return;
 
         codeElements.forEach((codeElement) => {
@@ -536,8 +564,8 @@ export class ChatManager {
                 borderRadius: '3px',
             }
 
-            console.log('this.chatMode', this.chatMode);
-            console.log("should be making buttons");
+            //console.log('this.chatMode', this.chatMode);
+            //console.log("should be making buttons");
 
             const copyButton = document.createElement('button');
             copyButton.textContent = '📋';
@@ -557,14 +585,8 @@ export class ChatManager {
                 editButton.addEventListener('click', async () => {
                     codeElement.style.color = 'red';
                     const codeString = codeElement.textContent;
-                    await doAjax('/applySnippet', { snippet: codeString, targetFile: this.targetFileInput.value });
+                    await this.applySnippet(codeString);
                     codeElement.style.color = 'cyan';
-                    //editButton.disabled = true;
-                    //editButton.style.display = "none";
-                    // find the next button with the textContent of '🤖✎⚡' and 
-                    // focus it. The button it focuses needs to be lower in the page than this one.
-                    //const nextButton = document.querySelector(`button[title="Apply snippet"]:not([disabled])`);
-                    //if (nextButton) nextButton.focus();
                     ctx.tools.pullMethodsList();
                 });
 
@@ -579,6 +601,19 @@ export class ChatManager {
             // Append the toolbar to the wrapper
             wrapper.appendChild(toolbar);
         });
+    }
+
+    async applySnippet(codeString) {
+        const conversationId = this.conversationPicker.value;
+        const isCodeGood = await doAjax('/applySnippet', { snippet: codeString, targetFile: this.targetFileInput.value });
+
+        if (!isCodeGood.success) {
+            alert('Merge failed. Please resolve the conflict manually.');
+            // set the user input to say that the snippet was formatted incorrectly 
+            // and needs to be corrected. 
+
+            this.setInput("The last snippet was formatted incorrectly and needs to be corrected. ");
+        }
     }
 
 }
