@@ -3,8 +3,6 @@ import { LLMSettingsManager } from './LLMSettingsManager.js';
 import { ProjectSettingsManager } from './ProjectSettingsManager.js';
 import { ChatManager } from './ChatManager.js';
 import { toolsManager } from './toolsManager.js';
-import { FileManager } from './FileManager.js';
-import { ConfirmDialog } from './confirmDialog.js';
 
 let ctx = {};
 
@@ -15,9 +13,6 @@ async function setup() {
     ctx.tabs = tabs;
     const chatTab = tabs.createTab("Chat");
     ctx.chat = new ChatManager(chatTab, ctx);
-
-    const fileTab = tabs.createTab("Files");
-    ctx.fileManager = new FileManager(fileTab, ctx);
 
     const toolsTab = tabs.createTab("Tools");
     ctx.tools = new toolsManager(toolsTab, ctx);

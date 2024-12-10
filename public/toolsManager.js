@@ -23,6 +23,7 @@ export class toolsManager {
         this.container.style.flexDirection = 'column';
         this.container.style.overflow = 'auto';
 
+        this.snippetTextArea = null;
 
         this.showToolBar();
     }
@@ -58,7 +59,7 @@ export class toolsManager {
 
         // button to call the prependClassStructure api endpoint
         const prependClassStructureButton = await this.makeToolBarButton('Prepend Class Structure', async () => {
-            await this.prependClassStructur();
+            await this.prependClassStructure();
         });
         this.toolBar.appendChild(prependClassStructureButton);
 
@@ -69,12 +70,34 @@ export class toolsManager {
 
     async implementAllStubs() {
         if (!await this.verifyTargetFileSpecified()) return;
-        await doAjax('/implementAllStubs', { targetFile: ctx.fileManager.currentFile });
+        this.showToolBar();
+        await doAjax('/implementAllStubs', { targetFile: ctx.targetFile });
     }
 
     async mergeAndFormat() {
         if (!await this.verifyTargetFileSpecified()) return;
-        await doAjax('/mergeAndFormat', { targetFile: ctx.fileManager.currentFile });
+        this.showToolBar();
+        let snippet = '';
+        if (this.snippetTextArea === null) {
+            this.snippetTextArea = document.createElement('textarea');
+            this.snippetTextArea.style.width = '100%';
+            this.snippetTextArea.style.height = '100px';
+            this.snippetTextArea.style.margin = '5px';
+            this.snippetTextArea.style.border = '1px solid #ccc';
+            this.snippetTextArea.style.borderRadius = '5px';
+            this.snippetTextArea.style.padding = '5px';
+            this.snippetTextArea.placeholder = 'Paste the snippet here to merge and format';
+            this.container.appendChild(this.snippetTextArea);
+        } else {
+            snippet = this.snippetTextArea.value;
+            this.snippetTextArea = null;
+        }
+
+
+        await doAjax('/applySnippet', {
+            targetFile: ctx.targetFile,
+            snippet: snippet,
+        });
     }
 
     async makeToolBarButton(title, handler) {
@@ -86,9 +109,9 @@ export class toolsManager {
         return button;
     }
 
-    async prependClassStructur() {
+    async prependClassStructure() {
         if (!await this.verifyTargetFileSpecified()) return;
-        await doAjax('/prependClassStructure', { targetFile: ctx.fileManager.currentFile });
+        await doAjax('/prependClassStructure', { targetFile: ctx.targetFile });
     }
 
     async pullMethodsList(showOnlyStubs = false) {
@@ -96,7 +119,7 @@ export class toolsManager {
         if (!await this.verifyTargetFileSpecified()) return;
 
 
-        const listOfMethods = await doAjax('/getMethodsList', { targetFile: ctx.fileManager.currentFile });
+        const listOfMethods = await doAjax('/getMethodsList', { targetFile: ctx.targetFile });
         // the response contains 
         for (const className in listOfMethods) {
             //console.log(className);
@@ -138,7 +161,7 @@ export class toolsManager {
 
     async implementSpecificClassMethod(className, methodName, lineNumber) {
         ctx.tabs.switchToTab('Chat');
-        await doAjax('/gotoLineNumber', { lineNumber, targetFile: ctx.fileManager.currentFile });
+        await doAjax('/gotoLineNumber', { lineNumber, targetFile: ctx.targetFile });
         await ctx.chat.newChat(`Implement ${methodName}.${className}`);
         await ctx.chat.addMessage(`Write the ${methodName} method in the ${className} class.`);
         await ctx.chat.callLLM();
@@ -146,13 +169,13 @@ export class toolsManager {
 
     async addToChatPrompt(className, methodName, lineNumber) {
         ctx.tabs.switchToTab('Chat');
-        await doAjax('/gotoLineNumber', { lineNumber, targetFile: ctx.fileManager.currentFile });
+        await doAjax('/gotoLineNumber', { lineNumber, targetFile: ctx.targetFile });
         await ctx.chat.newChat(`Modify ${methodName}.${className}`);
         await ctx.chat.setInput(`Modify the ${methodName} method in the ${className} class.\nImprove it.`);
     }
 
     async verifyTargetFileSpecified() {
-        if (!ctx.fileManager.currentFile) {
+        if (!ctx.targetFile) {
             alert('Please select a file first');
             ctx.tabs.switchToTab('Files');
             return false;

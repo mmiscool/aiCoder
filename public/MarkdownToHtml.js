@@ -17,7 +17,8 @@ export class MarkdownToHtml {
             backgroundColor: "black",
             color: "white",
             padding: "0px",
-            whiteSpace: "pre-wrap",
+            // preformatted text styles no wrap
+            whiteSpace: "pre",
             fontFamily: "monospace",
             borderRadius: "4px",
             overflowX: "auto",

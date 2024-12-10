@@ -13,7 +13,6 @@ export class LLMSettingsManager {
 
     async init() {
         this.container.innerHTML = '';
-        this.addSaveButton();
         this.addRefreshButton();
         this.llmSettings = await this.fetchSettings();
         this.createSettingsDiv();
@@ -87,6 +86,7 @@ export class LLMSettingsManager {
 
     createModelSelect(models, selectedModel) {
         const modelSelect = document.createElement('select');
+        modelSelect.onchange = () => this.saveSettings();
         modelSelect.style.width = '100%';
         modelSelect.style.marginBottom = '10px';
 
@@ -103,6 +103,7 @@ export class LLMSettingsManager {
 
     createApiKeyInput(apiKey) {
         const input = document.createElement('input');
+        input.onchange = () => this.saveSettings();
         input.type = 'password';
         input.style.width = '100%';
         input.style.marginBottom = '10px';
@@ -112,6 +113,7 @@ export class LLMSettingsManager {
 
     createActiveCheckbox(isActive) {
         const checkbox = document.createElement('input');
+        checkbox.onchange = () => this.saveSettings();
         checkbox.type = 'checkbox';
         checkbox.checked = isActive;
         return checkbox;
@@ -124,18 +126,6 @@ export class LLMSettingsManager {
             }
             activeCheckbox.checked = true;
         }
-    }
-
-    addSaveButton() {
-        const saveButton = document.createElement('button');
-        saveButton.textContent = '💾';
-        saveButton.title = 'Save Settings';
-        saveButton.style.padding = '10px';
-        saveButton.style.margin = '10px';
-        saveButton.style.backgroundColor = 'green';
-
-        saveButton.addEventListener('click', () => this.saveSettings());
-        this.container.appendChild(saveButton);
     }
 
     async saveSettings() {

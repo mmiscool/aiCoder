@@ -2,6 +2,7 @@ import { ConfirmDialog } from "./confirmDialog.js";
 import { doAjax } from "./doAjax.js";
 import { MarkdownToHtml } from "./MarkdownToHtml.js";
 import { makeElement } from "./domElementFactory.js";
+import { choseFile, fileDialog } from "./fileDialog.js";
 
 
 let ctx = {};
@@ -37,6 +38,17 @@ export class ChatManager {
         this.targetFileInput = document.createElement('input');
         this.targetFileInput.type = 'text';
         this.targetFileInput.style.width = '100%';
+        // make disabled
+        this.targetFileInput.contentEditable = false;
+
+        //add an onclick event that opens the file dialog
+        this.targetFileInput.addEventListener('click', async () => {
+            const targetFile = await choseFile();
+            this.setTargetFile(targetFile);
+            ///const conversationId = this.conversationPicker.value;
+            //await doAjax('/setTargetFile', { id: conversationId, targetFile });
+            //await this.loadConversationsList();
+        });
 
 
         // make a div to hold the conversation title and target file input elements
@@ -91,12 +103,25 @@ export class ChatManager {
         this.conversationPicker = document.createElement('select');
         this.conversationPicker.style.margin = '10px';
         this.conversationPicker.style.width = '100%';
+        this.conversationPicker.size = 1;
         this.conversationPicker.addEventListener('change', async () => {
             const selectedId = this.conversationPicker.value;
             if (selectedId) {
+                const oldAutoApplyMode = this.autoApplyMode;
+                this.autoApplyMode = false;
                 await this.loadConversation(selectedId);
+                this.autoApplyMode = oldAutoApplyMode;
             }
         });
+        // make clicking on the conversation picker adjust the size of the select element
+        this.conversationPicker.addEventListener('click', () => {
+            if (this.conversationPicker.size === 1) {
+                this.conversationPicker.size = this.conversationPicker.length;
+            }else{
+                this.conversationPicker.size = 1;
+            }
+        });
+
         conversationPickerDiv.appendChild(this.conversationPicker);
 
 
@@ -209,8 +234,11 @@ export class ChatManager {
         this.submitButton.style.width = '100%';
         this.submitButton.style.marginBottom = '10px';
         this.submitButton.addEventListener('click', async () => {
-            await this.addMessage(this.userInput.value);
-            this.userInput.value = '';
+            // test if message is empty. If empty, do not add message.
+            if (this.userInput.value !== '') {
+                await this.addMessage(this.userInput.value);
+                this.userInput.value = '';
+            }
             await this.callLLM();
         });
         this.container.appendChild(this.submitButton);
@@ -274,7 +302,7 @@ export class ChatManager {
     async loadConversation(conversationId) {
         console.log('conversationId', conversationId);
         const response = await doAjax('/pullMessages', { id: conversationId });
-        ctx.fileManager.currentFile = response.targetFile;
+        ctx.targetFile = response.targetFile;
         this.setTargetFile(response.targetFile);
         this.conversationTitleInput.value = response.title;
         //console.log('response.messages', response.messages);
@@ -382,8 +410,8 @@ export class ChatManager {
             // check if this is the last message
             if (response.messages.indexOf(message) === response.messages.length - 1) {
 
-               console.log("We are at the last message. ");
-               console.log(response.messages.indexOf(message), response.messages.length - 1);
+                console.log("We are at the last message. ");
+                console.log(response.messages.indexOf(message), response.messages.length - 1);
 
 
 
@@ -397,7 +425,7 @@ export class ChatManager {
                             const applyCodeBlock = await ConfirmDialog.confirm("Apply code block?", ctx.autoApplyTimeout, true);
                             if (applyCodeBlock) {
                                 //const mergeWorked = await doAjax('/applySnippet', { snippet: codeBlock, targetFile: this.targetFileInput.value });
-                                
+
                                 await this.applySnippet(codeBlock);
 
                                 // swap to the files tab
@@ -434,7 +462,7 @@ export class ChatManager {
 
         // loop over the prompts and add them to the dialog
         // also add a trash can icon to delete the prompt from the list
-        for (const prompt of customPrompts) {   
+        for (const prompt of customPrompts) {
             const promptDiv = document.createElement('div');
             promptDiv.textContent = prompt;
             promptDiv.style.padding = '10px';
@@ -497,11 +525,9 @@ export class ChatManager {
     }
 
     async newChat(title = false) {
-        const targetFile = this.targetFileInput.value;
-        if (!targetFile) {
-            alert('Please set a target file.');
-            ctx.tabs.switchToTab('Files');
-            return;
+        let targetFile = this.targetFileInput.value;
+        if (!targetFile || targetFile === '') {
+            targetFile = await choseFile();
         }
         const response = await doAjax('/newChat', { targetFile, title });
         this.chatMode = 'chat';
@@ -614,8 +640,8 @@ export class ChatManager {
 
             this.setInput("The last snippet was formatted incorrectly and needs to be corrected.");
             if (this.autoApplyMode) {
-                this.addMessage(this.userInput.value);
-                this.callLLM();
+                await this.addMessage(this.userInput.value);
+                await this.callLLM();
             }
         }
     }

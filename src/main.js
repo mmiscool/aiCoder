@@ -21,6 +21,7 @@ process.on('SIGINT', () => {
 //Current target file
 export const ctx = {};
 
+
 ctx.targetFile = process.argv[2];
 ctx.skipApprovingChanges = false;
 

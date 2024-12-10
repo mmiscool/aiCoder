@@ -3,10 +3,10 @@
 
 const overlay = document.createElement('div');
 overlay.style.position = 'absolute';
-overlay.style.top = '20px';
-overlay.style.bottom = '20px';
-overlay.style.left = '20px';
-overlay.style.right = '20px';
+overlay.style.top = '0px';
+overlay.style.bottom = '0px';
+overlay.style.left = '0px';
+overlay.style.right = '0px';
 overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
 overlay.style.display = 'none';
 overlay.style.justifyContent = 'center';
