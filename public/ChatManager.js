@@ -612,7 +612,11 @@ export class ChatManager {
             // set the user input to say that the snippet was formatted incorrectly 
             // and needs to be corrected. 
 
-            this.setInput("The last snippet was formatted incorrectly and needs to be corrected. ");
+            this.setInput("The last snippet was formatted incorrectly and needs to be corrected.");
+            if (this.autoApplyMode) {
+                this.addMessage(this.userInput.value);
+                this.callLLM();
+            }
         }
     }
 
