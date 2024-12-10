@@ -226,6 +226,19 @@ export class ChatManager {
         this.userInput.style.padding = '5px';
         // set a hint that shows in the empty field. 
         this.userInput.placeholder = "Tell me what you want, what you really really want...";
+        this.userInput.addEventListener('keydown', function (event) {
+            if (event.key === 'Tab') {
+                event.preventDefault(); // Prevent the default tab behavior
+                const start = this.selectionStart;
+                const end = this.selectionEnd;
+
+                // Insert a tab character at the cursor's position
+                this.value = this.value.substring(0, start) + '    ' + this.value.substring(end);
+
+                // Move the cursor to the correct position after the tab
+                this.selectionStart = this.selectionEnd = start + 4;
+            }
+        });
         this.container.appendChild(this.userInput);
 
         // add button to submit user input

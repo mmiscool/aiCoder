@@ -11,16 +11,16 @@ async function setup() {
     ctx.autoApplyTimeout = 3;
     const tabs = new tabInterface();
     ctx.tabs = tabs;
-    const chatTab = tabs.createTab("Chat");
+    const chatTab = tabs.createTab("Chat","💬");
     ctx.chat = new ChatManager(chatTab, ctx);
 
-    const toolsTab = tabs.createTab("Tools");
+    const toolsTab = tabs.createTab("Tools","🛠️");
     ctx.tools = new toolsManager(toolsTab, ctx);
 
-    const projectSettings = tabs.createTab("Project Settings");
+    const projectSettings = tabs.createTab("Project Settings","⚙️");
     ctx.projectSettings = new ProjectSettingsManager(projectSettings, ctx);
 
-    const llmSettingsTab = tabs.createTab("LLM Settings");
+    const llmSettingsTab = tabs.createTab("LLM Settings","🧠");
     ctx.llmSettings = new LLMSettingsManager(llmSettingsTab, ctx);
 
     document.body.style.margin = "0";

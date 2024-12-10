@@ -24,6 +24,7 @@ export class tabInterface {
         this.tabBar = document.createElement("div");
         this.tabBar.style.height = "50px";
         this.tabBar.style.display = "flex";
+        this.tabBar.style.flexDirection = "row"
         this.tabBar.style.backgroundColor = this.colors.tabBarBackground;
         this.tabBar.style.borderBottom = `2px solid ${this.colors.inactiveTabBorder}`;
         this.container.appendChild(this.tabBar);
@@ -31,17 +32,20 @@ export class tabInterface {
         // Create the content area
         this.contentArea = document.createElement("div");
         this.contentArea.style.flexGrow = "1";
-        this.contentArea.style.overflow = "auto";
+        this.contentArea.style.overflow = "scroll";
         this.container.appendChild(this.contentArea);
     }
 
-    createTab(name) {
+    createTab(name, icon) {
         const tabIndex = this.tabs.length;
 
         // Create the tab button
         const tabButton = document.createElement("button");
-        tabButton.textContent = name;
-        tabButton.style.flexGrow = "1";
+        tabButton.textContent = icon + " " + name;
+        // add tooltip
+        tabButton.title = name;
+        //tabButton.style.flexGrow = "1";
+
         tabButton.style.border = "none";
         tabButton.style.backgroundColor = this.colors.tabButtonBackground;
         tabButton.style.cursor = "pointer";
