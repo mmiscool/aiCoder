@@ -3,6 +3,12 @@
 [![semantic versioning](https://img.shields.io/badge/semantic%20versioning-2.0.0-green.svg)](https://semver.org)
 > All notable changes to this project will be documented in this file
 
+## [1.0.41](https://github.com/mmiscool/aiCoder/compare/v1.0.40...v1.0.41) (2024-12-11)
+
+### 🤖 Build System
+
+* changed default port number and added argument to start on custom port. ([7a0385f](https://github.com/mmiscool/aiCoder/commit/7a0385f0c6c535b761bcaf375b01ea33cc101448))
+
 ## [1.0.40](https://github.com/mmiscool/aiCoder/compare/v1.0.39...v1.0.40) (2024-12-10)
 
 ### 🤖 Build System
