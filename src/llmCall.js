@@ -205,6 +205,7 @@ async function getOllamaModels() {
         const arrayOfModels = ollamaModels.models.map(model => model.name);
         return arrayOfModels;
     } catch (error) {
+        return [];
         // Ask user if they want to try and install ollama
         if (await confirmAction('Ollama might not be installed. Do you want to try and install it?')) {
             await printAndPause('Installing Ollama...');
@@ -216,7 +217,7 @@ async function getOllamaModels() {
             await pullOllamaModelWithProgress('granite3-dense:latest');
 
             return getOllamaModels();
-            return [];
+            
         }
 
     }
