@@ -7,6 +7,14 @@ With **aiCoder** as your coding co-pilot, you can simplify development, refine y
 
 The magic lies in aiCoder’s advanced merging logic, which keeps your original code intact while integrating new snippets precisely and reliably.
 
+
+![NEW UI](./images/aiCoder.gif)
+
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=mmiscool/aiCoder&type=Date)](https://star-history.com/#mmiscool/aiCoder&Date)
+
 ## Purpose and Benefits
 **aiCoder** is designed to enhance your coding experience by leveraging the power of AI. It helps you:
 - Save time by automating repetitive coding tasks.
@@ -30,7 +38,7 @@ The magic lies in aiCoder’s advanced merging logic, which keeps your original 
 
 ### From NPM
 ```
-npm i aicodertool -g
+npm i -g aicodertool
 ```
 
 ### From Source
@@ -41,7 +49,7 @@ npm i aicodertool -g
    npm install && npm install -g .
    ```
    
-After installation, you’re all set! Just run the `aiCoder` command in any project directory.
+After installation, you’re all set! Just run the `aiCoder` or the much short `a` command in any project directory.
 
 If you want to use local Ollama as your LLM provider install it with the following commands. 
 ```

@@ -296,7 +296,7 @@ export class conversation {
             chatMode: this.chatMode,
             lastModified: new Date().toISOString()
         };
-        const conversationJSON = JSON.stringify(conversationObject);
+        const conversationJSON = JSON.stringify(conversationObject, null, 2);
         const filePath = `./.aiCoder/conversations/${id}.json`;
         await writeFile(filePath, conversationJSON);
 
