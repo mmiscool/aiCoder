@@ -11,9 +11,6 @@ The magic lies in aiCoder’s advanced merging logic, which keeps your original 
 ![NEW UI](./images/aiCoder.gif)
 
 
-## Star History
-
-## Star History
 
 <a href="https://star-history.com/#mmiscool/aiCoder&Date">
  <picture>
@@ -35,7 +32,7 @@ The magic lies in aiCoder’s advanced merging logic, which keeps your original 
 
 # Standard Workflow
 1. Run `aiCoder` in your project’s directory.
-2. Visit [http://localhost:5000](http://localhost:5000) to access the web UI.
+2. Visit [http://localhost:3000](http://localhost:3000) to access the web UI.
 3. Use **New Plan Chat** to discuss and define your project requirements, then save the plan. The saved plan guides future implementations.
 4. Open the **Files** tab to select the target file you want to modify.
 5. Start a **New Chat** with the selected file.
@@ -77,7 +74,9 @@ Launch `aiCoder` from within your project folder:
 cd myProjectFolder
 aicoder
 ```
-Then open [http://localhost:5000](http://localhost:5000/) in your browser to begin.
+Then open [http://localhost:3000](http://localhost:3000/) in your browser to begin.
+
+To run on a different port use `aicoder -p 3001`
 
 ## Chat Interface
 ![NEW UI](./images/CHAT.png)
