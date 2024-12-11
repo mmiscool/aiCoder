@@ -3,6 +3,12 @@
 [![semantic versioning](https://img.shields.io/badge/semantic%20versioning-2.0.0-green.svg)](https://semver.org)
 > All notable changes to this project will be documented in this file
 
+## [1.0.42](https://github.com/mmiscool/aiCoder/compare/v1.0.41...v1.0.42) (2024-12-11)
+
+### 🤖 Build System
+
+* Prevent setting screen from not working if ollama is not installed ([343f133](https://github.com/mmiscool/aiCoder/commit/343f1334532af18da2f4613dc149fc89c9f6c4a5))
+
 ## [1.0.41](https://github.com/mmiscool/aiCoder/compare/v1.0.40...v1.0.41) (2024-12-11)
 
 ### 🤖 Build System
