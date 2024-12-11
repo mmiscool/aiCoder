@@ -8,6 +8,7 @@ import mime from 'mime'; // Install this package with `npm install mime`
 import WebSocket, { WebSocketServer } from 'ws'; // WebSocket support
 import { getScriptFolderPath } from './fileIO.js';
 import { aiCoderApiFunctions } from './aiCoderApiFunctions.js';
+import { readArg } from './terminalHelpers.js';
 
 
 export let wss;
@@ -125,7 +126,7 @@ export function setupServer() {
     });
 
     // Start the server
-    const PORT = 5000;
+    let PORT = readArg("-p") || 3000;
     const HOST = '0.0.0.0';
     server.listen(PORT, HOST, () => {
         console.log(`Server is running at http://localhost:${PORT}`);

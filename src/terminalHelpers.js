@@ -171,3 +171,13 @@ export async function printDebugMessage(message) {
   }
 }
 
+
+
+
+export function readArg(flag) {
+  const index = process.argv.indexOf(flag);
+  if (index !== -1 && index + 1 < process.argv.length) {
+      return process.argv[index + 1];
+  }
+  return null; // Return null if the flag or its value is not found
+}
