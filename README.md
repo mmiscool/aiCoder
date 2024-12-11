@@ -13,7 +13,15 @@ The magic lies in aiCoder’s advanced merging logic, which keeps your original 
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=mmiscool/aiCoder&type=Date)](https://star-history.com/#mmiscool/aiCoder&Date)
+## Star History
+
+<a href="https://star-history.com/#mmiscool/aiCoder&Date">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=mmiscool/aiCoder&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=mmiscool/aiCoder&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=mmiscool/aiCoder&type=Date" />
+ </picture>
+</a>
 
 ## Purpose and Benefits
 **aiCoder** is designed to enhance your coding experience by leveraging the power of AI. It helps you:
