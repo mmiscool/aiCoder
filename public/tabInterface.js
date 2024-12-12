@@ -142,5 +142,45 @@ export class tabInterface {
             }
         });
     }
+
+    async  disableTab(tabName) {
+        // make the tab not clickable and greyed out
+        const idx = this.tabs.findIndex(tab => tab.name.toLowerCase() === tabName.toLowerCase());
+        if (idx !== -1) {
+            this.tabBar.childNodes[idx].style.pointerEvents = "none";
+            this.tabBar.childNodes[idx].style.textDecoration = "line-through";
+        }
+    }
+
+    async enableTab(tabName) {
+        const idx = await this.tabs.findIndex(tab => tab.name.toLowerCase() === tabName.toLowerCase());
+
+        if (idx !== -1) {
+            this.tabBar.childNodes[idx].style.pointerEvents = "auto";
+            this.tabBar.childNodes[idx].style.backgroundColor = this.colors.tabButtonBackground;
+            this.tabBar.childNodes[idx].style.textDecoration = "none";
+        }
+        // set this tab as active
+        this.activeTab = idx;
+        return await this.showActiveTab();
+       
+    }
+
+    async disableAllTabs() {
+        for (let i = 0; i < this.tabBar.childNodes.length; i++) {
+            this.tabBar.childNodes[i].style.pointerEvents = "none";
+            this.tabBar.childNodes[i].style.textDecoration = "line-through";
+        }
+        return true;
+    }
+
+    async enableAllTabs() {
+        for (let i = 0; i < this.tabBar.childNodes.length; i++) {
+            this.tabBar.childNodes[i].style.pointerEvents = "auto";
+            this.tabBar.childNodes[i].style.backgroundColor = this.colors.tabButtonBackground;
+            this.tabBar.childNodes[i].style.textDecoration = "none";
+        }
+        return true;
+    }
 }
 

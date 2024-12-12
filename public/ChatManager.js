@@ -276,6 +276,7 @@ export class ChatManager {
 
     async setTargetFile(targetFile) {
         this.targetFileInput.value = targetFile;
+        ctx.targetFile = targetFile;
     }
 
     async loadConversationsList() {

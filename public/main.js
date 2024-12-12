@@ -23,12 +23,12 @@ async function setup() {
     const llmSettingsTab = tabs.createTab("LLM Settings","🧠");
     ctx.llmSettings = new LLMSettingsManager(llmSettingsTab, ctx);
 
+
     document.body.style.margin = "0";
     document.body.style.height = "100vh";
     document.body.style.display = "flex";
 
     document.body.appendChild(tabs.getElement());
-
 
     window.ctx = ctx;
 }

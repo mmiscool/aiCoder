@@ -1,5 +1,5 @@
 import { readFile, writeFile } from './fileIO.js';
-import * as esprima from 'esprima';
+import * as esprima from 'esprima-next';
 
 export async function prependClassStructure(targetFile, onlyStubs = false) {
   // You can toggle onlyStubs = true or false as needed
@@ -41,39 +41,44 @@ export async function prependClassStructure(targetFile, onlyStubs = false) {
 
 
 export function getMethodsWithArguments(code, onlyStubs = false) {
-  //console.log(code);
-  // Parse the code using esprima
   const ast = esprima.parseModule(code, {
     sourceType: 'module',
     tolerant: true,
     range: true,
     loc: true,
-    attachComment: true
+    attachComment: true,
   });
   const classInfo = new Map();
 
-  // Collect information on each class, its methods, and arguments
   ast.body.forEach(node => {
-    if (node.type === 'ClassDeclaration' && node.id && node.id.name) {
-      const className = node.id.name;
-      const parentClassName = node.superClass && node.superClass.name ? node.superClass.name : null;
+    console.log(node);
+    let classNode = null;
+
+    if (node.type === 'ClassDeclaration') {
+      classNode = node;
+    } else if (
+      node.type === 'ExportNamedDeclaration' &&
+      node.declaration &&
+      node.declaration.type === 'ClassDeclaration'
+    ) {
+      classNode = node.declaration;
+    }
+
+    if (classNode && classNode.id && classNode.id.name) {
+      const className = classNode.id.name;
+      const parentClassName = classNode.superClass && classNode.superClass.name ? classNode.superClass.name : null;
       let methods = [];
 
-      node.body.body.forEach(classElement => {
+      classNode.body.body.forEach(classElement => {
         if (classElement.type === 'MethodDefinition' && classElement.key.type === 'Identifier') {
           const methodName = classElement.key.name;
-          const startCharacterLocation = classElement.start;
-          //console.log(classElement.loc);
-          const lineNumber = classElement.loc.start.line;
 
-          // Collect method arguments
           const args = classElement.value.params.map(param => {
             if (param.type === 'Identifier') return param.name;
             if (param.type === 'AssignmentPattern' && param.left.type === 'Identifier') return param.left.name;
             return 'unknown';
           });
 
-          // Check if method is a stub
           const methodBody = classElement.value.body?.body || [];
           const isStub =
             methodBody.length === 0 ||
@@ -81,11 +86,10 @@ export function getMethodsWithArguments(code, onlyStubs = false) {
               methodBody[0].type === 'ReturnStatement' &&
               !methodBody[0].argument);
 
-          methods.push({ name: methodName, args, isStub, lineNumber });
+          methods.push({ name: methodName, args, isStub });
         }
       });
 
-      // If onlyStubs is true, filter out non-stub methods
       if (onlyStubs) {
         methods = methods.filter(m => m.isStub);
       }
@@ -94,7 +98,6 @@ export function getMethodsWithArguments(code, onlyStubs = false) {
     }
   });
 
-  // Sort classes based on dependency hierarchy
   const sortedClasses = [];
   const processedClasses = new Set();
 
@@ -103,7 +106,6 @@ export function getMethodsWithArguments(code, onlyStubs = false) {
     const classData = classInfo.get(className);
     if (!classData) return;
 
-    // Add the parent class first if it exists
     if (classData.parentClassName && classInfo.has(classData.parentClassName)) {
       addClassAndSubclasses(classData.parentClassName);
     }
@@ -112,17 +114,12 @@ export function getMethodsWithArguments(code, onlyStubs = false) {
     processedClasses.add(className);
   }
 
-  //console.log(classInfo);
-  // Process classes in the order they appear in the original code
   Array.from(classInfo.keys()).forEach(addClassAndSubclasses);
 
-  // Convert sorted classes into the final output format
   const result = {};
   sortedClasses.forEach(({ className, methods }) => {
     result[className] = methods;
   });
-
-
 
   return result;
 }
@@ -147,24 +144,34 @@ export async function getStubMethods(code) {
 }
 
 
-export async function getListOfFunctions(code){
-  // we are getting the functions in the application. Not the classes or class methods
+export async function getListOfFunctions(code) {
   const ast = esprima.parseModule(code, {
     sourceType: 'module',
     tolerant: true,
     range: true,
     loc: true,
-    attachComment: true
+    attachComment: true,
   });
   const functionInfo = new Map();
 
-  // Collect information on each function, its arguments
   ast.body.forEach(node => {
-    if (node.type === 'FunctionDeclaration' && node.id && node.id.name) {
-      const functionName = node.id.name;
+    let functionNode = null;
+
+    if (node.type === 'FunctionDeclaration') {
+      functionNode = node;
+    } else if (
+      node.type === 'ExportNamedDeclaration' &&
+      node.declaration &&
+      node.declaration.type === 'FunctionDeclaration'
+    ) {
+      functionNode = node.declaration;
+    }
+
+    if (functionNode && functionNode.id && functionNode.id.name) {
+      const functionName = functionNode.id.name;
       let args = [];
 
-      node.params.forEach(param => {
+      functionNode.params.forEach(param => {
         if (param.type === 'Identifier') args.push(param.name);
         if (param.type === 'AssignmentPattern' && param.left.type === 'Identifier') args.push(param.left.name);
       });
@@ -175,3 +182,4 @@ export async function getListOfFunctions(code){
 
   return functionInfo;
 }
+

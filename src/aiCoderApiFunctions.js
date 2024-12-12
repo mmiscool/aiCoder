@@ -98,7 +98,9 @@ export class aiCoderApiFunctions {
     }
 
     async getMethodsList(parsedBody) {
+        console.log(parsedBody);
         const response = await getMethodsWithArguments(await readFile(parsedBody.targetFile));
+        console.log('getMethodsList', response);
         return response;
     }
 

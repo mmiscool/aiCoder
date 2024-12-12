@@ -16,6 +16,25 @@ export class LLMSettingsManager {
         this.addRefreshButton();
         this.llmSettings = await this.fetchSettings();
         this.createSettingsDiv();
+        // check if there is an active LLM
+        const activeLLM = await this.getActiveLLM();
+        // if no LLMS are active swap to this tab
+        if (!activeLLM) {
+            await ctx.tabs.disableAllTabs();
+            await ctx.tabs.enableTab('LLM Settings');
+            
+            // add an element to the top of the container to notify the user
+            const notification = document.createElement('div');
+            notification.textContent = 'You must select an active LLM and model';
+            notification.style.backgroundColor = 'red';
+            notification.style.color = 'white';
+            notification.style.padding = '10px';
+            notification.style.margin = '10px';
+            this.container.insertBefore(notification, this.settingsDiv);
+            
+        }else{
+            ctx.tabs.enableAllTabs();
+        }
     }
 
     async addRefreshButton() {
@@ -126,6 +145,15 @@ export class LLMSettingsManager {
             }
             activeCheckbox.checked = true;
         }
+    }
+
+    async getActiveLLM() {
+        for (const llmDiv of this.settingsDiv.children) {
+            if (llmDiv.querySelector('input[type="checkbox"]').checked) {
+                return llmDiv.querySelector('h2').textContent;
+            }
+        }
+        return null;
     }
 
     async saveSettings() {
