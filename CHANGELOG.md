@@ -3,6 +3,12 @@
 [![semantic versioning](https://img.shields.io/badge/semantic%20versioning-2.0.0-green.svg)](https://semver.org)
 > All notable changes to this project will be documented in this file
 
+## [1.0.45](https://github.com/mmiscool/aiCoder/compare/v1.0.44...v1.0.45) (2024-12-12)
+
+### 🤖 Build System
+
+* added function list button to tools tab. ([8f458f0](https://github.com/mmiscool/aiCoder/commit/8f458f0453d003b378a4ebbfcc8bae91cce48d81))
+
 ## [1.0.44](https://github.com/mmiscool/aiCoder/compare/v1.0.43...v1.0.44) (2024-12-12)
 
 ### 🤖 Build System
