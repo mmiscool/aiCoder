@@ -259,13 +259,11 @@ export class ChatManager {
         this.setInput("");
 
         // Call loadConversation with the selected conversation ID if any
-        //alert('this.conversationPicker.value: ' + this.conversationPicker.value);
         if (this.conversationPicker.value) {
             await this.loadConversation(this.conversationPicker.value);
         } else {
             // set the conversation picker to the first conversation
             this.conversationPicker.selectedIndex = 0;
-            alert('this.conversationPicker.value: ' + this.conversationPicker.value);
             if (this.conversationPicker.value) {
                 await this.loadConversation(this.conversationPicker.value);
             }

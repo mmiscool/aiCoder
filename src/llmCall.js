@@ -8,11 +8,13 @@ import {
     printAndPause,
     confirmAction,
     printToTerminal,
-    
+
 } from "./terminalHelpers.js";
 import Anthropic from '@anthropic-ai/sdk';
 import cliProgress from 'cli-progress';
-import { spawn } from 'child_process'; ``
+import { spawn } from 'child_process';
+
+import TurndownService from 'turndown';
 
 
 let throttleTime = 20;
@@ -46,6 +48,21 @@ export async function callLLM(messages) {
         if (messages[i].filePath) {
             messages[i].content = messages[i].description + "\n\n"
             messages[i].content += await readFile(messages[i].filePath);
+        }
+
+        // test if the message is a URL if so replace the content with the text from the URL
+        if (messages[i].content.startsWith('http')) {
+            const url = messages[i].content;
+            const response = await fetch(url);
+            console.log('response:', response);
+            const text = await response.text();
+            const turndownService = new TurndownService();
+            await turndownService.remove("script");
+            await turndownService.remove("style");
+            await turndownService.remove("footer");
+            const markdown = turndownService.turndown(text);
+            console.log('markdown:', markdown);
+            messages[i].content = markdown;
         }
     }
 
@@ -206,20 +223,6 @@ async function getOllamaModels() {
         return arrayOfModels;
     } catch (error) {
         return [];
-        // Ask user if they want to try and install ollama
-        if (await confirmAction('Ollama might not be installed. Do you want to try and install it?')) {
-            await printAndPause('Installing Ollama...');
-
-            // Use shell to install ollama
-
-            await installOllama();
-            await printAndPause('Ollama installed. Pulling default models...', 10);
-            await pullOllamaModelWithProgress('granite3-dense:latest');
-
-            return getOllamaModels();
-            
-        }
-
     }
 }
 
