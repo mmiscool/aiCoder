@@ -51,7 +51,6 @@ export function getMethodsWithArguments(code, onlyStubs = false) {
   const classInfo = new Map();
 
   ast.body.forEach(node => {
-    console.log(node);
     let classNode = null;
 
     if (node.type === 'ClassDeclaration') {
@@ -70,8 +69,11 @@ export function getMethodsWithArguments(code, onlyStubs = false) {
       let methods = [];
 
       classNode.body.body.forEach(classElement => {
+        
         if (classElement.type === 'MethodDefinition' && classElement.key.type === 'Identifier') {
           const methodName = classElement.key.name;
+          const lineNumber = classElement.loc.start.line;
+          console.log(methodName,lineNumber);
 
           const args = classElement.value.params.map(param => {
             if (param.type === 'Identifier') return param.name;
@@ -86,7 +88,7 @@ export function getMethodsWithArguments(code, onlyStubs = false) {
               methodBody[0].type === 'ReturnStatement' &&
               !methodBody[0].argument);
 
-          methods.push({ name: methodName, args, isStub });
+          methods.push({ name: methodName, args, isStub, lineNumber });
         }
       });
 
@@ -94,7 +96,7 @@ export function getMethodsWithArguments(code, onlyStubs = false) {
         methods = methods.filter(m => m.isStub);
       }
 
-      classInfo.set(className, { className, parentClassName, methods });
+      classInfo.set(className, { className, parentClassName, methods});
     }
   });
 
@@ -152,7 +154,7 @@ export async function getListOfFunctions(code) {
     loc: true,
     attachComment: true,
   });
-  const functionInfo = new Map();
+  const functionsInfo = new Map();
 
   ast.body.forEach(node => {
     let functionNode = null;
@@ -169,6 +171,7 @@ export async function getListOfFunctions(code) {
 
     if (functionNode && functionNode.id && functionNode.id.name) {
       const functionName = functionNode.id.name;
+      const lineNumber = functionNode.loc.start.line;
       let args = [];
 
       functionNode.params.forEach(param => {
@@ -176,10 +179,18 @@ export async function getListOfFunctions(code) {
         if (param.type === 'AssignmentPattern' && param.left.type === 'Identifier') args.push(param.left.name);
       });
 
-      functionInfo.set(functionName, { functionName, args });
+      const isStub = functionNode.body.body.length === 0;
+
+      functionsInfo.set(functionName, { functionName, args, isStub, lineNumber });
     }
   });
 
-  return functionInfo;
+  // convert the Map to an object
+  const result = {};
+  functionsInfo.forEach((value, key) => {
+    result[key] = value;
+  });
+
+  return result;
 }
 

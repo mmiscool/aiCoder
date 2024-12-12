@@ -1,5 +1,5 @@
 import { applySnippets } from "./intelligentMerge.js"
-import { getMethodsWithArguments } from "./classListing.js";
+import { getListOfFunctions, getMethodsWithArguments } from "./classListing.js";
 import { appendFile, getAllFiles, readFile, readOrLoadFromDefault, writeFile } from "./fileIO.js";
 import { intelligentlyMergeSnippets } from "./intelligentMerge.js";
 import { llmSettings, llmSettingsUpdate } from "./llmCall.js";
@@ -98,9 +98,12 @@ export class aiCoderApiFunctions {
     }
 
     async getMethodsList(parsedBody) {
-        console.log(parsedBody);
         const response = await getMethodsWithArguments(await readFile(parsedBody.targetFile));
-        console.log('getMethodsList', response);
+        return response;
+    }
+
+    async getFunctionList(parsedBody) {
+        const response = await getListOfFunctions(await readFile(parsedBody.targetFile));
         return response;
     }
 
