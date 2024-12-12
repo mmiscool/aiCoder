@@ -3,6 +3,12 @@
 [![semantic versioning](https://img.shields.io/badge/semantic%20versioning-2.0.0-green.svg)](https://semver.org)
 > All notable changes to this project will be documented in this file
 
+## [1.0.44](https://github.com/mmiscool/aiCoder/compare/v1.0.43...v1.0.44) (2024-12-12)
+
+### 🤖 Build System
+
+* Fixed problem where exported classes were not showing in methods list. ([3b76afa](https://github.com/mmiscool/aiCoder/commit/3b76afadb17e57748d0e412f212b35d07d19dbf9))
+
 ## [1.0.43](https://github.com/mmiscool/aiCoder/compare/v1.0.42...v1.0.43) (2024-12-12)
 
 ### 🤖 Build System
