@@ -3,6 +3,12 @@
 [![semantic versioning](https://img.shields.io/badge/semantic%20versioning-2.0.0-green.svg)](https://semver.org)
 > All notable changes to this project will be documented in this file
 
+## [1.0.43](https://github.com/mmiscool/aiCoder/compare/v1.0.42...v1.0.43) (2024-12-12)
+
+### 🤖 Build System
+
+* cleanup alerts in frontend. Added URL downloader to markdown for conversations. ([60a47cc](https://github.com/mmiscool/aiCoder/commit/60a47cc0f3014c6d56913985dc4fe648c8af6941))
+
 ## [1.0.42](https://github.com/mmiscool/aiCoder/compare/v1.0.41...v1.0.42) (2024-12-11)
 
 ### 🤖 Build System
