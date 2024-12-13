@@ -1,8 +1,4 @@
-import { highlight } from 'cli-highlight';
-import inquirer from 'inquirer';
 import { exec } from "child_process";
-import { marked } from 'marked';
-import TerminalRenderer from 'marked-terminal';
 import path from 'path';
 import { ctx, debugMode } from './main.js';
 import { wss } from './apiServer.js';
@@ -43,7 +39,7 @@ function getCallerInfo(level = 3) {
 
 export async function clearTerminal() {
 
-  return console.log("----------------------------------------------------------------------------");
+  //return console.log("----------------------------------------------------------------------------");
 
   if (ctx.ws) {
     ctx.ws.send("clear");
@@ -64,19 +60,15 @@ export async function clearTerminal() {
 }
 
 
-export async function printCodeToTerminal(jsCode) {
-  await console.log(await highlight(jsCode, { language: 'javascript', theme: 'dracula' }));
-}
 
-
-export async function printAndPause(message, secondsToPause = 2) {
+export async function printAndPause(message, secondsToPause = 0) {
   await getCallerInfo();
   wss.clients.forEach(client => {
     client.send(message);
   });
-  return console.log(message);
+
   console.log(message);
-  if (secondsToPause > 4) {
+  if (secondsToPause === 0) {
     return;
   } else {
     await new Promise(resolve => setTimeout(resolve, secondsToPause * 1000));
@@ -147,20 +139,6 @@ export async function pressEnterToContinue() {
 
 
 
-
-
-
-// markdown pretty print
-marked.setOptions({
-  renderer: new TerminalRenderer(),
-});
-
-export function markdownToTerminal(markdownText) {
-  console.log(marked(markdownText));
-}
-
-
-
 export async function printDebugMessage(message) {
   if (debugMode) {
     const stack = new Error().stack;
@@ -177,7 +155,13 @@ export async function printDebugMessage(message) {
 export function readArg(flag) {
   const index = process.argv.indexOf(flag);
   if (index !== -1 && index + 1 < process.argv.length) {
-      return process.argv[index + 1];
+    return process.argv[index + 1];
   }
+
+  // return true if the flag is found but no value is provided
+  if (index !== -1) {
+    return true
+  }
+
   return null; // Return null if the flag or its value is not found
 }

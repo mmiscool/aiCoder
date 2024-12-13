@@ -1,24 +1,48 @@
 import { applySnippets } from "./intelligentMerge.js"
 import { getListOfFunctions, getMethodsWithArguments } from "./classListing.js";
-import { appendFile, getAllFiles, readFile, readOrLoadFromDefault, writeFile } from "./fileIO.js";
+import { appendFile, getAllFiles, moveFile, readFile, readOrLoadFromDefault, readSetting, writeFile, writeSetting } from "./fileIO.js";
 import { intelligentlyMergeSnippets } from "./intelligentMerge.js";
 import { llmSettings, llmSettingsUpdate } from "./llmCall.js";
 import { launchNano } from "./terminalHelpers.js";
 import { prependClassStructure } from './classListing.js';
 import fs from 'fs';
 import { callLLM } from './llmCall.js';
+import { scrapeToMarkdown } from "./scrapeToMarkdown.js";
 
 
 
-console.log('Setting up default files');
-readOrLoadFromDefault('./.aiCoder/default-system-prompt.md', '/prompts/default-system-prompt.md');
-readOrLoadFromDefault('./.aiCoder/default-plan-prompt.md', '/prompts/default-plan-prompt.md');
-readOrLoadFromDefault('./.aiCoder/snippet-production-prompt.md', '/prompts/snippet-production-prompt.md');
-readOrLoadFromDefault('./.aiCoder/snippet-validation-prompt.md', '/prompts/snippet-validation-prompt.md');
-readOrLoadFromDefault('./.aiCoder/plan-edit-prompt.md', '/prompts/plan-edit-prompt.md');
-readOrLoadFromDefault('./.aiCoder/customPrompts.json', '/prompts/customPrompts.json');
+
+async function setupConfigFiles() {
+    console.log('Setting up default files');
+    // fix the existing prompt files
+    await moveFile('./.aiCoder/default-plan-prompt.md', './.aiCoder/prompts/default-plan-prompt.md');
+    await moveFile('./.aiCoder/default-system-prompt.md', './.aiCoder/prompts/default-system-prompt.md');
+    await moveFile('./.aiCoder/snippet-production-prompt.md', './.aiCoder/prompts/snippet-production-prompt.md');
+    await moveFile('./.aiCoder/snippet-validation-prompt.md', './.aiCoder/prompts/snippet-validation-prompt.md');
+    await moveFile('./.aiCoder/plan-edit-prompt.md', './.aiCoder/prompts/plan-edit-prompt.md');
+    await moveFile('./.aiCoder/customPrompts.json', './.aiCoder/prompts/customPrompts.json');
+
+    // move the llm api keys and models to the llmConfig folder
+    await moveFile('./.aiCoder/openai-api-key.txt', './.aiCoder/llmConfig/openai-api-key.txt');
+    await moveFile('./.aiCoder/openai-model.txt', './.aiCoder/llmConfig/openai-model.txt');
+    await moveFile('./.aiCoder/groq-api-key.txt', './.aiCoder/llmConfig/groq-api-key.txt');
+    await moveFile('./.aiCoder/groq-model.txt', './.aiCoder/llmConfig/groq-model.txt');
+    await moveFile('./.aiCoder/ollama-api-key.txt', './.aiCoder/llmConfig/ollama-api-key.txt');
+    await moveFile('./.aiCoder/ollama-model.txt', './.aiCoder/llmConfig/ollama-model.txt');
+    await moveFile('./.aiCoder/anthropic-api-key.txt', './.aiCoder/llmConfig/anthropic-api-key.txt');
+    await moveFile('./.aiCoder/anthropic-model.txt', './.aiCoder/llmConfig/anthropic-model.txt');
+
+    await moveFile('./.aiCoder/ai-service.txt', './.aiCoder/llmConfig/ai-service.txt');
 
 
+    await readSetting('prompts/default-plan-prompt.md');
+    await readSetting('prompts/default-system-prompt.md');
+    await readSetting('prompts/snippet-production-prompt.md');
+    await readSetting('prompts/snippet-validation-prompt.md');
+    await readSetting('prompts/plan-edit-prompt.md');
+    await readSetting('prompts/customPrompts.json');
+}
+setupConfigFiles();
 
 
 export class aiCoderApiFunctions {
@@ -62,10 +86,10 @@ export class aiCoderApiFunctions {
         if (parsedBody.title) await webUIConversation.setTitle(parsedBody.title);
         await webUIConversation.setTargetFile(parsedBody.targetFile);
 
-        await webUIConversation.addFileMessage("system", './.aiCoder/default-system-prompt.md');
-        await webUIConversation.addFileMessage("user", './.aiCoder/default-plan-prompt.md');
+        await webUIConversation.addFileMessage("system", './.aiCoder/llmConfig/default-system-prompt.md');
+        await webUIConversation.addFileMessage("user", './.aiCoder/llmConfig/default-plan-prompt.md');
         await webUIConversation.addTargetFileMessage("user", "// Code file to be edited");
-        await webUIConversation.addFileMessage("system", './.aiCoder/snippet-production-prompt.md');
+        await webUIConversation.addFileMessage("system", './.aiCoder/llmConfig/snippet-production-prompt.md');
         return { id: webUIConversation.id, targetFile: webUIConversation.targetFile };
     }
 
@@ -74,8 +98,8 @@ export class aiCoderApiFunctions {
         await webUIConversation.setMode('plan');
         await webUIConversation.setTitle(`Plan Chat`);
 
-        await webUIConversation.addFileMessage("system", './.aiCoder/plan-edit-prompt.md');
-        await webUIConversation.addFileMessage("user", './.aiCoder/default-plan-prompt.md', "Plan to be edited:");
+        await webUIConversation.addFileMessage("system", './.aiCoder/llmConfig/plan-edit-prompt.md');
+        await webUIConversation.addFileMessage("user", './.aiCoder/llmConfig/default-plan-prompt.md', "Plan to be edited:");
         return { id: webUIConversation.id, targetFile: webUIConversation.targetFile };
     }
 
@@ -117,24 +141,26 @@ export class aiCoderApiFunctions {
 
     async getSystemPrompts() {
         return {
-            default_plan_prompt: await readOrLoadFromDefault('./.aiCoder/default-plan-prompt.md', '/prompts/default-plan-prompt.md'),
-            default_system_prompt: await readOrLoadFromDefault('./.aiCoder/default-system-prompt.md', '/prompts/default-system-prompt.md'),
-            snippet_production_prompt: await readOrLoadFromDefault('./.aiCoder/snippet-production-prompt.md', '/prompts/snippet-production-prompt.md'),
+            default_plan_prompt: await readSetting('prompts/default-plan-prompt.md'),
+            default_system_prompt: await readSetting('prompts/default-system-prompt.md'),
+            snippet_production_prompt: await readSetting('prompts/snippet-production-prompt.md'),
         };
     }
 
     async updateSystemPrompts(parsedBody) {
-        await writeFile('./.aiCoder/default-plan-prompt.md', parsedBody.default_plan_prompt);
-        await writeFile('./.aiCoder/default-system-prompt.md', parsedBody.default_system_prompt);
-        await writeFile('./.aiCoder/snippet-production-prompt.md', parsedBody.snippet_production_prompt);
+        await writeSetting('prompts/default-plan-prompt.md', parsedBody.default_plan_prompt);
+        await writeSetting('prompts/default-system-prompt.md', parsedBody.default_system_prompt);
+        await writeSetting('prompts/snippet-production-prompt.md', parsedBody.snippet_production_prompt);
+
         return { success: true };
     }
 
     async savePlan(parsedBody) {
         if (parsedBody.append) {
-            await appendFile('./.aiCoder/default-plan-prompt.md', parsedBody.plan, true);
+            const currentPlan = await readSetting('prompts/default-plan-prompt.md');
+            await writeSetting('prompts/default-plan-prompt.md', currentPlan + '\n' + parsedBody.plan);
         } else {
-            await writeFile('./.aiCoder/default-plan-prompt.md', parsedBody.plan);
+            await writeSetting('prompts/default-plan-prompt.md', parsedBody.plan);
         }
 
         return { success: true };
@@ -246,9 +272,31 @@ export class conversation {
     }
 
     async addMessage(role, content) {
-        await this.messages.push({ role, content });
+        while (true) {
+            const firstLine = content.split('\n')[0].trim();
+            const everyThingElse = content.split('\n').slice(1).join('\n').trim();
+
+            // Check if the first line is a URL
+            if (firstLine.startsWith('https://') || firstLine.startsWith('http://')) {
+                //const scrapedContent = await scrapeToMarkdown(firstLine);
+                const markdownLink = `[${firstLine}](${firstLine})`;
+                const scrapedContent = `${markdownLink}\n\n${await scrapeToMarkdown(firstLine)}`;
+                await this.messages.push({ role, content: scrapedContent });
+                content = everyThingElse; // Update content to the remaining lines
+
+                // If there's no remaining content, break out of the loop
+                if (content.length === 0) break;
+            } else {
+                // If the first line is not a URL, add the remaining content and exit
+                if (content.length > 0) {
+                    await this.messages.push({ role, content });
+                }
+                break;
+            }
+        }
         await this.storeConversation();
     }
+
 
     async addFileMessage(role, filePath, description = '') {
         await this.messages.push({ role, content: filePath, filePath, description });

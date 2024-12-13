@@ -397,7 +397,7 @@ export class ChatManager {
                     //await doAjax('/storeCustomPrompts', { prompt: message.content });
                     const prompt = message.content;
                     // get the current list of prompts
-                    const customPromptsJSON = await doAjax('/readFile', { targetFile: './.aiCoder/customPrompts.json' });
+                    const customPromptsJSON = await doAjax('/readFile', { targetFile: './.aiCoder/prompts/customPrompts.json' });
                     let customPrompts = JSON.parse(customPromptsJSON.fileContent);
                     if (!customPrompts) customPrompts = [];
                     //console.log('prompts', customPrompts);
@@ -405,7 +405,7 @@ export class ChatManager {
                     if (!customPrompts.includes(prompt)) {
                         customPrompts.push(prompt);
                         await doAjax('/writeFile', {
-                            targetFile: './.aiCoder/customPrompts.json',
+                            targetFile: './.aiCoder/prompts/customPrompts.json',
                             fileContent: JSON.stringify(customPrompts, null, 2),
                         });
                     }
@@ -422,8 +422,8 @@ export class ChatManager {
             // check if this is the last message
             if (response.messages.indexOf(message) === response.messages.length - 1) {
 
-                console.log("We are at the last message. ");
-                console.log(response.messages.indexOf(message), response.messages.length - 1);
+                //console.log("We are at the last message. ");
+                //console.log(response.messages.indexOf(message), response.messages.length - 1);
 
 
 
@@ -458,7 +458,7 @@ export class ChatManager {
 
 
     async displayPremadePromptsList() {
-        const customPromptsJSON = await doAjax('/readFile', { targetFile: './.aiCoder/customPrompts.json' });
+        const customPromptsJSON = await doAjax('/readFile', { targetFile: '../.aiCoder/prompts/customPrompts.json' });
         let customPrompts = JSON.parse(customPromptsJSON.fileContent);
         if (!customPrompts) customPrompts = [];
         //console.log('prompts', customPrompts);
@@ -510,7 +510,7 @@ export class ChatManager {
                 if (confirmDelete) {
                     customPrompts = customPrompts.filter((p) => p !== prompt);
                     await doAjax('/writeFile', {
-                        targetFile: './.aiCoder/customPrompts.json',
+                        targetFile: './.aiCoder/prompts/customPrompts.json',
                         fileContent: JSON.stringify(customPrompts, null, 2),
                     });
                     this.displayPremadePromptsList();
@@ -650,7 +650,8 @@ export class ChatManager {
             // set the user input to say that the snippet was formatted incorrectly 
             // and needs to be corrected. 
 
-            this.setInput("The last snippet was formatted incorrectly and needs to be corrected.");
+            this.setInput(`The last snippet was formatted incorrectly and needs to be corrected. 
+                Remember that methods must be encapsulated in a class.`);
             if (this.autoApplyMode) {
                 await this.addMessage(this.userInput.value);
                 await this.callLLM();

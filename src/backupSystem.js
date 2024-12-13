@@ -80,7 +80,7 @@ export async function restoreFileFromBackup() {
     await createBackup(convertToRelativePath(ctx.targetFile));
     await rollbackFile(backupFile);
 
-    await printAndPause('File restored successfully', 2);
+    await printAndPause('File restored successfully');
 
 }
 

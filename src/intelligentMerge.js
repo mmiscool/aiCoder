@@ -4,14 +4,12 @@ import * as escodegen from 'escodegen';
 import esprima from 'esprima-next';
 import estraverse from 'estraverse';
 import { ctx } from './main.js';
-import { appendFile, readFile, readOrLoadFromDefault, writeFile, } from './fileIO.js';
+import { appendFile, readFile, writeFile, } from './fileIO.js';
 import { createBackup } from './backupSystem.js';
 
 
 import {
     clearTerminal,
-    printAndPause,
-    printCodeToTerminal,
 } from './terminalHelpers.js';
 
 

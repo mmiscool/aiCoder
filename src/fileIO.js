@@ -25,8 +25,8 @@ export async function readFile(filePath) {
 
 export async function writeFile(filePath, content, makeBackup = false) {
     if (typeof content !== 'string') {
-        await printAndPause('Content is not a string:', 0);
-        await printAndPause(content, 0);
+        await printAndPause('Content is not a string:');
+        await printAndPause(content);
         await pressEnterToContinue();
 
     }
@@ -74,18 +74,47 @@ export async function createFolderIfNotExists(folderPath) {
 
 
 
-export async function readOrLoadFromDefault(filePath, defaultFilePath) {
-    console.log('Reading or loading from default:', filePath);
+export async function readOrLoadFromDefault(filePath, defaultFilePath = null) {
+    //console.log('Reading or loading from default:', filePath);
     defaultFilePath = await getScriptFolderPath() + defaultFilePath;
     let fileContent = await readFile(filePath);
     if (fileContent === null) {
         console.log('Creating new file:', filePath);
         fileContent = await readFile(defaultFilePath);
         await writeFile(filePath, fileContent);
-    }else{
-        console.log('File exists:', filePath);
+    } else {
+        //console.log('File exists:', filePath);
     }
     return fileContent;
+}
+
+
+
+export async function readSetting(fileName) {
+    // by default the settings are stored in the ./.aiCoder folder. 
+    // If the file is not found we will use the readOrLoadFromDefault function to create a new file with the default settings
+    return await readOrLoadFromDefault(`./.aiCoder/${fileName}`, `/${fileName}`);
+}
+
+export async function writeSetting(fileName, content) {
+    // by default the settings are stored in the ./.aiCoder folder. 
+    await writeFile(`./.aiCoder/${fileName}`, content);
+}
+
+
+export async function moveFile(oldPath, newPath) {
+    // create the folders in the file path if they don't exist
+    try {
+        let folderPath = path.dirname(newPath);
+        await createFolderIfNotExists(folderPath);
+        printDebugMessage("Moving file:", oldPath, newPath);
+        await fs.renameSync(oldPath, newPath);
+        await printAndPause(`File moved: ${oldPath} to ${newPath}`);
+    } catch (error) {
+        //console.log(`Error moving file: ${oldPath} to ${newPath}`);
+        //console.log('Error moving file:', error);
+    }
+
 }
 
 

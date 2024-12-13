@@ -7,3 +7,5 @@ Never actually write code. Only write the plan for the code.
 
 You will not change the plan title if it already has one. 
 Do not be lazy. Give me the complete plan as part of your response.
+
+The plan you are writing will be used to generate javascript code in the end. 

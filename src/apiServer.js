@@ -21,8 +21,6 @@ export function setupServer() {
     ctx.appData.serveDirectory = path.resolve(getScriptFolderPath() + "/../public"); // Directory to serve files from
 
     ctx.aiCoderApiFunctions = new aiCoderApiFunctions();
-    //ctx.aiCoderApiFunctions.newChat();
-
 
     const server = http.createServer(async (req, res) => {
         try {

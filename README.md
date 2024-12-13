@@ -40,6 +40,7 @@ The magic lies in aiCoder’s advanced merging logic, which keeps your original 
 7. Review the suggested snippets and click **🤖✎⚡** to automatically merge them into the file.
 
 # Installation
+Installation instructions provided for linux. 
 
 ### From NPM
 ```
@@ -56,7 +57,8 @@ npm i -g aicodertool
    
 After installation, you’re all set! Just run the `aiCoder` or the much short `a` command in any project directory.
 
-If you want to use local Ollama as your LLM provider install it with the following commands. 
+Installing Ollama allows you to use local LLMs. 
+On linux you can run `aiCoder -setup` to automatically install ollama and pull the default model or manually install it with the following commands: 
 ```
 # Install Ollama 
 curl -fsSL https://ollama.com/install.sh | sh
@@ -67,6 +69,7 @@ ollama pull granite3-dense
 
 You can find and install additional models to test with 
 https://ollama.com/search
+
 
 ## Usage
 Launch `aiCoder` from within your project folder:

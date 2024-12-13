@@ -1,27 +1,36 @@
 import { OpenAI } from "openai";
 import Groq from "groq-sdk";
 import ollama from 'ollama';
-import fs from 'fs';
-import { readFile, writeFile } from "./fileIO.js"
+import { readFile, readSetting, writeSetting } from "./fileIO.js"
 import {
     clearTerminal,
     printAndPause,
-    confirmAction,
     printToTerminal,
-
+    readArg,
 } from "./terminalHelpers.js";
 import Anthropic from '@anthropic-ai/sdk';
 import cliProgress from 'cli-progress';
 import { spawn } from 'child_process';
-
-import TurndownService from 'turndown';
+import { read } from "fs";
 
 
 let throttleTime = 20;
 let lastCallTime = 0;
 
 
+async function setupMode() {
+    if (readArg('-setup')) {
+        await printAndPause('Entering setup mode');
+        await clearTerminal();
+        await printAndPause('Installing ollama', 5);
+        await installOllama();
+        await printAndPause('Ollama installed');
+        await printAndPause('Pulling the default model');
+        await pullOllamaModelWithProgress('granite3-dense:latest');
+    }
+}
 
+setupMode();
 
 
 
@@ -41,28 +50,13 @@ async function throttle() {
 
 
 export async function callLLM(messages) {
-    const llmToUse = await selectAIservice();
+    const llmToUse = await readSetting(`llmConfig/ai-service.txt`);
 
     // for each message in the array, check if it is a file path and if it is read the file and add the content to the messages array
     for (let i = 0; i < messages.length; i++) {
         if (messages[i].filePath) {
             messages[i].content = messages[i].description + "\n\n"
             messages[i].content += await readFile(messages[i].filePath);
-        }
-
-        // test if the message is a URL if so replace the content with the text from the URL
-        if (messages[i].content.startsWith('http')) {
-            const url = messages[i].content;
-            const response = await fetch(url);
-            console.log('response:', response);
-            const text = await response.text();
-            const turndownService = new TurndownService();
-            await turndownService.remove("script");
-            await turndownService.remove("style");
-            await turndownService.remove("footer");
-            const markdown = turndownService.turndown(text);
-            console.log('markdown:', markdown);
-            messages[i].content = markdown;
         }
     }
 
@@ -102,30 +96,30 @@ export async function llmSettings() {
     // pull the current settings from the files
     // pull the available models from each service
 
-    const currentService = await readFile('./.aiCoder/ai-service.txt');
+    const currentService = await readSetting(`llmConfig/ai-service.txt`);
 
     const settingsObject = {
         openai: {
-            model: await readFile(`./.aiCoder/openai-model.txt`),
-            apiKey: await readFile(`./.aiCoder/openai-api-key.txt`),
+            model: await readSetting(`llmConfig/openai-model.txt`),
+            apiKey: await  readSetting(`llmConfig/openai-api-key.txt`),
             models: await getOpenAIModels(),
             active: currentService === 'openai',
         },
         groq: {
-            model: await readFile(`./.aiCoder/groq-model.txt`),
-            apiKey: await readFile(`./.aiCoder/groq-api-key.txt`),
+            model: await  readSetting(`llmConfig/groq-model.txt`),
+            apiKey: await  readSetting(`llmConfig/groq-api-key.txt`),
             models: await getGroqModels(),
             active: currentService === 'groq',
         },
         ollama: {
-            model: await readFile(`./.aiCoder/ollama-model.txt`),
-            apiKey: await readFile(`./.aiCoder/ollama-api-key.txt`),
+            model:  await readSetting(`llmConfig/ollama-model.txt`),
+            apiKey: await  readSetting(`llmConfig/ollama-api-key.txt`),
             models: await getOllamaModels(),
             active: currentService === 'ollama',
         },
         anthropic: {
-            model: await readFile(`./.aiCoder/anthropic-model.txt`),
-            apiKey: await readFile(`./.aiCoder/anthropic-api-key.txt`),
+            model:  await readSetting(`llmConfig/anthropic-model.txt`),
+            apiKey: await  readSetting(`llmConfig/anthropic-api-key.txt`),
             models: await getClaudeModels(),
             active: currentService === 'anthropic',
         }
@@ -138,19 +132,19 @@ export async function llmSettings() {
 
 export async function llmSettingsUpdate(settings) {
     // write the new settings to the files
-    await writeFile(`./.aiCoder/openai-model.txt`, settings.openai.model);
-    await writeFile(`./.aiCoder/openai-api-key.txt`, settings.openai.apiKey);
+    await writeSetting(`llmConfig/openai-model.txt`, settings.openai.model);
+    await writeSetting(`llmConfig/openai-api-key.txt`, settings.openai.apiKey);
 
-    await writeFile(`./.aiCoder/groq-model.txt`, settings.groq.model);
-    await writeFile(`./.aiCoder/groq-api-key.txt`, settings.groq.apiKey);
+    await writeSetting(`llmConfig/groq-model.txt`, settings.groq.model);
+    await writeSetting(`llmConfig/groq-api-key.txt`, settings.groq.apiKey);
 
-    await writeFile(`./.aiCoder/ollama-model.txt`, settings.ollama.model);
-    await writeFile(`./.aiCoder/ollama-api-key.txt`, settings.ollama.apiKey);
+    await writeSetting(`llmConfig/ollama-model.txt`, settings.ollama.model);
+    await writeSetting(`llmConfig/ollama-api-key.txt`, settings.ollama.apiKey);
 
-    await writeFile(`./.aiCoder/anthropic-model.txt`, settings.anthropic.model);
-    await writeFile(`./.aiCoder/anthropic-api-key.txt`, settings.anthropic.apiKey);
+    await writeSetting(`llmConfig/anthropic-model.txt`, settings.anthropic.model);
+    await writeSetting(`llmConfig/anthropic-api-key.txt`, settings.anthropic.apiKey);
 
-    await writeFile(`./.aiCoder/ai-service.txt`,
+    await writeSetting(`llmConfig/ai-service.txt`,
         settings.openai.active ? 'openai' :
             settings.groq.active ? 'groq' :
                 settings.ollama.active ? 'ollama' :
@@ -160,39 +154,10 @@ export async function llmSettingsUpdate(settings) {
     return { success: true };
 }
 
-export async function setupLLMapiKey(overwrite = false, service = '') {
-    if (service === '') {
-        service = await selectAIservice();
-    }
-    const llmAPIkeyFileName = `./.aiCoder/${service}-api-key.txt`;
-
-    if (readFile(llmAPIkeyFileName) && !overwrite) {
-        return readFile(llmAPIkeyFileName);
-    } else {
-        return "";
-    }
-}
-
-
-
-export async function selectModel(overwrite = false) {
-    await clearTerminal();
-    const llmModelFileName = `./.aiCoder/${await selectAIservice()}-model.txt`;
-    if (readFile(llmModelFileName) && !overwrite) {
-        return readFile(llmModelFileName);
-    }
-}
-
-
-export async function selectAIservice(overwrite = false) {
-    if (fs.existsSync('./.aiCoder/ai-service.txt') && !overwrite) {
-        return fs.readFileSync('./.aiCoder/ai-service.txt', 'utf8');
-    }
-}
 
 // ollama related functions -----------------------------------------------------------------------------------------------
 export async function getOllamaResponse(messages) {
-    const response = await ollama.chat({ model: await selectModel(), messages, stream: true });
+    const response = await ollama.chat({ model: await readSetting('llmConfig/ollama-model.txt'), messages, stream: true });
     let responseText = '';
     for await (const part of response) {
         //process.stdout.write(part.message.content);
@@ -206,18 +171,8 @@ export async function getOllamaResponse(messages) {
 async function getOllamaModels() {
     try {
         const ollamaModels = await ollama.list();
-
         // if list is empty pull the default models
-        if (ollamaModels.models.length === 0) {
-            //await console.log(await ollama.pull({ model: 'granite3-dense:latest', stream: true }));
-            if (await confirmAction('No models found. Do you want to download the default models?')) {
-                await pullOllamaModelWithProgress('granite3-dense:latest');
-
-                return getOllamaModels();
-            } else return [];
-        }
-
-
+        if (ollamaModels.models.length === 0) return [];
         // Make a clean list of just the model names
         const arrayOfModels = ollamaModels.models.map(model => model.name);
         return arrayOfModels;
@@ -230,28 +185,33 @@ async function getOllamaModels() {
 
 async function installOllama() {
     await clearTerminal();
-    return new Promise((resolve, reject) => {
-        const command = 'curl';
-        const args = ['-fsSL', 'https://ollama.com/install.sh', '|', 'sh'];
+    try {
+        return new Promise((resolve, reject) => {
+            const command = 'curl';
+            const args = ['-fsSL', 'https://ollama.com/install.sh', '|', 'sh'];
 
-        const installer = spawn(command, args, { stdio: 'inherit', shell: true });
+            const installer = spawn(command, args, { stdio: 'inherit', shell: true });
 
-        installer.on('error', (error) => {
-            console.error(`Error: ${error.message}`);
-            reject(error);
+            installer.on('error', (error) => {
+                console.error(`Error: ${error.message}`);
+                reject(error);
+            });
+
+            installer.on('exit', (code) => {
+                if (code === 0) {
+                    console.log('Ollama installed successfully!');
+                    pullOllamaModelWithProgress('granite3-dense:latest');
+                    resolve();
+                } else {
+                    console.log(`Installation failed with code: ${code}`);
+                    reject(new Error(`Exit code: ${code}`));
+                }
+            });
         });
-
-        installer.on('exit', (code) => {
-            if (code === 0) {
-                console.log('Ollama installed successfully!');
-                pullOllamaModelWithProgress('granite3-dense:latest');
-                resolve();
-            } else {
-                console.log(`Installation failed with code: ${code}`);
-                reject(new Error(`Exit code: ${code}`));
-            }
-        });
-    });
+    } catch (error) {
+        console.error('Error installing Ollama:', error);
+        return;
+    }
 }
 
 
@@ -299,13 +259,13 @@ async function pullOllamaModelWithProgress(model) {
 // groq related functions -----------------------------------------------------------------------------------------------
 
 export async function getGroqResponse(messages) {
-    const groq = new Groq({ apiKey: await setupLLMapiKey() });
+    const groq = new Groq({ apiKey: readSetting('llmConfig/groq-api-key.txt') });
 
 
     const completion = await groq.chat.completions
         .create({
             messages,
-            model: await selectModel(),
+            model: await readSetting('llmConfig/groq-model.txt'),
         })
     console.log(completion.choices[0].message.content);
 
@@ -314,7 +274,7 @@ export async function getGroqResponse(messages) {
 
 
 async function getGroqModels() {
-    const groq = new Groq({ apiKey: await readFile('./.aiCoder/groq-api-key.txt') });
+    const groq = new Groq({ apiKey: await readSetting('llmConfig/groq-api-key.txt') });
     try {
         const response = await groq.models.list();
         const models = response.data;
@@ -334,13 +294,14 @@ async function getGroqModels() {
 
 // openAI related functions -----------------------------------------------------------------------------------------------
 async function getOpenAIResponse(messages) {
-    const apiKey = await setupLLMapiKey();
+    const apiKey = await readSetting('llmConfig/openai-api-key.txt');
+    console.log('apiKey:', apiKey);
     let openai = new OpenAI({ apiKey });
 
     let responseText = '';
 
     const resultStream = await openai.chat.completions.create({
-        model: await selectModel(),
+        model: await readSetting('llmConfig/openai-model.txt'),
         messages,
         stream: true
     });
@@ -357,7 +318,7 @@ async function getOpenAIResponse(messages) {
 
 
 async function getOpenAIModels() {
-    const apiKey = await readFile('./.aiCoder/openai-api-key.txt');
+    const apiKey = await readSetting('llmConfig/openai-api-key.txt');
     let openai = new OpenAI({ apiKey });
     try {
         const response = await openai.models.list();
@@ -380,7 +341,7 @@ async function getOpenAIModels() {
 
 // Anthropic related functions -----------------------------------------------------------------------------------------------
 async function getClaudeResponse(messages, retry = true) {
-    const apiKey = await setupLLMapiKey(); // Replace with your method for retrieving the API key
+    const apiKey = await readSetting('llmConfig/anthropic-api-key.txt');
     const anthropic = new Anthropic({ apiKey });
 
     let responseText = '';
@@ -407,7 +368,7 @@ async function getClaudeResponse(messages, retry = true) {
 
         // Make the API call with streaming
         const stream = anthropic.messages.stream({
-            model: await selectModel(), // Replace with your preferred model, e.g., "claude-3-5-sonnet-20241022"
+            model: await readSetting('llmConfig/anthropic-model.txt'), // Replace with your preferred model, e.g., "claude-3-5-sonnet-20241022"
             max_tokens: 8192, // Adjust the max tokens based on your requirements
             system: systemMessage, // Add the system message here
             messages: formattedMessages, // Use only user and assistant messages
