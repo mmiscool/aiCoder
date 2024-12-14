@@ -11,7 +11,7 @@ import {
 import Anthropic from '@anthropic-ai/sdk';
 import cliProgress from 'cli-progress';
 import { spawn } from 'child_process';
-import { read } from "fs";
+
 
 
 let throttleTime = 20;
@@ -75,7 +75,7 @@ export async function callLLM(messages) {
         response = await getClaudeResponse(messages);
     }
     else {
-        await printAndPause('This feature is not yet implemented.', 1.5);
+        await printAndPause('Error:   No LLM selected.', 1.5);
         response = '';
     }
 

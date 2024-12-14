@@ -8,7 +8,7 @@ import { setupServer } from './apiServer.js';
 
 
 
-export const debugMode = false;
+
 
 
 // graceful shutdown

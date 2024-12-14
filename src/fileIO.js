@@ -25,8 +25,7 @@ export async function readFile(filePath) {
 
 export async function writeFile(filePath, content, makeBackup = false) {
     if (typeof content !== 'string') {
-        await printAndPause('Content is not a string:');
-        await printAndPause(content);
+        await printDebugMessage('Content is not a string:',content);
     }
     // create the folders in the file path if they don't exist
     let folderPath = path.dirname(filePath);
@@ -39,7 +38,7 @@ export async function writeFile(filePath, content, makeBackup = false) {
 }
 
 export async function appendFile(filePath, content, makeBackup = false) {
-    printDebugMessage("Appending to file:", filePath);
+    await printDebugMessage("Appending to file:", filePath);
     filePath = await convertToRelativePath(filePath);
     if (makeBackup) await createBackup(filePath);
     await fs.appendFileSync(filePath, content, 'utf8');
@@ -115,8 +114,8 @@ export async function moveFile(oldPath, newPath) {
     try {
         let folderPath = path.dirname(newPath);
         await createFolderIfNotExists(folderPath);
-        printDebugMessage("Moving file:", oldPath, newPath);
         await fs.renameSync(oldPath, newPath);
+        await printDebugMessage("Moving file:", oldPath, newPath);
         await printAndPause(`File moved: ${oldPath} to ${newPath}`);
     } catch (error) {
         //console.log(`Error moving file: ${oldPath} to ${newPath}`);

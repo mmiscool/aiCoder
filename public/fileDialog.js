@@ -1,72 +1,101 @@
 // File: fileDialog.js
-// File: fileDialog.js
-import { doAjax } from "./doAjax.js";
+import { makeElement } from './domElementFactory.js';
+import { doAjax } from './doAjax.js';
 
 export async function fileDialog(fileListArray) {
     return new Promise((resolve) => {
-        // Create modal elements
-        const modal = document.createElement('div');
-        modal.id = 'file-dialog';
-        modal.style.position = 'fixed';
-        modal.style.top = '0';
-        modal.style.left = '0';
-        modal.style.width = '100vw';
-        modal.style.height = '100vh';
-        modal.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
-        modal.style.display = 'flex';
-        modal.style.justifyContent = 'center';
-        modal.style.alignItems = 'center';
-        modal.style.zIndex = '10000';
-        modal.style.color = '#f0f0f0';
+        // Create modal elements using makeElement
+        const modal = makeElement('div', {
+            id: 'file-dialog',
+            style: {
+                position: 'fixed',
+                top: '0',
+                left: '0',
+                width: '100vw',
+                height: '100vh',
+                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                zIndex: '10000',
+                color: '#f0f0f0',
+            },
+        });
 
-        const dialog = document.createElement('div');
-        dialog.id = 'file-dialog-content';
-        dialog.style.backgroundColor = '#333';
-        dialog.style.padding = '20px';
-        dialog.style.borderRadius = '8px';
-        dialog.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.4)';
-        dialog.style.width = '400px';
-        dialog.style.maxHeight = '80vh';
-        dialog.style.overflowY = 'auto';
+        const dialog = makeElement('div', {
+            id: 'file-dialog-content',
+            style: {
+                backgroundColor: '#333',
+                padding: '20px',
+                borderRadius: '8px',
+                boxShadow: '0 4px 8px rgba(0, 0, 0, 0.4)',
+                width: '400px',
+                maxHeight: '80vh',
+                overflowY: 'auto',
+            },
+        });
 
-        const title = document.createElement('h2');
-        title.innerText = 'Select a File';
-        title.style.margin = '0 0 20px';
-        title.style.color = '#ffffff';
-        dialog.appendChild(title);
+        const title = makeElement('h2', {
+            innerText: 'Select a File',
+            style: {
+                margin: '0 0 20px',
+                color: '#ffffff',
+            },
+        });
 
-        const fileTreeContainer = document.createElement('ul');
-        fileTreeContainer.style.listStyleType = 'none';
-        fileTreeContainer.style.padding = '0';
-        fileTreeContainer.style.margin = '0';
-        dialog.appendChild(fileTreeContainer);
+        const fileTreeContainer = makeElement('ul', {
+            style: {
+                listStyleType: 'none',
+                padding: '0',
+                margin: '0',
+            },
+        });
 
-        const buttonsContainer = document.createElement('div');
-        buttonsContainer.style.display = 'flex';
-        buttonsContainer.style.justifyContent = 'space-between';
-        buttonsContainer.style.marginTop = '20px';
+        const buttonsContainer = makeElement('div', {
+            style: {
+                display: 'flex',
+                justifyContent: 'space-between',
+                marginTop: '20px',
+            },
+        });
 
-        const cancelButton = document.createElement('button');
-        cancelButton.innerText = 'Cancel';
-        cancelButton.style.padding = '10px 20px';
-        cancelButton.style.cursor = 'pointer';
-        cancelButton.style.backgroundColor = '#444';
-        cancelButton.style.border = 'none';
-        cancelButton.style.borderRadius = '4px';
-        cancelButton.style.color = '#f0f0f0';
+        const cancelButton = makeElement('button', {
+            innerText: 'Cancel',
+            style: {
+                padding: '10px 20px',
+                cursor: 'pointer',
+                backgroundColor: '#444',
+                border: 'none',
+                borderRadius: '4px',
+                color: '#f0f0f0',
+            },
+            onclick: () => {
+                resolve(null);
+                document.body.removeChild(modal);
+            },
+        });
 
-        const selectButton = document.createElement('button');
-        selectButton.innerText = 'Select';
-        selectButton.disabled = true;
-        selectButton.style.padding = '10px 20px';
-        selectButton.style.cursor = 'pointer';
-        selectButton.style.backgroundColor = '#444';
-        selectButton.style.border = 'none';
-        selectButton.style.borderRadius = '4px';
-        selectButton.style.color = '#f0f0f0';
+        const selectButton = makeElement('button', {
+            innerText: 'Select',
+            disabled: true,
+            style: {
+                padding: '10px 20px',
+                cursor: 'pointer',
+                backgroundColor: '#444',
+                border: 'none',
+                borderRadius: '4px',
+                color: '#f0f0f0',
+            },
+            onclick: () => {
+                resolve(selectedFile.substring(1));
+                document.body.removeChild(modal);
+            },
+        });
 
         buttonsContainer.appendChild(cancelButton);
         buttonsContainer.appendChild(selectButton);
+        dialog.appendChild(title);
+        dialog.appendChild(fileTreeContainer);
         dialog.appendChild(buttonsContainer);
         modal.appendChild(dialog);
         document.body.appendChild(modal);
@@ -88,83 +117,77 @@ export async function fileDialog(fileListArray) {
         }
 
         function renderTree(tree, container, path = '', isRoot = false) {
-            Object.keys(tree).forEach((key) => {
-                const item = document.createElement('li');
-                item.style.marginLeft = '10px';
-                item.style.color = tree[key] === null ? '#66ccff' : '#ffffff'; // Blue for files, white for folders
-
-                const label = document.createElement('span');
-                label.innerText = key;
-                label.style.cursor = tree[key] === null ? 'pointer' : 'default';
-
-                // Add Unicode icons
-                if (tree[key] === null) {
-                    label.innerText = `📄 ${key}`; // File icon
-                } else {
-                    label.innerText = `📁 ${key}/`; // Folder icon
-                }
-
+            // Sort keys: folders first, then files, both alphabetically
+            const sortedKeys = Object.keys(tree).sort((a, b) => {
+                const isFolderA = tree[a] !== null;
+                const isFolderB = tree[b] !== null;
+        
+                if (isFolderA && !isFolderB) return -1; // Folders before files
+                if (!isFolderA && isFolderB) return 1;  // Files after folders
+                return a.localeCompare(b);             // Alphabetical order
+            });
+        
+            sortedKeys.forEach((key) => {
+                const item = makeElement('li', {
+                    style: {
+                        marginLeft: '10px',
+                        color: tree[key] === null ? '#66ccff' : '#ffffff',
+                    },
+                });
+        
+                const label = makeElement('span', {
+                    innerText: tree[key] === null ? `📄 ${key}` : `📁 ${key}/`,
+                    style: {
+                        cursor: tree[key] === null ? 'pointer' : 'default',
+                    },
+                    onclick: () => {
+                        if (tree[key] === null) {
+                            // Deselect all other items
+                            container.querySelectorAll('.selected').forEach((el) => el.classList.remove('selected'));
+        
+                            // Select the clicked file
+                            label.classList.add('selected');
+                            selectedFile = path + '/' + key;
+        
+                            // Resolve immediately on file click
+                            resolve(selectedFile.substring(1));
+                            document.body.removeChild(modal);
+                        }
+                    },
+                });
+        
                 item.appendChild(label);
                 container.appendChild(item);
-
+        
                 if (tree[key] !== null) {
-                    const subList = document.createElement('ul');
-                    subList.style.listStyleType = 'none';
-                    subList.style.paddingLeft = '20px';
-                    subList.style.display = isRoot ? 'block' : 'none'; // Expand root by default, collapse others
-
+                    const subList = makeElement('ul', {
+                        style: {
+                            listStyleType: 'none',
+                            paddingLeft: '20px',
+                            display: isRoot ? 'block' : 'none',
+                        },
+                    });
+        
                     renderTree(tree[key], subList, path + '/' + key);
                     item.appendChild(subList);
-
+        
                     label.style.cursor = 'pointer';
                     label.addEventListener('click', () => {
                         subList.style.display =
                             subList.style.display === 'none' ? 'block' : 'none';
                     });
                 }
-
-                label.addEventListener('click', () => {
-                    if (tree[key] === null) {
-                        const allItems = container.querySelectorAll('.selected');
-                        allItems.forEach((i) => i.classList.remove('selected'));
-                        label.classList.add('selected');
-                        selectedFile = path + '/' + key;
-                        selectButton.disabled = false;
-
-                        resolve(selectedFile.substring(1));
-                        document.body.removeChild(modal);
-                    }
-                });
-
-
-                // if (tree[key] === null) {
-                //     label.addEventListener('click', () => {
-                //         resolve(selectedFile.substring(1));
-                //         document.body.removeChild(modal);
-                //     });
-                // }
             });
         }
+        
+        
 
         // Build and render the tree
         const tree = buildTree(fileListArray);
         let selectedFile = null;
         renderTree(tree, fileTreeContainer, '', true); // Root node expanded
-
-        // Handle dialog actions
-        cancelButton.addEventListener('click', () => {
-            resolve(null);
-            document.body.removeChild(modal);
-        });
-
-        selectButton.addEventListener('click', () => {
-            resolve(selectedFile.substring(1));
-            document.body.removeChild(modal);
-        });
     });
 }
-
-
 
 export async function choseFile() {
     const response = await doAjax('/getFilesList', {});

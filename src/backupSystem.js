@@ -1,14 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
-import { convertToRelativePath, createFolderIfNotExists } from './fileIO.js';
-import inquirer from 'inquirer';
-import { Separator } from '@inquirer/prompts';
-
-//import { ctx.targetFile } from './fileSelector.js';
-import { ctx } from './main.js';
-import { clearTerminal, printAndPause, selectListHeight } from './terminalHelpers.js';
-
+import { createFolderIfNotExists } from './fileIO.js';
 
 // make a folder including any parent folders if they don't exist
 export async function createBackup(filePath) {
@@ -36,53 +29,9 @@ export async function createBackup(filePath) {
 
 
 export async function rollbackFile(pathToBackupFile) {
-    await fs.copyFileSync(pathToBackupFile, ctx.targetFile);
+    await fs.copyFileSync(pathToBackupFile, pathToBackupFile.replace('_backup_', ''));
 }
 
-
-export async function restoreFileFromBackup() {
-    // List all the versions of the ctx.targetFile file in the ./.aiCoder/backups folder
-    // Ask the user to select a version to restore
-    // Restore the selected version
-    const backupFolder = '.aiCoder/backups';
-
-    let filePath = await convertToRelativePath(ctx.targetFile);
-
-    console.log('Restoring file from backup:', filePath);
-
-
-    let allBackupFiles = await listFilesMatchingName(`${backupFolder}/${filePath}_backup_`);
-    await deleteDuplicates(allBackupFiles);
-    allBackupFiles = await listFilesMatchingName(`${backupFolder}/${filePath}_backup_`);
-
-
-    if (allBackupFiles.length === 0) return console.log('No backups found for this file');
-
-    await clearTerminal();
-
-    // Ask the user to select a backup file to restore
-    const { backupFile } = await inquirer.prompt([
-        {
-            type: 'list',
-            name: 'backupFile',
-            message: 'Select a backup version to restore:',
-            choices: ['Cancel', new Separator(), ...allBackupFiles,],
-            loop: false,
-            pageSize: await selectListHeight(),
-        }
-    ]);
-    // clear the terminal  
-    await clearTerminal();
-    if (backupFile === 'Cancel') return console.log('File restore cancelled');
-
-    console.log('Restoring file from backup:', backupFile);
-    // backup the current file in the ctx.targetFile variable. This needs to be converted to a relative path
-    await createBackup(convertToRelativePath(ctx.targetFile));
-    await rollbackFile(backupFile);
-
-    await printAndPause('File restored successfully');
-
-}
 
 
 export async function listFilesMatchingName(baseFileName) {
@@ -106,18 +55,6 @@ export async function listFilesMatchingName(baseFileName) {
     await searchDirectory(baseDir);
     return results;
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

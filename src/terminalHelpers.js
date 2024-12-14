@@ -1,11 +1,19 @@
 import { exec } from "child_process";
 import path from 'path';
-import { ctx, debugMode } from './main.js';
+import { ctx } from './main.js';
 import { wss } from './apiServer.js';
 import { readSetting, writeSetting } from "./fileIO.js";
-import { read, write } from "fs";
 
 
+export async function printDebugMessage(...message) {
+  if (await readArg('-debug')) {
+    const stack = new Error().stack;
+    const callerLine = stack.split("\n")[2];
+    const functionName = callerLine.match(/at (\S+)/)[1];
+    console.log(`Called inside function: ${functionName}`);
+    console.log(...message);
+  }
+}
 
 
 function getCallerInfo(level = 3) {
@@ -63,7 +71,7 @@ export async function clearTerminal() {
 
 
 export async function printAndPause(message, secondsToPause = 0) {
-  await getCallerInfo();
+  if (await readArg('-debug')) await getCallerInfo();
   wss.clients.forEach(client => {
     client.send(message);
   });
@@ -83,10 +91,6 @@ export async function printToTerminal(message) {
   wss.clients.forEach(client => {
     client.send(message);
   });
-}
-
-export async function selectListHeight() {
-  return process.stdout.rows - 2;
 }
 
 
@@ -182,22 +186,6 @@ export function launchNano(filePath, lineNumber = null) {
     }
   });
 }
-
-
-
-
-
-
-export async function printDebugMessage(message) {
-  if (debugMode) {
-    const stack = new Error().stack;
-    const callerLine = stack.split("\n")[2];
-    const functionName = callerLine.match(/at (\S+)/)[1];
-    console.log(`Called inside function: ${functionName}`);
-    console.log(message);
-  }
-}
-
 
 
 

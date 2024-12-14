@@ -1,4 +1,3 @@
-//
 export function makeElement(tag, attributes = {}) {
     // Create the DOM element
     const element = document.createElement(tag);

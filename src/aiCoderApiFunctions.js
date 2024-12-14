@@ -1,6 +1,6 @@
 import { applySnippets } from "./intelligentMerge.js"
 import { getListOfFunctions, getMethodsWithArguments } from "./classListing.js";
-import { appendFile, getAllFiles, moveFile, readFile, readOrLoadFromDefault, readSetting, writeFile, writeSetting } from "./fileIO.js";
+import {  getAllFiles, moveFile, readFile, readSetting, writeFile, writeSetting } from "./fileIO.js";
 import { intelligentlyMergeSnippets } from "./intelligentMerge.js";
 import { llmSettings, llmSettingsUpdate } from "./llmCall.js";
 import { launchEditor } from "./terminalHelpers.js";
