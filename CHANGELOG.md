@@ -3,6 +3,12 @@
 [![semantic versioning](https://img.shields.io/badge/semantic%20versioning-2.0.0-green.svg)](https://semver.org)
 > All notable changes to this project will be documented in this file
 
+## [1.0.48](https://github.com/mmiscool/aiCoder/compare/v1.0.47...v1.0.48) (2024-12-14)
+
+### 🤖 Build System
+
+* Use '@mmiscool/scrape_to_markdown' for scraping html to markdown. ([8e9b4a9](https://github.com/mmiscool/aiCoder/commit/8e9b4a911fcb08ce411bcf3af3f97234e04af8b6))
+
 ## [1.0.47](https://github.com/mmiscool/aiCoder/compare/v1.0.46...v1.0.47) (2024-12-14)
 
 ### 🤖 Build System
