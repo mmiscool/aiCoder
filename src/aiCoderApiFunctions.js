@@ -7,7 +7,7 @@ import { launchEditor } from "./terminalHelpers.js";
 import { prependClassStructure } from './classListing.js';
 import fs from 'fs';
 import { callLLM } from './llmCall.js';
-import { scrapeToMarkdown } from "./scrapeToMarkdown.js";
+import { scrapeToMarkdown } from '@mmiscool/scrape_to_markdown'
 
 
 
