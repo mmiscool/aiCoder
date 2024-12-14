@@ -7,10 +7,8 @@ import { readSetting, writeSetting } from "./fileIO.js";
 
 export async function printDebugMessage(...message) {
   if (await readArg('-debug')) {
-    const stack = new Error().stack;
-    const callerLine = stack.split("\n")[2];
-    const functionName = callerLine.match(/at (\S+)/)[1];
-    console.log(`Called inside function: ${functionName}`);
+    //const stack = new Error().stack;
+    await getCallerInfo();
     console.log(...message);
   }
 }
