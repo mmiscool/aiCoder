@@ -2,7 +2,8 @@ import { exec } from "child_process";
 import path from 'path';
 import { ctx, debugMode } from './main.js';
 import { wss } from './apiServer.js';
-
+import { readSetting, writeSetting } from "./fileIO.js";
+import { read, write } from "fs";
 
 
 
@@ -90,51 +91,99 @@ export async function selectListHeight() {
 
 
 
-
-export async function input(promptText, defaultValue = '') {
-  let promptObject = {};
-  promptObject.type = 'input';
-  promptObject.name = 'input';
-  promptObject.message = promptText || 'Enter a value:';
-  promptObject.default = defaultValue || '';
-  return await (await inquirer.prompt([promptObject])).input;
+export async function launchEditor(filePath, lineNumber = null) {
+  // load the default editor from the setting
+  const editorToUse = await readSetting('preferredEditor.txt');
+  printAndPause(`Opening ${filePath} to line ${lineNumber} with ${editorToUse}`);
+  if (editorToUse === 'vscode') return launchVScode(filePath, lineNumber);
+  if (editorToUse === 'neovim') return launchNeovim(filePath, lineNumber);
+  if (editorToUse === 'nano') return launchNano(filePath, lineNumber);
+  if (editorToUse === 'vim') return launchVim(filePath, lineNumber);
+  return launchVScode(filePath, lineNumber);
 }
 
-
-export async function confirmAction(message, defaultValue = true) {
-  let promptObject = {};
-  promptObject.type = 'confirm';
-  promptObject.name = 'confirm';
-  promptObject.message = message || 'Are you sure?';
-  promptObject.default = defaultValue;
-  return await (await inquirer.prompt([promptObject])).confirm;
+async function setEditor() {
+  if (readArg('-editor')) {
+    console.log('Prefered editor is set to:', await readSetting('preferredEditor.txt'));
+    console.log('Options are: vscode, neovim, nano, vim');
+    if (readArg('-editor') === 'vscode') await writeSetting('preferredEditor.txt', 'vscode');
+    if (readArg('-editor') === 'neovim') await writeSetting('preferredEditor.txt', 'neovim');
+    if (readArg('-editor') === 'nano') await writeSetting('preferredEditor.txt', 'nano');
+    if (readArg('-editor') === 'vim') await writeSetting('preferredEditor.txt', 'vim');
+    process.exit(0);
+  }
 }
+setEditor();
 
 
-export function launchNano(filePath, lineNumber = null) {
+export function launchVScode(filePath, lineNumber = null) {
   console.log('launchNano', filePath, lineNumber);
 
   // convert file path to absolute path
   filePath = path.resolve(filePath);
 
 
-  const stringCommand = `code -g ${filePath}:${lineNumber}:1`;;
+  const stringCommand = `code -g ${filePath}:${lineNumber}:1`;
   console.log('stringCommand', stringCommand);
   return exec(stringCommand, (error) => {
     if (error) {
       console.error('Error opening the file with VSCode:', error);
     }
   });
-
-
 }
 
 
+export function launchNeovim(filePath, lineNumber = null) {
+  // Convert file path to absolute path
+  filePath = path.resolve(filePath);
 
-// function to press any key to continue
-export async function pressEnterToContinue() {
-  return await input('Press Enter to continue...');
+  // Construct the command string for Neovim
+  const lineArgument = lineNumber ? `+${lineNumber}` : '';
+  const stringCommand = `nvim ${lineArgument} ${filePath}`;
+  console.log('stringCommand', stringCommand);
+
+  return exec(stringCommand, (error) => {
+    if (error) {
+      console.error('Error opening the file with Neovim:', error);
+    }
+  });
 }
+
+// launch regular vim 
+export function launchVim(filePath, lineNumber = null) {
+  // Convert file path to absolute path
+  filePath = path.resolve(filePath);
+
+  // Construct the command string for Neovim
+  const lineArgument = lineNumber ? `+${lineNumber}` : '';
+  const stringCommand = `vim ${lineArgument} ${filePath}`;
+  console.log('stringCommand', stringCommand);
+
+  return exec(stringCommand, (error) => {
+    if (error) {
+      console.error('Error opening the file with Vim:', error);
+    }
+  });
+}
+
+
+export function launchNano(filePath, lineNumber = null) {
+  // Convert file path to absolute path
+  filePath = path.resolve(filePath);
+
+  // Construct the command string for Nano
+  const lineArgument = lineNumber ? `+${lineNumber}` : '';
+  const stringCommand = `nano ${lineArgument} ${filePath}`;
+  console.log('stringCommand', stringCommand);
+
+  return exec(stringCommand, (error) => {
+    if (error) {
+      console.error('Error opening the file with Nano:', error);
+    }
+  });
+}
+
+
 
 
 

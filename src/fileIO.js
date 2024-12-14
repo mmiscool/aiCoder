@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path, { dirname } from 'path';
 import { createBackup } from './backupSystem.js';
-import { pressEnterToContinue, printAndPause, printDebugMessage } from './terminalHelpers.js';
+import { printAndPause, printDebugMessage } from './terminalHelpers.js';
 import { fileURLToPath } from 'url';
 
 // Helper functions to read, write, and append to files
@@ -27,8 +27,6 @@ export async function writeFile(filePath, content, makeBackup = false) {
     if (typeof content !== 'string') {
         await printAndPause('Content is not a string:');
         await printAndPause(content);
-        await pressEnterToContinue();
-
     }
     // create the folders in the file path if they don't exist
     let folderPath = path.dirname(filePath);
@@ -93,10 +91,20 @@ export async function readOrLoadFromDefault(filePath, defaultFilePath = null) {
 export async function readSetting(fileName) {
     // by default the settings are stored in the ./.aiCoder folder. 
     // If the file is not found we will use the readOrLoadFromDefault function to create a new file with the default settings
-    return await readOrLoadFromDefault(`./.aiCoder/${fileName}`, `/${fileName}`);
+
+    try {
+        return await readOrLoadFromDefault(`./.aiCoder/${fileName}`, `/${fileName}`);
+    } catch (error) {
+        console.log('Error reading setting:', fileName);
+        //console.log('Error:', error);
+        return null;
+    }
+
+
 }
 
 export async function writeSetting(fileName, content) {
+    console.log('Writing setting:', fileName, content);
     // by default the settings are stored in the ./.aiCoder folder. 
     await writeFile(`./.aiCoder/${fileName}`, content);
 }

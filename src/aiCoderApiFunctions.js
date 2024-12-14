@@ -3,7 +3,7 @@ import { getListOfFunctions, getMethodsWithArguments } from "./classListing.js";
 import { appendFile, getAllFiles, moveFile, readFile, readOrLoadFromDefault, readSetting, writeFile, writeSetting } from "./fileIO.js";
 import { intelligentlyMergeSnippets } from "./intelligentMerge.js";
 import { llmSettings, llmSettingsUpdate } from "./llmCall.js";
-import { launchNano } from "./terminalHelpers.js";
+import { launchEditor } from "./terminalHelpers.js";
 import { prependClassStructure } from './classListing.js';
 import fs from 'fs';
 import { callLLM } from './llmCall.js';
@@ -167,7 +167,8 @@ export class aiCoderApiFunctions {
     }
 
     async gotoLineNumber(parsedBody) {
-        await launchNano(parsedBody.targetFile, parsedBody.lineNumber);
+        console.log('gotoLineNumber', parsedBody);
+        await launchEditor(parsedBody.targetFile, parsedBody.lineNumber);
         return { success: true };
     }
 

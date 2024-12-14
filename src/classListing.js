@@ -6,7 +6,7 @@ export async function prependClassStructure(targetFile, onlyStubs = false) {
 
   const fileContent = await readFile(targetFile);
   const list = await getMethodsWithArguments(fileContent, onlyStubs);
-  console.log(list);
+  //console.log(list);
 
   // Prompt if the user wants to include function names in the list
   const includeFunctions = true;
@@ -73,7 +73,7 @@ export function getMethodsWithArguments(code, onlyStubs = false) {
         if (classElement.type === 'MethodDefinition' && classElement.key.type === 'Identifier') {
           const methodName = classElement.key.name;
           const lineNumber = classElement.loc.start.line;
-          console.log(methodName,lineNumber);
+          //console.log(methodName,lineNumber);
 
           const args = classElement.value.params.map(param => {
             if (param.type === 'Identifier') return param.name;
