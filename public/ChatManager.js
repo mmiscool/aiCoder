@@ -456,7 +456,7 @@ export class ChatManager {
 
 
     async displayPremadePromptsList() {
-        const customPromptsJSON = await doAjax('/readFile', { targetFile: '../.aiCoder/prompts/customPrompts.json' });
+        const customPromptsJSON = await doAjax('/readFile', { targetFile: '.aiCoder/prompts/customPrompts.json' });
         let customPrompts = JSON.parse(customPromptsJSON.fileContent);
         if (!customPrompts) customPrompts = [];
         //console.log('prompts', customPrompts);

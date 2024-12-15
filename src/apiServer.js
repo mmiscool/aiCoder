@@ -13,13 +13,20 @@ import { execSync } from 'child_process';
 export let wss;
 
 
-// run "npm run build" to build the frontend
-execSync('npm run buildFrontend &', { stdio: 'inherit' });
 
 
 
 
 
+async function buildFrontend() {
+    console.log('Building frontend...');
+    const scriptPath = await getScriptFolderPath();
+
+    //execSync('npm run buildFrontend &', { stdio: 'inherit' });
+    execSync(`cd ${scriptPath} && npm run buildFrontend &`, { stdio: 'inherit' });
+}
+
+buildFrontend();
 
 export function setupServer() {
     // ctx variables

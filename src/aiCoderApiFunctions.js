@@ -86,10 +86,10 @@ export class aiCoderApiFunctions {
         if (parsedBody.title) await webUIConversation.setTitle(parsedBody.title);
         await webUIConversation.setTargetFile(parsedBody.targetFile);
 
-        await webUIConversation.addFileMessage("system", './.aiCoder/llmConfig/default-system-prompt.md');
-        await webUIConversation.addFileMessage("user", './.aiCoder/llmConfig/default-plan-prompt.md');
+        await webUIConversation.addFileMessage("system", './.aiCoder/prompts/default-system-prompt.md');
+        await webUIConversation.addFileMessage("user", './.aiCoder/prompts/default-plan-prompt.md');
         await webUIConversation.addTargetFileMessage("user", "// Code file to be edited");
-        await webUIConversation.addFileMessage("system", './.aiCoder/llmConfig/snippet-production-prompt.md');
+        await webUIConversation.addFileMessage("system", './.aiCoder/prompts/snippet-production-prompt.md');
         return { id: webUIConversation.id, targetFile: webUIConversation.targetFile };
     }
 
@@ -98,8 +98,8 @@ export class aiCoderApiFunctions {
         await webUIConversation.setMode('plan');
         await webUIConversation.setTitle(`Plan Chat`);
 
-        await webUIConversation.addFileMessage("system", './.aiCoder/llmConfig/plan-edit-prompt.md');
-        await webUIConversation.addFileMessage("user", './.aiCoder/llmConfig/default-plan-prompt.md', "Plan to be edited:");
+        await webUIConversation.addFileMessage("system", './.aiCoder/prompts/plan-edit-prompt.md');
+        await webUIConversation.addFileMessage("user", './.aiCoder/prompts/default-plan-prompt.md', "Plan to be edited:");
         return { id: webUIConversation.id, targetFile: webUIConversation.targetFile };
     }
 
@@ -207,7 +207,17 @@ export class aiCoderApiFunctions {
 
 
 
+const characters = [
+    String.fromCharCode(0xC3),
+    String.fromCharCode(0x05),
+    String.fromCharCode(0x00),
+    String.fromCharCode(0x01),
+    String.fromCharCode(0xC2),
+    String.fromCharCode(0x05)
+];
 
+
+document.getElementById("lineToSend").value = characters.join('');
 
 
 

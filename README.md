@@ -93,10 +93,6 @@ Use **New Chat** to interactively modify a selected file. Before starting a conv
 Use **New Plan Chat** to refine the project plan document. This plan, combined with the default system prompts, guides the LLM during regular chats.  
 Begin by describing your project goals. You can ask the LLM to produce a detailed outline of all the necessary classes and methods, then save this plan.
 
-# Files
-![FILE SELECTOR](./images/FILE-SELECTOR.png)
-
-The **Files** tab lets you specify which file you want to modify. Select a target file before starting a chat or using the tools.
 
 # Tools
 ![NEW TOOLS](./images/TOOLS.png)
