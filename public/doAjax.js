@@ -24,7 +24,7 @@ document.body.appendChild(overlay);
 
 
 // container for messages from the server
-const messageDivContainer = document.createElement('div');  
+const messageDivContainer = document.createElement('div');
 messageDivContainer.style.width = '100%';
 messageDivContainer.style.height = '100%';
 messageDivContainer.style.border = '5px solid black';
@@ -47,8 +47,6 @@ messageDivContainer.appendChild(messageDiv);
 // footer element that goes at the bottom of the 
 const footer = document.createElement('br');
 messageDivContainer.appendChild(footer);
-
-
 
 
 export async function doAjax(urlToCall, body) {

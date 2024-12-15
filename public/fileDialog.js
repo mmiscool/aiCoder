@@ -22,6 +22,8 @@ export async function fileDialog(fileListArray) {
             },
         });
 
+
+
         const dialog = makeElement('div', {
             id: 'file-dialog-content',
             style: {

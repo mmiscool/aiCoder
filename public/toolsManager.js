@@ -19,8 +19,13 @@ export class toolsManager {
         this.container.style.flexDirection = 'column';
         this.container.style.overflow = 'auto';
         this.snippetTextArea = null;
+        this.onlyStubs = (localStorage.getItem('showOnlyStubs') === 'true');
+        // checkbox to show only stubs
+
         this.showToolBar();
     }
+
+
     async showToolBar() {
         this.container.innerHTML = '';
         this.toolBar = document.createElement('div');
@@ -28,18 +33,27 @@ export class toolsManager {
         this.toolBar.style.flexDirection = 'row';
         // toolBar.style.justifyContent = 'space-between';
         this.toolBar.style.margin = '0px';
+
+        const showOnlyStubsCheckbox = document.createElement('input');
+        showOnlyStubsCheckbox.type = 'checkbox';
+        showOnlyStubsCheckbox.checked = localStorage.getItem('showOnlyStubs') === 'true';
+        showOnlyStubsCheckbox.onchange = async () => {
+            await localStorage.setItem('showOnlyStubs', showOnlyStubsCheckbox.checked);
+            console.log('showOnlyStubs', showOnlyStubsCheckbox.checked);
+            this.onlyStubs = showOnlyStubsCheckbox.checked;
+            await this.displayListOfStubsAndMethods();
+        }
+        this.container.appendChild(showOnlyStubsCheckbox);
+        const showOnlyStubsLabel = document.createElement('label');
+        showOnlyStubsLabel.textContent = 'Show Only Stubs';
+        this.container.appendChild(showOnlyStubsLabel);
+        this.container.appendChild(document.createElement('br'));
+
+
         const pullMethodsListButton = await this.makeToolBarButton('Methods List', async () => {
-            await this.pullMethodsList();
+            this.displayListOfStubsAndMethods();
         });
         this.toolBar.appendChild(pullMethodsListButton);
-        const pullStubsListButton = await this.makeToolBarButton('Stubs List', async () => {
-            await this.pullMethodsList(true);
-        });
-        this.toolBar.appendChild(pullStubsListButton);
-        const pullFunctionListButton = await this.makeToolBarButton('Function List', async () => {
-            await this.pullFunctionList();
-        });
-        this.toolBar.appendChild(pullFunctionListButton);
         const implementAllStubsButton = await this.makeToolBarButton('Implement All Stubs', async () => {
             await this.implementAllStubs();
         });
@@ -55,6 +69,14 @@ export class toolsManager {
         });
         this.toolBar.appendChild(prependClassStructureButton);
         this.container.appendChild(this.toolBar);
+        return await console.log('showToolBar');
+    }
+
+    async displayListOfStubsAndMethods() {
+        await this.showToolBar();
+        if (!await this.verifyTargetFileSpecified()) return;
+        await this.pullMethodsList();
+        await this.pullFunctionList();
     }
     async implementAllStubs() {
         if (!await this.verifyTargetFileSpecified())
@@ -99,37 +121,33 @@ export class toolsManager {
             return;
         await doAjax('/prependClassStructure', { targetFile: ctx.targetFile });
     }
-    async pullMethodsList(showOnlyStubs = false) {
-        this.showToolBar();
-        if (!await this.verifyTargetFileSpecified())
-            return;
+    async pullMethodsList() {
         const listOfMethods = await doAjax('/getMethodsList', { targetFile: ctx.targetFile });
         console.log(listOfMethods);
         // the response contains
         for (const className in listOfMethods) {
             // console.log(className);
             const methods = listOfMethods[className];
-            for (const {name, args, isStub, lineNumber} of methods) {
-                if (showOnlyStubs && !isStub)
-                    continue;
+            for (const { name, args, isStub, lineNumber } of methods) {
+                if (this.onlyStubs && !isStub) continue;
                 const argList = args.join(', ');
-                console.log(`${ className }.${ name }(${ argList })`);
+                //console.log(`${className}.${name}(${argList})`);
                 const methodItemElement = document.createElement('dim');
                 // add class .hover-effect to
                 methodItemElement.classList.add('hover-effect');
-                methodItemElement.textContent = `${ className }.${ name }(${ argList })`;
+                methodItemElement.textContent = `${className}.${name}(${argList})`;
                 if (isStub) {
                     methodItemElement.style.color = 'red';
                     methodItemElement.addEventListener('click', async () => {
                         await this.implementSpecificClassMethod(className, name, lineNumber);
-                        await this.pullMethodsList(showOnlyStubs);
+                        await this.pullMethodsList(this.onlyStubs);
                     });
                 } else {
                     methodItemElement.style.color = 'green';
                     methodItemElement.addEventListener('click', async () => {
                         await this.addToChatPrompt(className, name, lineNumber);
-                        console.log('this is the line number ', lineNumber);
-                        await this.pullMethodsList(showOnlyStubs);
+                        //console.log('this is the line number ', lineNumber);
+                        await this.pullMethodsList(this.onlyStubs);
                     });
                 }
                 this.container.appendChild(methodItemElement);
@@ -137,55 +155,40 @@ export class toolsManager {
             }
         }
     }
-    async pullFunctionList(showOnlyStubs = false) {
-        // this calls the getFunctionList endpoint and displays the list of functions in the container
-        // similar to pullMethodsList, but for functions
-        this.showToolBar();
-        if (!await this.verifyTargetFileSpecified())
-            return;
+    async pullFunctionList() {
         const listOfFunctions = await doAjax('/getFunctionList', { targetFile: ctx.targetFile });
-        console.log(listOfFunctions);
-        /* format of the response
-            {
-                "test": {
-                    "functionName": "test",
-                    "args": [],
-                    "isStub": true,
-                    "lineNumber": 1131
-                },
-                "test2": {
-                    "functionName": "test2",
-                    "args": [],
-                    "isStub": true,
-                    "lineNumber": 1135
-                }
-            }*/
+
         for (const key in listOfFunctions) {
-            console.log(key);
+            // console.log(key);
             // Logs the key (function name) from the response
-            const {functionName, args, isStub, lineNumber} = listOfFunctions[key];
+            const { functionName, args, isStub, lineNumber } = listOfFunctions[key];
+            if (this.onlyStubs && !isStub) continue;
             const argList = args.join(', ');
-            console.log(`${ functionName }(${ argList })`);
+            //console.log(`${functionName}(${argList})`);
             const functionItemElement = document.createElement('dim');
             // add class .hover-effect to
             functionItemElement.classList.add('hover-effect');
-            functionItemElement.textContent = `${ functionName }(${ argList })`;
+            functionItemElement.textContent = `${functionName}(${argList})`;
             if (isStub) {
                 functionItemElement.style.color = 'red';
                 functionItemElement.addEventListener('click', async () => {
                     await this.implementSpecificFunction(functionName, lineNumber);
-                    await this.pullFunctionList(showOnlyStubs);
+                    await this.pullFunctionList(this.onlyStubs);
                 });
             } else {
                 functionItemElement.style.color = 'green';
                 functionItemElement.addEventListener('click', async () => {
                     await this.addFunctionToChatPrompt(functionName, lineNumber);
                     console.log('this is the line number ', lineNumber);
-                    await this.pullFunctionList(showOnlyStubs);
+                    await this.pullFunctionList(this.onlyStubs);
                 });
             }
+            console.log(this.onlyStubs, isStub);
+
             this.container.appendChild(functionItemElement);
             this.container.appendChild(document.createElement('br'));
+
+
         }
     }
     async implementSpecificClassMethod(className, methodName, lineNumber) {
@@ -194,8 +197,8 @@ export class toolsManager {
             lineNumber,
             targetFile: ctx.targetFile
         });
-        await ctx.chat.newChat(`Implement ${ methodName }.${ className }`);
-        await ctx.chat.addMessage(`Write the ${ methodName } method in the ${ className } class.`);
+        await ctx.chat.newChat(`Implement ${methodName}.${className}`);
+        await ctx.chat.addMessage(`Write the ${methodName} method in the ${className} class.`);
         await ctx.chat.callLLM();
     }
     async addToChatPrompt(className, methodName, lineNumber) {
@@ -204,8 +207,8 @@ export class toolsManager {
             lineNumber,
             targetFile: ctx.targetFile
         });
-        await ctx.chat.newChat(`Modify ${ methodName }.${ className }`);
-        await ctx.chat.setInput(`Modify the ${ methodName } method in the ${ className } class.\nImprove it.`);
+        await ctx.chat.newChat(`Modify ${methodName}.${className}`);
+        await ctx.chat.setInput(`Modify the ${methodName} method in the ${className} class.\nImprove it.`);
     }
     async implementSpecificFunction(functionName, lineNumber) {
         ctx.tabs.switchToTab('Chat');
@@ -213,8 +216,8 @@ export class toolsManager {
             lineNumber,
             targetFile: ctx.targetFile
         });
-        await ctx.chat.newChat(`Implement ${ functionName }`);
-        await ctx.chat.addMessage(`Write the ${ functionName } function.`);
+        await ctx.chat.newChat(`Implement ${functionName}`);
+        await ctx.chat.addMessage(`Write the ${functionName} function.`);
         await ctx.chat.callLLM();
     }
     async addFunctionToChatPrompt(functionName, lineNumber) {
@@ -223,13 +226,13 @@ export class toolsManager {
             lineNumber,
             targetFile: ctx.targetFile
         });
-        await ctx.chat.newChat(`Modify ${ functionName }`);
-        await ctx.chat.setInput(`Modify the ${ functionName } function.\nImprove it.`);
+        await ctx.chat.newChat(`Modify ${functionName}`);
+        await ctx.chat.setInput(`Modify the ${functionName} function.\nImprove it.`);
     }
     async verifyTargetFileSpecified() {
         if (!ctx.targetFile) {
             alert('Please select a file first');
-            ctx.tabs.switchToTab('Files');
+            ctx.tabs.switchToTab('chat');
             return false;
         }
         return true;

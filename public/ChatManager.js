@@ -45,9 +45,6 @@ export class ChatManager {
         this.targetFileInput.addEventListener('click', async () => {
             const targetFile = await choseFile();
             this.setTargetFile(targetFile);
-            ///const conversationId = this.conversationPicker.value;
-            //await doAjax('/setTargetFile', { id: conversationId, targetFile });
-            //await this.loadConversationsList();
         });
 
 
@@ -277,6 +274,7 @@ export class ChatManager {
     async setTargetFile(targetFile) {
         this.targetFileInput.value = targetFile;
         ctx.targetFile = targetFile;
+        return await ctx.tools.displayListOfStubsAndMethods();
     }
 
     async loadConversationsList() {
@@ -315,7 +313,7 @@ export class ChatManager {
         console.log('conversationId', conversationId);
         const response = await doAjax('/pullMessages', { id: conversationId });
         ctx.targetFile = response.targetFile;
-        this.setTargetFile(response.targetFile);
+        await this.setTargetFile(response.targetFile);
         this.conversationTitleInput.value = response.title;
         //console.log('response.messages', response.messages);
         this.chatMessageDiv.innerHTML = '';
@@ -441,9 +439,9 @@ export class ChatManager {
                                 await this.applySnippet(codeBlock);
 
                                 // swap to the files tab
-                                ctx.tabs.switchToTab('Tools');
+                                await ctx.tabs.switchToTab('Tools');
                                 // pull the methods list
-                                ctx.tools.pullMethodsList();
+                                await ctx.tools.displayListOfStubsAndMethods();
                             }
                         }
 
@@ -452,8 +450,8 @@ export class ChatManager {
             }
 
         });
-
-        this.addCodeToolbars();
+        await this.addCodeToolbars();
+        //await ctx.tools.displayListOfStubsAndMethods();
     }
 
 
@@ -625,7 +623,7 @@ export class ChatManager {
                     const codeString = codeElement.textContent;
                     await this.applySnippet(codeString);
                     codeElement.style.color = 'cyan';
-                    ctx.tools.pullMethodsList();
+                    ctx.tools.displayListOfStubsAndMethods();
                 });
 
                 toolbar.appendChild(editButton);

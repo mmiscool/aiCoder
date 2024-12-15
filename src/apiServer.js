@@ -9,16 +9,22 @@ import WebSocket, { WebSocketServer } from 'ws'; // WebSocket support
 import { getScriptFolderPath } from './fileIO.js';
 import { aiCoderApiFunctions } from './aiCoderApiFunctions.js';
 import { readArg } from './terminalHelpers.js';
-
-
+import { execSync } from 'child_process';
 export let wss;
+
+
+// run "npm run build" to build the frontend
+execSync('npm run buildFrontend &', { stdio: 'inherit' });
+
+
+
 
 
 
 export function setupServer() {
     // ctx variables
     ctx.appData = {};
-    ctx.appData.serveDirectory = path.resolve(getScriptFolderPath() + "/../public"); // Directory to serve files from
+    ctx.appData.serveDirectory = path.resolve(getScriptFolderPath() + "/../dist"); // Directory to serve files from
 
     ctx.aiCoderApiFunctions = new aiCoderApiFunctions();
 
