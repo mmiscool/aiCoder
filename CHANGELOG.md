@@ -3,6 +3,12 @@
 [![semantic versioning](https://img.shields.io/badge/semantic%20versioning-2.0.0-green.svg)](https://semver.org)
 > All notable changes to this project will be documented in this file
 
+## [1.0.53](https://github.com/mmiscool/aiCoder/compare/v1.0.52...v1.0.53) (2024-12-15)
+
+### 🤖 Build System
+
+* Made web sockets work for both http and https. ([0149c63](https://github.com/mmiscool/aiCoder/commit/0149c634dc6be5cfcc37dabf963b4502e8522293))
+
 ## [1.0.52](https://github.com/mmiscool/aiCoder/compare/v1.0.51...v1.0.52) (2024-12-15)
 
 ### 🤖 Build System
