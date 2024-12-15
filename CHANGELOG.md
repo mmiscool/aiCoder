@@ -3,6 +3,13 @@
 [![semantic versioning](https://img.shields.io/badge/semantic%20versioning-2.0.0-green.svg)](https://semver.org)
 > All notable changes to this project will be documented in this file
 
+## [1.0.50](https://github.com/mmiscool/aiCoder/compare/v1.0.49...v1.0.50) (2024-12-15)
+
+### 🤖 Build System
+
+* added build step for frontend ([4af8699](https://github.com/mmiscool/aiCoder/commit/4af86991e5640874bc1f933dd0f9ef66793d9bca))
+* cleanup lingering unreachable code. ([bdb5924](https://github.com/mmiscool/aiCoder/commit/bdb59244512a751c17692d02e681dea987ea266a))
+
 ## [1.0.49](https://github.com/mmiscool/aiCoder/compare/v1.0.48...v1.0.49) (2024-12-14)
 
 ### 🤖 Build System
