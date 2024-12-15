@@ -207,27 +207,6 @@ export class aiCoderApiFunctions {
 
 
 
-const characters = [
-    String.fromCharCode(0xC3),
-    String.fromCharCode(0x05),
-    String.fromCharCode(0x00),
-    String.fromCharCode(0x01),
-    String.fromCharCode(0xC2),
-    String.fromCharCode(0x05)
-];
-
-
-document.getElementById("lineToSend").value = characters.join('');
-
-
-
-
-
-
-
-
-
-
 
 
 
