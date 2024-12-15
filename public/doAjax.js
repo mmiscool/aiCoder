@@ -81,7 +81,7 @@ export async function doAjax(urlToCall, body) {
 
 class WebSocketClient {
   constructor() {
-    this.url = `ws://${window.location.host}`;
+    this.url = window.location.protocol === "http:"? `ws://${window.location.host}` : `wss://${window.location.host}`;
     this.socket = null;
   }
 

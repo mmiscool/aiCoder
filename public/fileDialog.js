@@ -192,7 +192,7 @@ export async function fileDialog(fileListArray) {
 }
 
 export async function choseFile() {
-    const response = await doAjax('/getFilesList', {});
+    const response = await doAjax('./getFilesList', {});
     const fileList = response.files || [];
 
     const selectedFile = await fileDialog(fileList);

@@ -82,7 +82,7 @@ export class toolsManager {
         if (!await this.verifyTargetFileSpecified())
             return;
         this.showToolBar();
-        await doAjax('/implementAllStubs', { targetFile: ctx.targetFile });
+        await doAjax('./implementAllStubs', { targetFile: ctx.targetFile });
     }
     async mergeAndFormat() {
         if (!await this.verifyTargetFileSpecified())
@@ -103,7 +103,7 @@ export class toolsManager {
             snippet = this.snippetTextArea.value;
             this.snippetTextArea = null;
         }
-        await doAjax('/applySnippet', {
+        await doAjax('./applySnippet', {
             targetFile: ctx.targetFile,
             snippet: snippet
         });
@@ -119,10 +119,10 @@ export class toolsManager {
     async prependClassStructure() {
         if (!await this.verifyTargetFileSpecified())
             return;
-        await doAjax('/prependClassStructure', { targetFile: ctx.targetFile });
+        await doAjax('./prependClassStructure', { targetFile: ctx.targetFile });
     }
     async pullMethodsList() {
-        const listOfMethods = await doAjax('/getMethodsList', { targetFile: ctx.targetFile });
+        const listOfMethods = await doAjax('./getMethodsList', { targetFile: ctx.targetFile });
         console.log(listOfMethods);
         // the response contains
         for (const className in listOfMethods) {
@@ -156,7 +156,7 @@ export class toolsManager {
         }
     }
     async pullFunctionList() {
-        const listOfFunctions = await doAjax('/getFunctionList', { targetFile: ctx.targetFile });
+        const listOfFunctions = await doAjax('./getFunctionList', { targetFile: ctx.targetFile });
 
         for (const key in listOfFunctions) {
             // console.log(key);
@@ -193,7 +193,7 @@ export class toolsManager {
     }
     async implementSpecificClassMethod(className, methodName, lineNumber) {
         ctx.tabs.switchToTab('Chat');
-        await doAjax('/gotoLineNumber', {
+        await doAjax('./gotoLineNumber', {
             lineNumber,
             targetFile: ctx.targetFile
         });
@@ -203,7 +203,7 @@ export class toolsManager {
     }
     async addToChatPrompt(className, methodName, lineNumber) {
         ctx.tabs.switchToTab('Chat');
-        await doAjax('/gotoLineNumber', {
+        await doAjax('./gotoLineNumber', {
             lineNumber,
             targetFile: ctx.targetFile
         });
@@ -212,7 +212,7 @@ export class toolsManager {
     }
     async implementSpecificFunction(functionName, lineNumber) {
         ctx.tabs.switchToTab('Chat');
-        await doAjax('/gotoLineNumber', {
+        await doAjax('./gotoLineNumber', {
             lineNumber,
             targetFile: ctx.targetFile
         });
@@ -222,7 +222,7 @@ export class toolsManager {
     }
     async addFunctionToChatPrompt(functionName, lineNumber) {
         ctx.tabs.switchToTab('Chat');
-        await doAjax('/gotoLineNumber', {
+        await doAjax('./gotoLineNumber', {
             lineNumber,
             targetFile: ctx.targetFile
         });

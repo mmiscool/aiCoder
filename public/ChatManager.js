@@ -28,7 +28,7 @@ export class ChatManager {
         //make it so that on change it saves the title
         this.conversationTitleInput.addEventListener('change', async () => {
             const conversationId = this.conversationPicker.value;
-            await doAjax('/setConversationTitle', { id: conversationId, title: this.conversationTitleInput.value });
+            await doAjax('./setConversationTitle', { id: conversationId, title: this.conversationTitleInput.value });
             await this.loadConversationsList();
         });
 
@@ -278,7 +278,7 @@ export class ChatManager {
     }
 
     async loadConversationsList() {
-        const conversations = await doAjax('/getConversationsList', {});
+        const conversations = await doAjax('./getConversationsList', {});
         //console.log('conversations', conversations);
         // format the conversations list
         // [
@@ -311,7 +311,7 @@ export class ChatManager {
 
     async loadConversation(conversationId) {
         console.log('conversationId', conversationId);
-        const response = await doAjax('/pullMessages', { id: conversationId });
+        const response = await doAjax('./pullMessages', { id: conversationId });
         ctx.targetFile = response.targetFile;
         await this.setTargetFile(response.targetFile);
         this.conversationTitleInput.value = response.title;
@@ -356,7 +356,7 @@ export class ChatManager {
                 savePlanButton.style.padding = '2px 5px';
                 savePlanButton.style.borderRadius = '3px';
                 savePlanButton.addEventListener('click', async () => {
-                    await doAjax('/savePlan', { plan: message.content });
+                    await doAjax('./savePlan', { plan: message.content });
 
                 });
                 individualMessageDiv.appendChild(savePlanButton);
@@ -372,7 +372,7 @@ export class ChatManager {
                 appendPlanButton.style.padding = '2px 5px';
                 appendPlanButton.style.borderRadius = '3px';
                 appendPlanButton.addEventListener('click', async () => {
-                    await doAjax('/savePlan', { plan: message.content, append: true });
+                    await doAjax('./savePlan', { plan: message.content, append: true });
 
                 });
                 individualMessageDiv.appendChild(appendPlanButton);
@@ -392,17 +392,17 @@ export class ChatManager {
 
                 addPromptButton.style.borderRadius = '3px';
                 addPromptButton.addEventListener('click', async () => {
-                    //await doAjax('/storeCustomPrompts', { prompt: message.content });
+                    //await doAjax('./storeCustomPrompts', { prompt: message.content });
                     const prompt = message.content;
                     // get the current list of prompts
-                    const customPromptsJSON = await doAjax('/readFile', { targetFile: './.aiCoder/prompts/customPrompts.json' });
+                    const customPromptsJSON = await doAjax('./readFile', { targetFile: './.aiCoder/prompts/customPrompts.json' });
                     let customPrompts = JSON.parse(customPromptsJSON.fileContent);
                     if (!customPrompts) customPrompts = [];
                     //console.log('prompts', customPrompts);
                     // check if the prompt is already in the list
                     if (!customPrompts.includes(prompt)) {
                         customPrompts.push(prompt);
-                        await doAjax('/writeFile', {
+                        await doAjax('./writeFile', {
                             targetFile: './.aiCoder/prompts/customPrompts.json',
                             fileContent: JSON.stringify(customPrompts, null, 2),
                         });
@@ -434,7 +434,7 @@ export class ChatManager {
                         for (const codeBlock of markdown.codeBlocks) {
                             const applyCodeBlock = await ConfirmDialog.confirm("Apply code block?", ctx.autoApplyTimeout, true);
                             if (applyCodeBlock) {
-                                //const mergeWorked = await doAjax('/applySnippet', { snippet: codeBlock, targetFile: this.targetFileInput.value });
+                                //const mergeWorked = await doAjax('./applySnippet', { snippet: codeBlock, targetFile: this.targetFileInput.value });
 
                                 await this.applySnippet(codeBlock);
 
@@ -456,7 +456,7 @@ export class ChatManager {
 
 
     async displayPremadePromptsList() {
-        const customPromptsJSON = await doAjax('/readFile', { targetFile: '.aiCoder/prompts/customPrompts.json' });
+        const customPromptsJSON = await doAjax('./readFile', { targetFile: '.aiCoder/prompts/customPrompts.json' });
         let customPrompts = JSON.parse(customPromptsJSON.fileContent);
         if (!customPrompts) customPrompts = [];
         //console.log('prompts', customPrompts);
@@ -507,7 +507,7 @@ export class ChatManager {
                 const confirmDelete = await ConfirmDialog.confirm(`Delete prompt: \n "${prompt}"?`, 0, false);
                 if (confirmDelete) {
                     customPrompts = customPrompts.filter((p) => p !== prompt);
-                    await doAjax('/writeFile', {
+                    await doAjax('./writeFile', {
                         targetFile: './.aiCoder/prompts/customPrompts.json',
                         fileContent: JSON.stringify(customPrompts, null, 2),
                     });
@@ -530,7 +530,7 @@ export class ChatManager {
 
     async addMessage(message) {
         const conversationId = this.conversationPicker.value;
-        await doAjax('/addMessage', { id: conversationId, message });
+        await doAjax('./addMessage', { id: conversationId, message });
         await this.loadConversation(conversationId); // Fix method call
     }
 
@@ -539,7 +539,7 @@ export class ChatManager {
         if (!targetFile || targetFile === '') {
             targetFile = await choseFile();
         }
-        const response = await doAjax('/newChat', { targetFile, title });
+        const response = await doAjax('./newChat', { targetFile, title });
         this.chatMode = 'chat';
         await this.loadConversationsList();
         this.conversationPicker.value = response.id;
@@ -547,7 +547,7 @@ export class ChatManager {
     }
 
     async newPlanChat(title = false) {
-        const response = await doAjax('/newPlanChat', { title });
+        const response = await doAjax('./newPlanChat', { title });
         await this.loadConversationsList();
         this.chatMode = 'plan';
         this.conversationPicker.value = response.id;
@@ -556,7 +556,7 @@ export class ChatManager {
 
     async callLLM() {
         const conversationId = this.conversationPicker.value;
-        await doAjax('/callLLM', { id: conversationId });
+        await doAjax('./callLLM', { id: conversationId });
         await this.loadConversation(conversationId); // Fix method call
     }
 
@@ -641,7 +641,7 @@ export class ChatManager {
 
     async applySnippet(codeString) {
         const conversationId = this.conversationPicker.value;
-        const isCodeGood = await doAjax('/applySnippet', { snippet: codeString, targetFile: this.targetFileInput.value });
+        const isCodeGood = await doAjax('./applySnippet', { snippet: codeString, targetFile: this.targetFileInput.value });
 
         if (!isCodeGood.success) {
             alert('Merge failed. Please resolve the conflict manually.');

@@ -54,7 +54,7 @@ export class LLMSettingsManager {
     }
 
     async fetchSettings() {
-        return await doAjax('/llmSettings', {});
+        return await doAjax('./llmSettings', {});
     }
 
     createSettingsDiv() {
@@ -178,7 +178,7 @@ export class LLMSettingsManager {
         }
 
         console.log(newSettings);
-        await doAjax('/llmSettingsUpdate', newSettings);
+        await doAjax('./llmSettingsUpdate', newSettings);
 
         await this.init();
     }

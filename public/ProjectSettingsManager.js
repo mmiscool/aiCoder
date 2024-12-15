@@ -36,7 +36,7 @@ export class ProjectSettingsManager {
     }
 
     async fetchPrompts() {
-        return await doAjax('/getSystemPrompts', {});
+        return await doAjax('./getSystemPrompts', {});
     }
 
     createPromptsDiv() {
@@ -123,7 +123,7 @@ export class ProjectSettingsManager {
         }
 
         console.log(updatedPrompts); // Log the updated data for debugging
-        await doAjax('/updateSystemPrompts', updatedPrompts); // Send updated prompts back to the server
+        await doAjax('./updateSystemPrompts', updatedPrompts); // Send updated prompts back to the server
     
         await this.init(); // Reinitialize the settings manager
     }
