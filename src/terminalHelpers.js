@@ -47,7 +47,7 @@ function getCallerInfo(level = 3) {
 export async function clearTerminal() {
 
   //return console.log("----------------------------------------------------------------------------");
-
+  return;
   if (ctx.ws) {
     ctx.ws.send("clear");
   }
@@ -71,7 +71,7 @@ export async function clearTerminal() {
 export async function printAndPause(message, secondsToPause = 0) {
   if (await readArg('-debug')) await getCallerInfo();
   wss.clients.forEach(client => {
-    client.send(message);
+    client.send(message + '\n');
   });
 
   console.log(message);

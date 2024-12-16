@@ -13,11 +13,10 @@ export class ProjectSettingsManager {
 
     async init() {
         this.container.innerHTML = '';
-        this.addSaveButton();
         this.addRefreshButton();
         this.systemPrompts = await this.fetchPrompts();
         this.createPromptsDiv();
-        
+
     }
 
     async addRefreshButton() {
@@ -93,6 +92,7 @@ export class ProjectSettingsManager {
         editableDiv.style.whiteSpace = 'pre-wrap';
         editableDiv.contentEditable = true; // Makes the div editable
         editableDiv.textContent = content;
+        editableDiv.onchange = () => this.savePrompts();
         return editableDiv;
     }
 
@@ -103,7 +103,7 @@ export class ProjectSettingsManager {
         saveButton.style.padding = '10px';
         saveButton.style.margin = '10px';
         saveButton.style.backgroundColor = 'green';
-        
+
         //saveButton.style.backgroundColor = 'blue';
         saveButton.addEventListener('click', () => this.savePrompts());
         this.container.appendChild(saveButton);
@@ -111,20 +111,33 @@ export class ProjectSettingsManager {
 
     async savePrompts() {
         const updatedPrompts = {};
-
+    
         // Gather updated values from editable divs
         for (const fieldDiv of this.promptsDiv.children) {
             const editableDiv = fieldDiv.querySelector('div[contenteditable]');
             if (editableDiv) {
                 const field = editableDiv.getAttribute('data-field');
-                const value = editableDiv.textContent.trim(); // Retrieve the edited content
+                let value = editableDiv.innerHTML; // Retrieve the edited content
+    
+                // Normalize the content to plain text
+                value = value
+                    .replace(/<br\s*\/?>/g, '\n') // Replace <br> with newline
+                    .replace(/<div>/g, '\n') // Replace opening <div> with newline
+                    .replace(/<\/div>/g, '') // Remove closing </div>
+                    .replace(/<p>/g, '\n') // Replace <p> with newline
+                    .replace(/<\/p>/g, '') // Remove closing </p>
+                    .replace(/&nbsp;/g, ' ') // Replace non-breaking spaces with regular spaces
+                    //.replace(/\n+/g, '\n') // Collapse multiple newlines into a single newline
+                    .trim(); // Trim leading/trailing whitespace
+    
                 updatedPrompts[field] = value;
             }
         }
-
+    
         console.log(updatedPrompts); // Log the updated data for debugging
         await doAjax('./updateSystemPrompts', updatedPrompts); // Send updated prompts back to the server
     
         await this.init(); // Reinitialize the settings manager
     }
+    
 }

@@ -3,11 +3,7 @@ import esprima from 'esprima-next';
 import estraverse from 'estraverse';
 import { appendFile, readFile, writeFile, } from './fileIO.js';
 import { createBackup } from './backupSystem.js';
-
-
-import {
-    clearTerminal,
-} from './terminalHelpers.js';
+import { clearTerminal, } from './terminalHelpers.js';
 
 
 export async function intelligentlyMergeSnippets(filename) {
@@ -59,6 +55,7 @@ export class codeManipulator {
                     }
 
                     // Collect or replace methods from this class definition
+                    // Collect or replace methods from this class definition
                     node.body.body.forEach((method) => {
                         if (method.type === 'MethodDefinition') {
                             const methodName = method.key.name;
@@ -68,6 +65,34 @@ export class codeManipulator {
                             if (definitions.classes[className].methods[methodName]) {
                                 const existingMethod = definitions.classes[className].methods[methodName];
                                 const existingMethodEmpty = isMethodEmpty(existingMethod);
+
+                                // Merge comments
+                                if (method.leadingComments || existingMethod.leadingComments) {
+                                    const mergedComments = [];
+
+                                    // Collect comments from the existing method
+                                    if (existingMethod.leadingComments) {
+                                        existingMethod.leadingComments.forEach((comment) => {
+                                            mergedComments.push(comment.value.trim());
+                                        });
+                                    }
+
+                                    // Collect comments from the new method
+                                    if (method.leadingComments) {
+                                        method.leadingComments.forEach((comment) => {
+                                            mergedComments.push(comment.value.trim());
+                                        });
+                                    }
+
+                                    // Combine all comments into a single block comment
+                                    const combinedComment = `*\n${mergedComments.map((line) => ` * ${line}`).join('\n')}\n `;
+                                    method.leadingComments = [
+                                        {
+                                            type: "Block",
+                                            value: combinedComment.trim()
+                                        }
+                                    ];
+                                }
 
                                 // Replacement logic:
                                 // 1. If the new method is empty and the existing one is not empty, do NOT override.
@@ -87,6 +112,7 @@ export class codeManipulator {
                             }
                         }
                     });
+
                 } else if (node.type === 'VariableDeclaration' && parent.type === 'Program') {
                     // Only track root-level variables
                     node.declarations.forEach((declaration) => {
@@ -227,25 +253,91 @@ export class codeManipulator {
             }
         });
 
-        // Modify all comments to include a single space between the // and the comment text.
+
+
+
+        // convert all leading comments to block comments for functions and methods
         estraverse.traverse(existingAST, {
             enter: (node) => {
-                if (node.leadingComments) {
-                    node.leadingComments = node.leadingComments.map(
-                        (comment) => {
-                            return {
-                                type: comment.type,
-                                value: ` ${comment.value.trim()}`
-                            }
+                if (
+                    (node.type === "FunctionDeclaration" ||
+                        node.type === "FunctionExpression" ||
+                        (node.type === "MethodDefinition" && node.key)) &&
+                    node.leadingComments
+                ) {
+                    // Combine all leading comments into a single block comment
+                    let blockComment = "";
+                    node.leadingComments.forEach((comment) => {
+                        blockComment += comment.value + "\n";
+                    });
+
+                    // Get the level of indentation from the start of the node
+                    const nodeStartColumn = node.loc.start.column;
+                    const indent = " ".repeat(nodeStartColumn);
+
+                    // Normalize comment lines
+                    let commentLines = blockComment.split("\n").map((line) => {
+                        return line.replace(/^\s*\*?/, "").trim(); // Remove leading asterisks and spaces
+                    });
+
+                    // remove duplicate lines. The instance that comes first is kept
+                    commentLines = commentLines.filter((line, index, arr) => {
+                        return arr.indexOf(line) === index;
+                    });
+
+                    // trim all lines. Ensure that there is only one '*' at the beginning of each line
+                    commentLines = commentLines.map((line) => {
+                        line = line.trim().replace(/^\*?/, "").trim();
+                        line = line.trim().replace(/^\*?/, "").trim();
+                    
+                        return  line;
+                    });
+
+
+
+                    // Remove empty lines before and after actual content
+                    const trimmedCommentLines = commentLines.filter((line, index, arr) => {
+                        if (line.trim() === "") {
+                            // Keep empty lines only if they are between non-empty lines
+                            const hasContentBefore = arr.slice(0, index).some((l) => l.trim() !== "");
+                            const hasContentAfter = arr.slice(index + 1).some((l) => l.trim() !== "");
+                            return hasContentBefore && hasContentAfter;
                         }
-                    );
+                        return true; // Always keep non-empty lines
+                    });
+
+                    // Format and indent the trimmed lines
+                    const formattedComment = trimmedCommentLines
+                        .map((line) => (line ? `${indent} * ${line}` : `${indent} *`))
+                        .join("\n");
+
+                    // Wrap with block comment syntax, ensuring proper formatting
+                    const formattedBlockComment = `\n${indent}*\n${formattedComment}\n${indent}*`;
+                    console.log(formattedBlockComment);
+                    // Replace leadingComments with the correctly formatted single block comment
+                    node.leadingComments = [
+                        {
+                            type: "Block",
+                            value: formattedBlockComment.trim()
+                        }
+                    ];
                 }
             }
         });
 
+
+
+
+
+
+
+
+
+
+
         const mergedCode = await escodegen.generate(existingAST, {
             comment: true,
-            
+
             format: {
                 indent: {
                     style: '    ',

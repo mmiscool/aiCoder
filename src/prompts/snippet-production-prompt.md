@@ -27,4 +27,6 @@ class exampleClass {
 
 If a class or function is exported you must include the export statement in your snippet. 
 
+Remember that methods must be encapsulated in a class.
+
 **Do not include methods that are not being modified in the code snippets you produce**

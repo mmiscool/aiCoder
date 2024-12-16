@@ -22,8 +22,9 @@ export class tabInterface {
 
         // Create the tab bar
         this.tabBar = document.createElement("div");
-        this.tabBar.style.height = "50px";
+        this.tabBar.style.height = "40px";
         this.tabBar.style.display = "flex";
+        this.tabBar.style.flexGrow = "0";
         this.tabBar.style.flexDirection = "row"
         this.tabBar.style.backgroundColor = this.colors.tabBarBackground;
         this.tabBar.style.borderBottom = `2px solid ${this.colors.inactiveTabBorder}`;
@@ -32,7 +33,7 @@ export class tabInterface {
         // Create the content area
         this.contentArea = document.createElement("div");
         this.contentArea.style.flexGrow = "1";
-        this.contentArea.style.overflow = "scroll";
+        this.contentArea.style.overflowY = "scroll";
         this.container.appendChild(this.contentArea);
     }
 
@@ -51,6 +52,7 @@ export class tabInterface {
         tabButton.style.cursor = "pointer";
         tabButton.style.outline = "1px solid black";
         tabButton.style.padding = "10px";
+        tabButton.style.height = "40px";
         tabButton.style.transition = "background-color 0.3s";
 
         // Highlight the active tab
@@ -143,7 +145,7 @@ export class tabInterface {
         });
     }
 
-    async  disableTab(tabName) {
+    async disableTab(tabName) {
         // make the tab not clickable and greyed out
         const idx = this.tabs.findIndex(tab => tab.name.toLowerCase() === tabName.toLowerCase());
         if (idx !== -1) {
@@ -163,7 +165,7 @@ export class tabInterface {
         // set this tab as active
         this.activeTab = idx;
         return await this.showActiveTab();
-       
+
     }
 
     async disableAllTabs() {

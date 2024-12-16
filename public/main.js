@@ -3,6 +3,7 @@ import { LLMSettingsManager } from './LLMSettingsManager.js';
 import { ProjectSettingsManager } from './ProjectSettingsManager.js';
 import { ChatManager } from './ChatManager.js';
 import { toolsManager } from './toolsManager.js';
+import './confirmDialog.js';
 
 let ctx = {};
 
@@ -31,6 +32,7 @@ async function setup() {
     document.body.appendChild(tabs.getElement());
 
     window.ctx = ctx;
+
 }
 
 
@@ -42,3 +44,5 @@ async function setDefaultLocalStorageKey(key, value) {
 
 // call the setup function only after the DOM has loaded
 document.addEventListener('DOMContentLoaded', setup);
+
+

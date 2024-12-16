@@ -389,8 +389,7 @@ async function getClaudeResponse(messages, retry = true) {
             const text = convertedBack.delta.text; // Extract the text from the chunk
             responseText += text; // Append to the complete response
 
-            //print the text to the console in real time
-            process.stdout.write(text);
+            printToTerminal(text);
         }
         //console.log('stream:', stream);
     } catch (error) {

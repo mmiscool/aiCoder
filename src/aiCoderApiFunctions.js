@@ -73,6 +73,36 @@ export class aiCoderApiFunctions {
     }
 
 
+    async writeMethodWithLLM(parsedBody) {
+        console.log('newChat', parsedBody);
+        if (!parsedBody.targetFile) {
+            return { error: "No target file provided" };
+        }
+        const webUIConversation = new conversation();
+        console.log('newChat', webUIConversation);
+        console.log('newChat', webUIConversation);
+        await webUIConversation.setMode('chat');
+        await webUIConversation.setTitle(`Chat about ${parsedBody.targetFile}`);
+        if (parsedBody.title) await webUIConversation.setTitle(parsedBody.title);
+        await webUIConversation.setTargetFile(parsedBody.targetFile);
+
+        await webUIConversation.addFileMessage("system", './.aiCoder/prompts/default-system-prompt.md');
+        await webUIConversation.addFileMessage("user", './.aiCoder/prompts/default-plan-prompt.md');
+        await webUIConversation.addTargetFileMessage("user", "// Code file to be edited");
+        await webUIConversation.addFileMessage("system", './.aiCoder/prompts/snippet-production-prompt.md');
+        await webUIConversation.addMessage("user", `Write the ${parsedBody.methodName} method in the ${parsedBody.className} class.`);
+        //await webUIConversation.addMessage("user", `The method should ${parsedBody.methodDescription}`);
+        await webUIConversation.callLLM();
+        // extract the code snippets from the conversation
+        const response = await webUIConversation.lastMessage();
+        const snippets = await extractCodeSnippets(response);
+        console.log('snippets', snippets);
+        for (const snippet of snippets) {
+           await this.applySnippet({ targetFile: parsedBody.targetFile, snippet });
+        }
+
+    }
+
     async newChat(parsedBody) {
         console.log('newChat', parsedBody);
         if (!parsedBody.targetFile) {

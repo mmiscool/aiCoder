@@ -231,7 +231,7 @@ export class toolsManager {
     }
     async verifyTargetFileSpecified() {
         if (!ctx.targetFile) {
-            alert('Please select a file first');
+            await alert('Please select a file first');
             ctx.tabs.switchToTab('chat');
             return false;
         }

@@ -173,7 +173,7 @@ export class LLMSettingsManager {
         }
 
         if (activeModels.length > 1) {
-            alert('Only one model can be active at a time');
+            await alert('Only one model can be active at a time');
             return;
         }
 

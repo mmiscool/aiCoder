@@ -1,8 +1,9 @@
-import { ConfirmDialog } from "./confirmDialog.js";
+
 import { doAjax } from "./doAjax.js";
 import { MarkdownToHtml } from "./MarkdownToHtml.js";
 import { makeElement } from "./domElementFactory.js";
 import { choseFile, fileDialog } from "./fileDialog.js";
+import { auto } from "groq-sdk/_shims/registry.mjs";
 
 
 let ctx = {};
@@ -114,7 +115,7 @@ export class ChatManager {
         this.conversationPicker.addEventListener('click', () => {
             if (this.conversationPicker.size === 1) {
                 this.conversationPicker.size = this.conversationPicker.length;
-            }else{
+            } else {
                 this.conversationPicker.size = 1;
             }
         });
@@ -159,16 +160,26 @@ export class ChatManager {
 
         this.newChatButton = document.createElement('button');
         this.newChatButton.textContent = 'New Chat';
-
         this.newChatButton.style.margin = '10px';
         this.newChatButton.addEventListener('click', () => {
             this.newChat();
         });
         this.container.appendChild(this.newChatButton);
 
+
+        this.newChatWithPromptButton = document.createElement('button');
+        this.newChatWithPromptButton.textContent = 'New Chat with Prompt';
+        this.newChatWithPromptButton.style.margin = '10px';
+        this.newChatWithPromptButton.addEventListener('click', () => {
+            this.displayPremadePromptsList(true);
+        }
+        );
+        this.container.appendChild(this.newChatWithPromptButton);
+
+
+
         this.newPlanChatButton = document.createElement('button');
         this.newPlanChatButton.textContent = 'New Plan Chat';
-
         this.newPlanChatButton.style.margin = '10px';
         this.newPlanChatButton.addEventListener('click', () => {
             this.newPlanChat();
@@ -244,12 +255,7 @@ export class ChatManager {
         this.submitButton.style.width = '100%';
         this.submitButton.style.marginBottom = '10px';
         this.submitButton.addEventListener('click', async () => {
-            // test if message is empty. If empty, do not add message.
-            if (this.userInput.value !== '') {
-                await this.addMessage(this.userInput.value);
-                this.userInput.value = '';
-            }
-            await this.callLLM();
+            await this.submitButtonHandler();
         });
         this.container.appendChild(this.submitButton);
 
@@ -269,6 +275,15 @@ export class ChatManager {
         this.autoApplyMode = localStorage.getItem('autoApplyMode') === 'true';
         this.autoApplyCheckbox.checked = this.autoApplyMode;
         this.setInput("")
+    }
+
+    async submitButtonHandler() {
+        // test if message is empty. If empty, do not add message.
+        if (this.userInput.value !== '') {
+            await this.addMessage(this.userInput.value);
+            this.userInput.value = '';
+        }
+        await this.callLLM();
     }
 
     async setTargetFile(targetFile) {
@@ -432,7 +447,7 @@ export class ChatManager {
                     if (markdown.codeBlocks.length > 0) {
                         // for loop over the code blocks and apply them
                         for (const codeBlock of markdown.codeBlocks) {
-                            const applyCodeBlock = await ConfirmDialog.confirm("Apply code block?", ctx.autoApplyTimeout, true);
+                            const applyCodeBlock = await confirm("Apply code block?", ctx.autoApplyTimeout, true);
                             if (applyCodeBlock) {
                                 //const mergeWorked = await doAjax('./applySnippet', { snippet: codeBlock, targetFile: this.targetFileInput.value });
 
@@ -455,7 +470,7 @@ export class ChatManager {
     }
 
 
-    async displayPremadePromptsList() {
+    async displayPremadePromptsList(newConversation = false) {
         const customPromptsJSON = await doAjax('./readFile', { targetFile: '.aiCoder/prompts/customPrompts.json' });
         let customPrompts = JSON.parse(customPromptsJSON.fileContent);
         if (!customPrompts) customPrompts = [];
@@ -468,7 +483,30 @@ export class ChatManager {
 
         this.promptsDialog.showModal();
 
-        this.promptsDialog.innerHTML = 'Pre-made Prompts:';
+        this.promptsDialog.innerHTML = '';
+
+        // add a checkbox for automatic submit mode
+        const autoSubmitCheckbox = document.createElement('input');
+        autoSubmitCheckbox.type = 'checkbox';
+        autoSubmitCheckbox.checked = localStorage.getItem('autoSubmitMode') === 'true';
+        autoSubmitCheckbox.style.margin = '10px';
+        this.promptsDialog.appendChild(autoSubmitCheckbox);
+        const autoSubmitLabel = document.createElement('label');
+        autoSubmitLabel.textContent = 'Auto Submit Mode';
+        autoSubmitLabel.style.fontWeight = 'bold';
+        autoSubmitLabel.style.margin = '10px';
+        this.promptsDialog.appendChild(autoSubmitLabel);
+        autoSubmitCheckbox.addEventListener('change', (event) => {
+            this.displayPremadePromptsList(newConversation);
+            localStorage.setItem('autoSubmitMode', autoSubmitCheckbox.checked);
+        });
+
+        // add "Pre-made Prompts:" to the dialog
+        const premadePromptsLabel = document.createElement('div');
+        premadePromptsLabel.textContent = 'Pre-made Prompts:';
+        premadePromptsLabel.style.fontWeight = 'bold';
+        this.promptsDialog.appendChild(premadePromptsLabel);
+
 
         // loop over the prompts and add them to the dialog
         // also add a trash can icon to delete the prompt from the list
@@ -482,9 +520,11 @@ export class ChatManager {
             promptDiv.style.backgroundColor = 'rgba(0, 50, 100, 0.9)';
             promptDiv.style.margin = '10px';
             promptDiv.style.cursor = 'pointer';
-            promptDiv.addEventListener('click', () => {
-                this.setInput(prompt);
-                this.promptsDialog.close();
+            promptDiv.addEventListener('click', async () => {
+                if (newConversation) await this.newChat(prompt);
+                await this.setInput(prompt);
+                await this.promptsDialog.close();
+                if (autoSubmitCheckbox.checked) await this.submitButtonHandler();
             });
 
             const trashIcon = document.createElement('span');
@@ -543,7 +583,7 @@ export class ChatManager {
         this.chatMode = 'chat';
         await this.loadConversationsList();
         this.conversationPicker.value = response.id;
-        await this.loadConversation(response.id); // Fix method call
+        return await this.loadConversation(response.id); // Fix method call
     }
 
     async newPlanChat(title = false) {
@@ -644,17 +684,18 @@ export class ChatManager {
         const isCodeGood = await doAjax('./applySnippet', { snippet: codeString, targetFile: this.targetFileInput.value });
 
         if (!isCodeGood.success) {
-            alert('Merge failed. Please resolve the conflict manually.');
+           await alert('Merge failed. Please resolve the conflict manually.');
             // set the user input to say that the snippet was formatted incorrectly 
             // and needs to be corrected. 
 
-            this.setInput(`The last snippet was formatted incorrectly and needs to be corrected. 
+            await this.setInput(`The last snippet was formatted incorrectly and needs to be corrected. 
                 Remember that methods must be encapsulated in a class.`);
             if (this.autoApplyMode) {
                 await this.addMessage(this.userInput.value);
                 await this.callLLM();
             }
         }
+        return isCodeGood;
     }
 
 }
