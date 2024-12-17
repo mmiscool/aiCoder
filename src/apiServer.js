@@ -21,6 +21,12 @@ export let wss;
 async function buildFrontend() {
     console.log('Building frontend...');
     const scriptPath = await getScriptFolderPath();
+    console.log('scriptPath:', scriptPath);
+
+    // delete the folders named 'dist' and '.parcel-cache' before building the frontend
+    // these folders are located in the parent directory of the scriptPath
+    await execSync(`rm -rf ${scriptPath}/../dist`);
+    await execSync(`rm -rf ${scriptPath}/../.parcel-cache`);
 
     //execSync('npm run buildFrontend &', { stdio: 'inherit' });
     execSync(`cd ${scriptPath} && npm run buildFrontend &`, { stdio: 'inherit' });

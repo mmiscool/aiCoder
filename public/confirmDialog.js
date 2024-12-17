@@ -17,6 +17,7 @@ const dialogStyle = {
 
 const confirmButtonStyle = {
     padding: '10px 20px',
+    margin: '10px',
     backgroundColor: '#4CAF50', // Green
     color: '#fff',
     border: 'none',
@@ -26,6 +27,7 @@ const confirmButtonStyle = {
 
 const cancelButtonStyle = {
     padding: '10px 20px',
+    margin: '10px',
     backgroundColor: '#f44336', // Red
     color: '#fff',
     border: 'none',

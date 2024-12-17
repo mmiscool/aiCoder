@@ -192,10 +192,10 @@ export class ChatManager {
 
         this.promptsDialog = document.createElement('dialog');
         this.promptsDialog.style.position = 'absolute';
-        this.promptsDialog.style.top = '50%';
-        this.promptsDialog.style.bottom = '15%';
-        this.promptsDialog.style.right = '15%';
-        this.promptsDialog.style.left = '15%';
+        this.promptsDialog.style.top = '30px';
+        this.promptsDialog.style.bottom = '30px';
+        this.promptsDialog.style.right = '30px';
+        this.promptsDialog.style.left = '30px';
 
 
 
@@ -253,7 +253,7 @@ export class ChatManager {
         this.submitButton = document.createElement('button');
         this.submitButton.textContent = 'Submit';
         this.submitButton.style.width = '100%';
-        this.submitButton.style.marginBottom = '10px';
+        this.submitButton.style.marginBottom = '100px';
         this.submitButton.addEventListener('click', async () => {
             await this.submitButtonHandler();
         });
@@ -520,6 +520,8 @@ export class ChatManager {
             promptDiv.style.backgroundColor = 'rgba(0, 50, 100, 0.9)';
             promptDiv.style.margin = '10px';
             promptDiv.style.cursor = 'pointer';
+            // preformatted text
+            promptDiv.style.whiteSpace = 'pre-wrap';
             promptDiv.addEventListener('click', async () => {
                 if (newConversation) await this.newChat(prompt);
                 await this.setInput(prompt);
@@ -544,7 +546,7 @@ export class ChatManager {
             trashIcon.addEventListener('click', async (event) => {
                 event.stopPropagation();
                 this.promptsDialog.close();
-                const confirmDelete = await ConfirmDialog.confirm(`Delete prompt: \n "${prompt}"?`, 0, false);
+                const confirmDelete = await confirm(`Delete prompt: \n "${prompt}"?`, 0, false);
                 if (confirmDelete) {
                     customPrompts = customPrompts.filter((p) => p !== prompt);
                     await doAjax('./writeFile', {

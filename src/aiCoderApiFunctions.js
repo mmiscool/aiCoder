@@ -1,6 +1,6 @@
 import { applySnippets } from "./intelligentMerge.js"
 import { getListOfFunctions, getMethodsWithArguments } from "./classListing.js";
-import {  getAllFiles, moveFile, readFile, readSetting, writeFile, writeSetting } from "./fileIO.js";
+import { getAllFiles, moveFile, readFile, readSetting, writeFile, writeSetting } from "./fileIO.js";
 import { intelligentlyMergeSnippets } from "./intelligentMerge.js";
 import { llmSettings, llmSettingsUpdate } from "./llmCall.js";
 import { launchEditor } from "./terminalHelpers.js";
@@ -88,7 +88,7 @@ export class aiCoderApiFunctions {
 
         await webUIConversation.addFileMessage("system", './.aiCoder/prompts/default-system-prompt.md');
         await webUIConversation.addFileMessage("user", './.aiCoder/prompts/default-plan-prompt.md');
-        await webUIConversation.addTargetFileMessage("user", "// Code file to be edited");
+        await webUIConversation.addTargetFileMessage("user", `// file:'${parsedBody.targetFile}'`);
         await webUIConversation.addFileMessage("system", './.aiCoder/prompts/snippet-production-prompt.md');
         await webUIConversation.addMessage("user", `Write the ${parsedBody.methodName} method in the ${parsedBody.className} class.`);
         //await webUIConversation.addMessage("user", `The method should ${parsedBody.methodDescription}`);
@@ -98,7 +98,7 @@ export class aiCoderApiFunctions {
         const snippets = await extractCodeSnippets(response);
         console.log('snippets', snippets);
         for (const snippet of snippets) {
-           await this.applySnippet({ targetFile: parsedBody.targetFile, snippet });
+            await this.applySnippet({ targetFile: parsedBody.targetFile, snippet });
         }
 
     }
@@ -323,8 +323,8 @@ export class conversation {
         this.storeConversation();
     }
 
-    async addTargetFileMessage(description = '') {
-        await this.addFileMessage('user', this.targetFile, description);
+    async addTargetFileMessage(user, description = '') {
+        await this.addFileMessage(user, this.targetFile, description);
     }
 
     async lastMessage() {

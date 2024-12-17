@@ -226,6 +226,9 @@ export class codeManipulator {
             }
         });
 
+
+
+
         // remove leading comments that start with ""... existing" being case insensitive
         estraverse.traverse(existingAST, {
             enter: (node) => {
