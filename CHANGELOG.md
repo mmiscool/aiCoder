@@ -3,6 +3,12 @@
 [![semantic versioning](https://img.shields.io/badge/semantic%20versioning-2.0.0-green.svg)](https://semver.org)
 > All notable changes to this project will be documented in this file
 
+## [1.0.55](https://github.com/mmiscool/aiCoder/compare/v1.0.54...v1.0.55) (2024-12-17)
+
+### 🤖 Build System
+
+* added treeview widget ([704e9c9](https://github.com/mmiscool/aiCoder/commit/704e9c946b1b1ad7b685775ab45c7d9ab94b9066))
+
 ## [1.0.54](https://github.com/mmiscool/aiCoder/compare/v1.0.53...v1.0.54) (2024-12-16)
 
 ### 🤖 Build System
