@@ -3,6 +3,12 @@
 [![semantic versioning](https://img.shields.io/badge/semantic%20versioning-2.0.0-green.svg)](https://semver.org)
 > All notable changes to this project will be documented in this file
 
+## [1.0.56](https://github.com/mmiscool/aiCoder/compare/v1.0.55...v1.0.56) (2024-12-18)
+
+### 🤖 Build System
+
+* ui tweaks ([e8cdf77](https://github.com/mmiscool/aiCoder/commit/e8cdf7715ba1e8eca92177cbe271bc7ac01c896c))
+
 ## [1.0.55](https://github.com/mmiscool/aiCoder/compare/v1.0.54...v1.0.55) (2024-12-17)
 
 ### 🤖 Build System
