@@ -9,7 +9,7 @@
   },
   "scripts": {
     "start": "./src/main.js",
-    "buildFrontend": " ./node_modules/.bin/parcel watch ./public/index.html  --no-hmr "
+    "buildFrontend": " ./node_modules/.bin/parcel watch ./public/index.html --no-hmr"
   },
   "targets": {
     "default": {

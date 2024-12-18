@@ -358,10 +358,10 @@ export class ChatManager {
 
 
             const contentDiv = document.createElement('div');
-            const markdown = new MarkdownToHtml(contentDiv, message.content);
+            const markdown = await new MarkdownToHtml(contentDiv, message.content);
             individualMessageDiv.appendChild(contentDiv);
 
-            if (this.chatMode === 'plan' && message.role === 'assistant') {
+            if (message.role === 'assistant') {
                 const savePlanButton = document.createElement('button');
                 savePlanButton.textContent = '💾 Replace plan'
                 savePlanButton.style.cursor = 'pointer';
@@ -372,7 +372,6 @@ export class ChatManager {
                 savePlanButton.style.borderRadius = '3px';
                 savePlanButton.addEventListener('click', async () => {
                     await doAjax('./savePlan', { plan: message.content });
-
                 });
                 individualMessageDiv.appendChild(savePlanButton);
 
@@ -606,15 +605,25 @@ export class ChatManager {
         // Query all <code> elements on the page
 
         let codeElements = [];
-        // gather all elements that have the "language-javascript" class
-        if (this.chatMode === 'plan') codeElements = await document.querySelectorAll('.language-markdown');
 
-        if (this.chatMode === 'chat') codeElements = await document.querySelectorAll('.language-javascript');
+        // querySelector for all elements of type <code>
+        if (this.chatMode === 'plan') codeElements = await document.getElementsByTagName('code');
 
-        //console.log('codeElements', codeElements);
+        if (this.chatMode === 'chat') {
+            codeElements = await document.getElementsByTagName('code');
+            // filter out the code elements that are a single line
+            codeElements = Array.from(codeElements).filter((codeElement) => {
+                return codeElement.textContent.split('\n').length > 1;
+            });
+        }
+
+
+        codeElements = Array.from(codeElements);
+        console.log('codeElements', codeElements);
         if (codeElements.length === 0) return;
 
         codeElements.forEach((codeElement) => {
+            console.log('codeElement', codeElement);
             // Create a wrapper to hold the code and toolbar
             const wrapper = document.createElement('div');
             wrapper.style.position = 'relative';
@@ -655,21 +664,21 @@ export class ChatManager {
             });
             toolbar.appendChild(copyButton);
 
-            if (this.chatMode === 'chat') {
-                const editButton = document.createElement('button');
-                editButton.textContent = '🤖✎⚡';
-                editButton.title = 'Apply snippet';
-                Object.assign(editButton.style, buttonStyles);
-                editButton.addEventListener('click', async () => {
-                    codeElement.style.color = 'red';
-                    const codeString = codeElement.textContent;
-                    await this.applySnippet(codeString);
-                    codeElement.style.color = 'cyan';
-                    ctx.tools.displayListOfStubsAndMethods();
-                });
 
-                toolbar.appendChild(editButton);
-            }
+            const editButton = document.createElement('button');
+            editButton.textContent = '🤖✎⚡';
+            editButton.title = 'Apply snippet';
+            Object.assign(editButton.style, buttonStyles);
+            editButton.addEventListener('click', async () => {
+                codeElement.style.color = 'red';
+                const codeString = codeElement.textContent;
+                await this.applySnippet(codeString);
+                codeElement.style.color = 'cyan';
+                ctx.tools.displayListOfStubsAndMethods();
+            });
+
+            toolbar.appendChild(editButton);
+
 
             // Wrap the <code> element with the wrapper
             const parent = codeElement.parentNode;
@@ -686,7 +695,7 @@ export class ChatManager {
         const isCodeGood = await doAjax('./applySnippet', { snippet: codeString, targetFile: this.targetFileInput.value });
 
         if (!isCodeGood.success) {
-           await alert('Merge failed. Please resolve the conflict manually.');
+            await alert('Merge failed. Please resolve the conflict manually.');
             // set the user input to say that the snippet was formatted incorrectly 
             // and needs to be corrected. 
 

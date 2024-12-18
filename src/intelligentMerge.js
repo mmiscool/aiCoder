@@ -316,7 +316,7 @@ export class codeManipulator {
 
                     // Wrap with block comment syntax, ensuring proper formatting
                     const formattedBlockComment = `\n${indent}*\n${formattedComment}\n${indent}*`;
-                    console.log(formattedBlockComment);
+                    //console.log(formattedBlockComment);
                     // Replace leadingComments with the correctly formatted single block comment
                     node.leadingComments = [
                         {
