@@ -695,7 +695,7 @@ export class ChatManager {
         const isCodeGood = await doAjax('./applySnippet', { snippet: codeString, targetFile: this.targetFileInput.value });
 
         if (!isCodeGood.success) {
-            await alert('Merge failed. Please resolve the conflict manually.');
+            await alert('Merge failed. Please resolve the conflict manually.', 3);
             // set the user input to say that the snippet was formatted incorrectly 
             // and needs to be corrected. 
 

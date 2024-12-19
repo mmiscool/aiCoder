@@ -423,6 +423,10 @@ async function getClaudeResponse(messages, retry = true) {
 async function getClaudeModels() {
     // Predefined list of Claude models based on Anthropic's documentation
     const models = [
+        'claude-3-5-sonnet-latest',
+        'claude-3-5-haiku-latest',
+        'claude-3-opus-latest',
+        
         'claude-3-5-sonnet-20241022',
         'claude-3-5-haiku-20241022',
         'claude-3-opus-20240229',

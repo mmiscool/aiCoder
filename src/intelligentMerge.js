@@ -6,174 +6,31 @@ import { createBackup } from './backupSystem.js';
 import { clearTerminal, } from './terminalHelpers.js';
 
 
+
 export async function intelligentlyMergeSnippets(filename) {
-    const manipulator = new codeManipulator(filename);
-    await manipulator.mergeCode("   ");
+    const originalCode = await readFile(filename);
+    const manipulator = await new codeManipulator(originalCode);
+    await manipulator.parse();
+    await manipulator.mergeDuplcates();
+    await writeFile(await manipulator.generateCode());
 }
 
 
 export async function applySnippets(targetFile, snippets) {
     let cleanedSnippets = await snippets.join('\n\n\n\n\n', true);
-    const manipulator = await new codeManipulator(targetFile);
+    const manipulator = await new codeManipulator(await readFile(targetFile));
     return await manipulator.mergeCode(cleanedSnippets);
 }
 
 
+
+
 export class codeManipulator {
-    constructor(filePath) {
-        this.filePath = filePath;
+    constructor(code = '') {
+        this.code = code;
     }
 
-    async cleanUpDuplicates(ast) {
-        const definitions = {
-            classes: {}, // Store class methods and first definition
-            variables: {}, // Track first occurrence and latest definition of root-level variables
-            functions: {}, // Track latest occurrence of root-level functions
-        };
-
-        // Helper function to determine if a method is empty
-        function isMethodEmpty(method) {
-            // MethodDefinition nodes have a `.value` which is a FunctionExpression or similar.
-            // Check if the body is empty.
-            if (method.value && method.value.body && method.value.body.body) {
-                return method.value.body.body.length === 0;
-            }
-            return true;
-        }
-
-        estraverse.traverse(ast, {
-            enter(node, parent) {
-                if (node.type === 'ClassDeclaration' && parent.type === 'Program') {
-                    const className = node.id.name;
-
-                    // Store the first definition of the class if not already recorded
-                    if (!definitions.classes[className]) {
-                        definitions.classes[className] = {
-                            methods: {},
-                            firstDefinition: node,
-                        };
-                    }
-
-                    // Collect or replace methods from this class definition
-                    // Collect or replace methods from this class definition
-                    node.body.body.forEach((method) => {
-                        if (method.type === 'MethodDefinition') {
-                            const methodName = method.key.name;
-                            const newMethodEmpty = isMethodEmpty(method);
-
-                            // If we already have a recorded method, decide if we override it
-                            if (definitions.classes[className].methods[methodName]) {
-                                const existingMethod = definitions.classes[className].methods[methodName];
-                                const existingMethodEmpty = isMethodEmpty(existingMethod);
-
-                                // Merge comments
-                                if (method.leadingComments || existingMethod.leadingComments) {
-                                    const mergedComments = [];
-
-                                    // Collect comments from the existing method
-                                    if (existingMethod.leadingComments) {
-                                        existingMethod.leadingComments.forEach((comment) => {
-                                            mergedComments.push(comment.value.trim());
-                                        });
-                                    }
-
-                                    // Collect comments from the new method
-                                    if (method.leadingComments) {
-                                        method.leadingComments.forEach((comment) => {
-                                            mergedComments.push(comment.value.trim());
-                                        });
-                                    }
-
-                                    // Combine all comments into a single block comment
-                                    const combinedComment = `*\n${mergedComments.map((line) => ` * ${line}`).join('\n')}\n `;
-                                    method.leadingComments = [
-                                        {
-                                            type: "Block",
-                                            value: combinedComment.trim()
-                                        }
-                                    ];
-                                }
-
-                                // Replacement logic:
-                                // 1. If the new method is empty and the existing one is not empty, do NOT override.
-                                // 2. If the existing is empty and the new is non-empty, override.
-                                // 3. If both are empty, overriding with empty doesn't matter, but it's safe to just override.
-                                // 4. If both are non-empty, override to keep the latest definition.
-
-                                if (newMethodEmpty && !existingMethodEmpty) {
-                                    // Don't override a non-empty method with an empty one
-                                    return;
-                                }
-                                // Otherwise, override
-                                definitions.classes[className].methods[methodName] = method;
-                            } else {
-                                // No existing method stored, just store this one
-                                definitions.classes[className].methods[methodName] = method;
-                            }
-                        }
-                    });
-
-                } else if (node.type === 'VariableDeclaration' && parent.type === 'Program') {
-                    // Only track root-level variables
-                    node.declarations.forEach((declaration) => {
-                        const varName = declaration.id.name;
-
-                        // If this is the first occurrence, store its position but allow replacement
-                        if (!definitions.variables[varName]) {
-                            definitions.variables[varName] = { firstOccurrence: node, latestDeclaration: node };
-                        } else {
-                            // Update the latest declaration for this variable
-                            definitions.variables[varName].latestDeclaration = node;
-                        }
-                    });
-                } else if (node.type === 'FunctionDeclaration' && parent.type === 'Program') {
-                    const funcName = node.id.name;
-                    // Replace or store the latest occurrence of the function
-                    definitions.functions[funcName] = node;
-                }
-            },
-        });
-
-        // Merge methods into the first definition of each class
-        Object.values(definitions.classes).forEach(({ methods, firstDefinition }) => {
-            // Replace existing methods with the latest collected methods
-            firstDefinition.body.body = Object.values(methods);
-        });
-
-        // Rebuild the AST body
-        const newBody = [];
-
-        ast.body.forEach((node) => {
-            if (node.type === 'ClassDeclaration') {
-                const className = node.id.name;
-                if (node === definitions.classes[className].firstDefinition) {
-                    newBody.push(node); // Add the merged first class definition
-                }
-            } else if (node.type === 'VariableDeclaration') {
-                node.declarations.forEach((declaration) => {
-                    const varName = declaration.id.name;
-                    if (definitions.variables[varName] && definitions.variables[varName].firstOccurrence === node) {
-                        // Insert the latest declaration at the position of the first occurrence
-                        newBody.push(definitions.variables[varName].latestDeclaration);
-                    }
-                });
-            } else if (node.type === 'FunctionDeclaration') {
-                const funcName = node.id.name;
-                if (definitions.functions[funcName] === node) {
-                    newBody.push(node); // Add only the latest occurrence of the function
-                }
-            } else {
-                newBody.push(node); // Retain other non-class, non-variable, and non-function nodes
-            }
-        });
-
-        // Replace the AST body with the new filtered and merged body
-        ast.body = newBody;
-    }
-
-    async mergeCode(newCode = '') {
-
-        // test if the new code is syntactically correct
+    async mergeCode(newCode) {
         try {
             await esprima.parseScript(newCode, {
                 tolerant: true,
@@ -186,24 +43,338 @@ export class codeManipulator {
             return false;
         }
 
+        this.code += '\n\n\n\n' + newCode;
+        await this.parse();
+        await this.mergeDuplcates();
+        return await this.generateCode();
+    }
+
+
+
+    async mergeDuplcates() {
+        await this.makeAllFunctionsExported();
+
+        await this.makeAllClassesExported();
+
+        await this.mergeDuplicateImports();
+        await this.mergeDuplicateVariables();
+
+        await this.mergeDuplicateFunctions();
+        await this.mergeDuplicateClasses();
+
+        // Remove empty export statements
+        estraverse.replace(this.ast, {
+            enter: (node, parent) => {
+                if (
+                    node.type === 'ExportNamedDeclaration' &&
+                    !node.declaration &&
+                    (!node.specifiers || node.specifiers.length === 0)
+                ) {
+                    return this.removeNodeFromParent(node, parent);
+                }
+                return node;
+            }
+        });
+
+        return this.generateCode();
+    }
+
+
+    async mergeDuplicateFunctions() {
+        if (!this.ast) {
+            throw new Error("AST not parsed. Call the `parse` method first.");
+        }
+
+        const functionMap = new Map();
+
+        // Traverse the AST to collect all function declarations
+        estraverse.traverse(this.ast, {
+            enter: (node) => {
+                if (node.type === 'FunctionDeclaration') {
+                    const functionName = node.id.name;
+
+                    if (functionMap.has(functionName)) {
+                        const existingFunction = functionMap.get(functionName);
+
+                        // Check if the new function contains code
+                        const hasCode =
+                            node.body &&
+                            node.body.body &&
+                            node.body.body.length > 0;
+
+                        const existingHasCode =
+                            existingFunction.body &&
+                            existingFunction.body.body &&
+                            existingFunction.body.body.length > 0;
+
+                        if (hasCode) {
+                            // Replace the existing function with the new one
+                            functionMap.set(functionName, node);
+                        } else if (existingHasCode) {
+                            // Do nothing, as the existing function contains code
+                        } else {
+                            // Both are stubs; retain the first one
+                        }
+
+                        // Mark the duplicate function for removal
+                        node.remove = true;
+                    } else {
+                        // Add the function to the map
+                        functionMap.set(functionName, node);
+                    }
+                }
+            }
+        });
+
+        // Remove duplicate functions
+        estraverse.replace(this.ast, {
+            enter: (node, parent) => {
+                if (node.remove) {
+                    return this.removeNodeFromParent(node, parent);
+                }
+                return node;
+            }
+        });
+
+        return this.ast;
+    }
 
 
 
 
-        await createBackup(this.filePath);
-        // read the existing file and append the new code to it
-        await appendFile(this.filePath, "\n\n\n" + newCode);
+    async mergeDuplicateImports() {
+    }
 
-        let existingAST = await this.parse();
-        const newAST = await esprima.parseScript(newCode, {
+
+
+    async mergeDuplicateVariables() {
+        if (!this.ast) {
+            throw new Error("AST not parsed. Call the `parse` method first.");
+        }
+
+        const variableMap = new Map();
+
+        // Traverse the AST to collect root-level variable declarations
+        estraverse.traverse(this.ast, {
+            enter: (node, parent) => {
+                // Only process root-level variable declarations
+                if (node.type === 'VariableDeclaration' && parent.type === 'Program') {
+                    node.declarations.forEach((declaration) => {
+                        const variableName = declaration.id.name;
+
+                        if (variableMap.has(variableName)) {
+                            const existingDeclaration = variableMap.get(variableName);
+
+                            // Replace the existing declaration's id and init
+                            existingDeclaration.id = declaration.id;
+                            existingDeclaration.init = declaration.init;
+
+                            // Mark the new (later) declaration for removal
+                            declaration.remove = true;
+                        } else {
+                            // Add the variable to the map
+                            variableMap.set(variableName, declaration);
+                        }
+                    });
+                }
+            }
+        });
+
+        // Remove duplicate variable declarations
+        estraverse.replace(this.ast, {
+            enter: (node, parent) => {
+                if (
+                    node.type === 'VariableDeclaration' &&
+                    node.declarations.every((decl) => decl.remove)
+                ) {
+                    return this.removeNodeFromParent(node, parent);
+                }
+
+                // Filter out removed declarations from VariableDeclaration nodes
+                if (node.type === 'VariableDeclaration') {
+                    node.declarations = node.declarations.filter((decl) => !decl.remove);
+                }
+
+                return node;
+            }
+        });
+
+        return this.ast;
+    }
+
+
+
+
+
+
+
+    async mergeDuplicateClasses() {
+        if (!this.ast) {
+            throw new Error("AST not parsed. Call the `parse` method first.");
+        }
+
+        const classMap = new Map();
+
+        // Traverse the AST to collect all class declarations
+        estraverse.traverse(this.ast, {
+            enter: (node) => {
+                if (node.type === 'ClassDeclaration') {
+                    const className = node.id.name;
+
+                    if (classMap.has(className)) {
+                        const existingClass = classMap.get(className);
+
+                        // Merge methods from the new class into the existing one
+                        const existingMethods = new Map(
+                            existingClass.body.body
+                                .filter((method) => method.type === 'MethodDefinition')
+                                .map((method) => [method.key.name, method])
+                        );
+
+                        node.body.body.forEach((method) => {
+                            if (method.type === 'MethodDefinition') {
+                                const methodName = method.key.name;
+
+                                if (existingMethods.has(methodName)) {
+                                    const existingMethod = existingMethods.get(methodName);
+
+                                    // Replace method only if the new method has code
+                                    if (
+                                        method.value.body &&
+                                        method.value.body.body.length > 0
+                                    ) {
+                                        existingMethod.value = method.value;
+                                    }
+                                } else {
+                                    // Add the new method if it does not exist
+                                    existingClass.body.body.push(method);
+                                }
+                            }
+                        });
+
+                        // Mark the current class for removal
+                        node.remove = true;
+                    } else {
+                        // Add the class to the map
+                        classMap.set(className, node);
+                    }
+                }
+            }
+        });
+
+        // Remove duplicate classes
+        estraverse.replace(this.ast, {
+            enter: (node, parent) => {
+                if (node.remove) {
+                    return this.removeNodeFromParent(node, parent);
+                }
+                return node;
+            }
+        });
+
+        return this.ast;
+    }
+
+    removeNodeFromParent(node, parent) {
+        if (!parent) return null;
+        if (Array.isArray(parent.body)) {
+            parent.body = parent.body.filter((child) => child !== node);
+        }
+        return null;
+    }
+
+
+
+
+    async makeAllClassesExported() {
+        if (!this.ast) {
+            throw new Error("AST not parsed. Call the `parse` method first.");
+        }
+
+        estraverse.replace(this.ast, {
+            enter: (node, parent) => {
+                // Check if the node is a class declaration
+                if (node.type === 'ClassDeclaration') {
+                    // If the parent is not already an export declaration, modify it
+                    if (!parent || parent.type !== 'ExportNamedDeclaration') {
+                        // Wrap in ExportNamedDeclaration only if not already exported
+                        // copy the comments from the function to the export statement
+                        const leadingComments = node.leadingComments;
+                        const trailingComments = node.trailingComments;
+
+                        node.leadingComments = [];
+                        node.trailingComments = [];
+
+                        return {
+                            type: 'ExportNamedDeclaration',
+                            declaration: node,
+                            specifiers: [],
+                            source: null,
+                            leadingComments,
+                            trailingComments,
+                        };
+                    }
+                }
+                return node;
+            }
+        });
+        await this.generateCode();
+        return this.ast;
+    }
+
+
+    async makeAllFunctionsExported() {
+        if (!this.ast) {
+            throw new Error("AST not parsed. Call the `parse` method first.");
+        }
+
+        estraverse.replace(this.ast, {
+            enter: (node, parent) => {
+                // Check if the node is a FunctionDeclaration
+                if (node.type === 'FunctionDeclaration') {
+                    // If the parent is not already an export declaration, modify it
+                    if (!parent || parent.type !== 'ExportNamedDeclaration') {
+                        // Wrap in ExportNamedDeclaration only if not already exported
+                        // remove the comments from the function
+
+                        // copy the comments from the function to the export statement
+                        const leadingComments = node.leadingComments;
+                        const trailingComments = node.trailingComments;
+
+                        node.leadingComments = [];
+                        node.trailingComments = [];
+
+
+                        return {
+                            type: 'ExportNamedDeclaration',
+                            declaration: node,
+                            specifiers: [],
+                            source: null,
+                            leadingComments,
+                            trailingComments,
+                        };
+                    }
+                }
+                return node;
+            }
+        });
+        await this.generateCode();
+        return this.ast;
+    }
+
+
+
+    async parse() {
+        this.ast = await esprima.parseScript(this.code, {
             tolerant: true,
             range: true,
             loc: true,
             attachComment: true
         });
 
+
         // remove trailing comments from the original code except for the last one under the particular node
-        estraverse.traverse(existingAST, {
+        await estraverse.traverse(this.ast, {
             enter: (node) => {
                 if (node.trailingComments) {
                     node.trailingComments = [];
@@ -211,10 +382,9 @@ export class codeManipulator {
             }
         });
 
-        await this.cleanUpDuplicates(existingAST);
 
         // iterate over the AST and remove adjacent duplicate leading comments
-        estraverse.traverse(existingAST, {
+        await estraverse.traverse(this.ast, {
             enter: (node) => {
                 if (node.leadingComments) {
                     for (let i = 0; i < node.leadingComments.length - 1; i++) {
@@ -229,118 +399,18 @@ export class codeManipulator {
 
 
 
-        // remove leading comments that start with ""... existing" being case insensitive
-        estraverse.traverse(existingAST, {
-            enter: (node) => {
-                if (node.leadingComments) {
-                    node.leadingComments = node.leadingComments.filter(
-                        (comment) => !comment.value.match(/... existing/i)
-                    );
-                }
-            }
-        });
+        console.log(this.ast);
+        return this.ast;
+    }
 
-        // if a comment includes "New method:" remove the string "New method:" (case insensitive)
-        estraverse.traverse(existingAST, {
-            enter: (node) => {
-                if (node.leadingComments) {
-                    node.leadingComments = node.leadingComments.map(
-                        (comment) => {
-                            return {
-                                type: comment.type,
-                                value: comment.value.replace(/New method:/i, '')
-                            }
-                        }
-                    );
-                }
-            }
-        });
+    async generateCode() {
+        if (!this.ast) {
+            throw new Error("AST not parsed. Call the `parse` method first.");
+        }
 
 
-
-
-        // convert all leading comments to block comments for functions and methods
-        estraverse.traverse(existingAST, {
-            enter: (node) => {
-                if (
-                    (node.type === "FunctionDeclaration" ||
-                        node.type === "FunctionExpression" ||
-                        (node.type === "MethodDefinition" && node.key)) &&
-                    node.leadingComments
-                ) {
-                    // Combine all leading comments into a single block comment
-                    let blockComment = "";
-                    node.leadingComments.forEach((comment) => {
-                        blockComment += comment.value + "\n";
-                    });
-
-                    // Get the level of indentation from the start of the node
-                    const nodeStartColumn = node.loc.start.column;
-                    const indent = " ".repeat(nodeStartColumn);
-
-                    // Normalize comment lines
-                    let commentLines = blockComment.split("\n").map((line) => {
-                        return line.replace(/^\s*\*?/, "").trim(); // Remove leading asterisks and spaces
-                    });
-
-                    // remove duplicate lines. The instance that comes first is kept
-                    commentLines = commentLines.filter((line, index, arr) => {
-                        return arr.indexOf(line) === index;
-                    });
-
-                    // trim all lines. Ensure that there is only one '*' at the beginning of each line
-                    commentLines = commentLines.map((line) => {
-                        line = line.trim().replace(/^\*?/, "").trim();
-                        line = line.trim().replace(/^\*?/, "").trim();
-                    
-                        return  line;
-                    });
-
-
-
-                    // Remove empty lines before and after actual content
-                    const trimmedCommentLines = commentLines.filter((line, index, arr) => {
-                        if (line.trim() === "") {
-                            // Keep empty lines only if they are between non-empty lines
-                            const hasContentBefore = arr.slice(0, index).some((l) => l.trim() !== "");
-                            const hasContentAfter = arr.slice(index + 1).some((l) => l.trim() !== "");
-                            return hasContentBefore && hasContentAfter;
-                        }
-                        return true; // Always keep non-empty lines
-                    });
-
-                    // Format and indent the trimmed lines
-                    const formattedComment = trimmedCommentLines
-                        .map((line) => (line ? `${indent} * ${line}` : `${indent} *`))
-                        .join("\n");
-
-                    // Wrap with block comment syntax, ensuring proper formatting
-                    const formattedBlockComment = `\n${indent}*\n${formattedComment}\n${indent}*`;
-                    //console.log(formattedBlockComment);
-                    // Replace leadingComments with the correctly formatted single block comment
-                    node.leadingComments = [
-                        {
-                            type: "Block",
-                            value: formattedBlockComment.trim()
-                        }
-                    ];
-                }
-            }
-        });
-
-
-
-
-
-
-
-
-
-
-
-        const mergedCode = await escodegen.generate(existingAST, {
+        const newCode = await escodegen.generate(this.ast, {
             comment: true,
-
             format: {
                 indent: {
                     style: '    ',
@@ -360,74 +430,10 @@ export class codeManipulator {
                 safeConcatenation: true,
             },
         });
-        await clearTerminal();
-        console.log(this);
-        await this.writeFile(mergedCode);
-        return true;
-    }
-
-    async removeClass(classNameToRemove) {
-        const existingAST = this.parse();
-
-        estraverse.replace(existingAST, {
-            enter: (node) => {
-                if (node.type === 'ClassDeclaration' && node.id.name === classNameToRemove) {
-                    return estraverse.VisitorOption.Remove;
-                }
-            }
-        });
-
-        const updatedCode = escodegen.generate(existingAST);
-        await this.writeFile(updatedCode);
-    }
-
-    async removeClassMethod(className, methodNameToRemove) {
-        const existingAST = this.parse();
-
-        estraverse.traverse(existingAST, {
-            enter: (node) => {
-                if (node.type === 'ClassDeclaration' && node.id.name === className) {
-                    node.body.body = node.body.body.filter(
-                        (method) => !(method.key.name === methodNameToRemove)
-                    );
-                }
-            }
-        });
-
-        const updatedCode = escodegen.generate(existingAST);
-        await this.writeFile(updatedCode);
-    }
-
-    async removeFunction(functionNameToRemove) {
-        const existingAST = this.parse();
-
-        estraverse.replace(existingAST, {
-            enter: (node) => {
-                if (node.type === 'FunctionDeclaration' && node.id.name === functionNameToRemove) {
-                    return estraverse.VisitorOption.Remove;
-                }
-            }
-        });
-
-        const updatedCode = escodegen.generate(existingAST);
-        await this.writeFile(updatedCode);
-    }
-
-    async parse() {
-        return await esprima.parseScript(await this.readFile(), {
-            tolerant: true,
-            range: true,
-            loc: true,
-            attachComment: true
-        });
-    }
-
-    async readFile() {
-        return readFile(this.filePath);
-    }
-
-    async writeFile(newCode) {
-        writeFile(this.filePath, newCode);
+        //console.log(this.ast);
+        this.code = newCode;
+        await this.parse();
+        return this.code;
     }
 }
 

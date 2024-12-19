@@ -139,13 +139,13 @@ export class toolsManager {
                 if (isStub) {
                     methodItemElement.style.color = 'red';
                     methodItemElement.addEventListener('click', async () => {
-                        await this.implementSpecificClassMethod(className, name, lineNumber);
+                        await this.implementSpecificClassMethod(className, name, args, lineNumber);
                         await this.pullMethodsList(this.onlyStubs);
                     });
                 } else {
                     methodItemElement.style.color = 'green';
                     methodItemElement.addEventListener('click', async () => {
-                        await this.addToChatPrompt(className, name, lineNumber);
+                        await this.addToChatPrompt(className, name, args, lineNumber);
                         //console.log('this is the line number ', lineNumber);
                         await this.pullMethodsList(this.onlyStubs);
                     });
@@ -172,13 +172,13 @@ export class toolsManager {
             if (isStub) {
                 functionItemElement.style.color = 'red';
                 functionItemElement.addEventListener('click', async () => {
-                    await this.implementSpecificFunction(functionName, lineNumber);
+                    await this.implementSpecificFunction(functionName, args, lineNumber);
                     await this.pullFunctionList(this.onlyStubs);
                 });
             } else {
                 functionItemElement.style.color = 'green';
                 functionItemElement.addEventListener('click', async () => {
-                    await this.addFunctionToChatPrompt(functionName, lineNumber);
+                    await this.addFunctionToChatPrompt(functionName, args, lineNumber);
                     console.log('this is the line number ', lineNumber);
                     await this.pullFunctionList(this.onlyStubs);
                 });
@@ -191,43 +191,78 @@ export class toolsManager {
 
         }
     }
-    async implementSpecificClassMethod(className, methodName, lineNumber) {
+    async implementSpecificClassMethod(className, methodName, args, lineNumber) {
         ctx.tabs.switchToTab('Chat');
         await doAjax('./gotoLineNumber', {
             lineNumber,
             targetFile: ctx.targetFile
         });
         await ctx.chat.newChat(`Implement ${methodName}.${className}`);
-        await ctx.chat.addMessage(`Write the ${methodName} method in the ${className} class.`);
+        await ctx.chat.addMessage(`Write the ${methodName} method in the ${className} class.
+Remember to respond with a snippet in the form of the following:
+\`\`\`
+class ${className} {
+    ${methodName}(${args.join(', ')}) {
+        // your code here
+    }
+}
+\`\`\`
+`);
         await ctx.chat.callLLM();
     }
-    async addToChatPrompt(className, methodName, lineNumber) {
+    async addToChatPrompt(className, methodName, args, lineNumber) {
         ctx.tabs.switchToTab('Chat');
         await doAjax('./gotoLineNumber', {
             lineNumber,
             targetFile: ctx.targetFile
         });
         await ctx.chat.newChat(`Modify ${methodName}.${className}`);
-        await ctx.chat.setInput(`Modify the ${methodName} method in the ${className} class.\nImprove it.`);
+        await ctx.chat.setInput(`Modify the ${methodName} method in the ${className} class.
+Improve it.
+
+Remember to respond with a snippet in the form of the following:
+\`\`\`
+class ${className} {
+    ${methodName}(${args.join(', ')}) {
+        // your code here
     }
-    async implementSpecificFunction(functionName, lineNumber) {
+}
+\`\`\`
+`);
+    }
+    async implementSpecificFunction(functionName, args, lineNumber) {
         ctx.tabs.switchToTab('Chat');
         await doAjax('./gotoLineNumber', {
             lineNumber,
             targetFile: ctx.targetFile
         });
         await ctx.chat.newChat(`Implement ${functionName}`);
-        await ctx.chat.addMessage(`Write the ${functionName} function.`);
+        await ctx.chat.addMessage(`Write the ${functionName} function.
+Remember to respond with a snippet in the form of the following:
+\`\`\`
+function ${functionName}(${args.join(', ')}) {
+    // your code here
+}
+\`\`\`            
+`);
         await ctx.chat.callLLM();
     }
-    async addFunctionToChatPrompt(functionName, lineNumber) {
+    async addFunctionToChatPrompt(functionName, args, lineNumber) {
         ctx.tabs.switchToTab('Chat');
         await doAjax('./gotoLineNumber', {
             lineNumber,
             targetFile: ctx.targetFile
         });
         await ctx.chat.newChat(`Modify ${functionName}`);
-        await ctx.chat.setInput(`Modify the ${functionName} function.\nImprove it.`);
+        await ctx.chat.setInput(`Modify the ${functionName} function.
+Improve it.
+            
+\`\`\`
+function ${functionName}(${args.join(', ')}) {
+    // your code here
+}
+\`\`\`
+`);
     }
     async verifyTargetFileSpecified() {
         if (!ctx.targetFile) {

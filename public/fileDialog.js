@@ -101,8 +101,11 @@ export async function fileDialog(fileListArray) {
                 padding: '10px 20px', marginTop: '10px', cursor: 'pointer',
                 backgroundColor: '#66ccff', border: 'none', borderRadius: '4px', color: '#333',
             },
-            onclick: () => {
-                if (selectedFilePath) resolve(selectedFilePath);
+            onclick: async () => {
+                if (selectedFilePath) {
+                    selectedFilePath = './' + selectedFilePath;
+                    resolve(selectedFilePath);
+                }
                 else alert('Please select a file.');
                 document.body.removeChild(modal);
             },
