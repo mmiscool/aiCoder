@@ -76,12 +76,17 @@ export async function doAjax(urlToCall, body) {
 
 
 
-
+const getWebSocketURL = () => {
+  const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  const host = window.location.host;
+  const pathname = window.location.pathname.replace(/\/[^/]*$/, ''); // Remove the file name if present
+  return `${protocol}//${host}${pathname}/ws`;
+};
 
 
 class WebSocketClient {
   constructor() {
-    this.url = window.location.protocol === "http:"? `ws://${window.location.host}` : `wss://${window.location.host}`;
+    this.url = getWebSocketURL();
     this.socket = null;
   }
 
