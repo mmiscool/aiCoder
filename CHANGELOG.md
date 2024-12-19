@@ -3,6 +3,12 @@
 [![semantic versioning](https://img.shields.io/badge/semantic%20versioning-2.0.0-green.svg)](https://semver.org)
 > All notable changes to this project will be documented in this file
 
+## [1.0.59](https://github.com/mmiscool/aiCoder/compare/v1.0.58...v1.0.59) (2024-12-19)
+
+### 🤖 Build System
+
+* make web sockets work behind reverse proxy not at root. ([5935375](https://github.com/mmiscool/aiCoder/commit/5935375739617f851152a8a51e7df6c2484009ba))
+
 ## [1.0.58](https://github.com/mmiscool/aiCoder/compare/v1.0.57...v1.0.58) (2024-12-19)
 
 ### 🤖 Build System
