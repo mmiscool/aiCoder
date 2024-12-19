@@ -15,12 +15,12 @@ export async function intelligentlyMergeSnippets(filename) {
     await manipulator.parse();
     await manipulator.mergeDuplicates();
     const theNewCodeWeGot = await manipulator.generateCode();
-    console.log(`The new code we got: ${theNewCodeWeGot}`);
-    await writeFile(await manipulator.generateCode());
+    await writeFile(filename, theNewCodeWeGot);
 }
 
 
 export async function applySnippets(targetFile, snippets) {
+    console.log(`Applying snippets to file: ${targetFile}`);
     let cleanedSnippets = await snippets.join('\n\n\n\n\n', true);
     const originalCode = await readFile(targetFile);
     const manipulator = await new codeManipulator();
@@ -60,7 +60,7 @@ export class codeManipulator {
         }
 
         this.code = this.code + '\n\n\n\n' + newCode;
-        console.log(this.code);
+  
         await this.parse();
         await this.mergeDuplicates();
         return await this.generateCode();
@@ -71,7 +71,6 @@ export class codeManipulator {
     async mergeDuplicates() {
         await this.parse();
         await this.makeAllFunctionsExported();
-
         await this.makeAllClassesExported();
 
         await this.mergeDuplicateImports();
@@ -160,9 +159,78 @@ export class codeManipulator {
 
 
 
-
     async mergeDuplicateImports() {
+        if (!this.ast) {
+            throw new Error("AST not parsed. Call the `parse` method first.");
+        }
+    
+        const importMap = new Map();
+        const importNodes = [];
+        console.log('Merging duplicate imports');
+    
+        // Traverse the AST to collect and combine imports
+        estraverse.traverse(this.ast, {
+            enter: (node, parent) => {
+                if (node.type === 'ImportDeclaration') {
+                    const source = node.source.value;
+                    console.log(`import {${node.specifiers.map((s) => s.local.name).join(', ')}} from '${source}'`);
+                    if (importMap.has(source)) {
+                        // Merge specifiers from the duplicate import
+                        const existingNode = importMap.get(source);
+                        const existingSpecifiers = existingNode.specifiers;
+                        const newSpecifiers = node.specifiers;
+    
+                        // Avoid duplicates in specifiers
+                        newSpecifiers.forEach((specifier) => {
+                            if (
+                                !existingSpecifiers.some(
+                                    (existing) =>
+                                        existing.local.name === specifier.local.name
+                                )
+                            ) {
+                                existingSpecifiers.push(specifier);
+                            }
+                        });
+    
+                        // Mark the duplicate node for removal
+                        node.remove = true;
+                    } else {
+                        // Add the import to the map
+                        importMap.set(source, node);
+                        importNodes.push(node); // Keep track of import nodes
+                    }
+                }
+            }
+        });
+    
+        // Remove duplicate import nodes
+        estraverse.replace(this.ast, {
+            enter: (node, parent) => {
+                if (node.type === 'ImportDeclaration' && node.remove) {
+                    return this.removeNodeFromParent(node, parent);
+                }
+                return node;
+            }
+        });
+    
+        // Move all imports to the top of the program
+        estraverse.replace(this.ast, {
+            enter: (node) => {
+                if (node.type === 'Program') {
+                    // Remove all imports from their original position
+                    node.body = node.body.filter((child) => child.type !== 'ImportDeclaration');
+    
+                    // Add the combined import statements to the top
+                    node.body.unshift(...importNodes);
+                }
+                return node;
+            }
+        });
+    
+        return this.ast;
     }
+    
+    
 
 
 
@@ -389,7 +457,8 @@ export class codeManipulator {
             tolerant: true,
             range: true,
             loc: true,
-            attachComment: true
+            attachComment: true,
+            sourceType: 'module',
         });
 
 
@@ -424,12 +493,12 @@ export class codeManipulator {
     }
 
     async generateCode() {
-        console.log('Generating code', this.code);
+        //console.log('Generating code', this.code);
         if (!this.ast) {
             throw new Error("AST not parsed. Call the `parse` method first.");
         }
 
-        console.log(this.ast)
+        //console.log(this.ast)
         const newCode = await escodegen.generate(this.ast, {
             comment: true,
             format: {
@@ -451,10 +520,10 @@ export class codeManipulator {
                 safeConcatenation: true,
             },
         });
-        console.log(`this is the new code: ${newCode}`);
+        //console.log(`this is the new code: ${newCode}`);
         //console.log(this.ast);
         this.code = newCode;
-        //await this.parse();
+        await this.parse();
         return this.code;
     }
 }
