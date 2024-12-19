@@ -8,19 +8,28 @@ import { clearTerminal, } from './terminalHelpers.js';
 
 
 export async function intelligentlyMergeSnippets(filename) {
+    console.log(`Intelligently merging snippets for file: ${filename}`);
     const originalCode = await readFile(filename);
-    const manipulator = await new codeManipulator(originalCode);
+    const manipulator = new codeManipulator();
+    await manipulator.setCode(originalCode);
     await manipulator.parse();
-    await manipulator.mergeDuplcates();
+    await manipulator.mergeDuplicates();
+    const theNewCodeWeGot = await manipulator.generateCode();
+    console.log(`The new code we got: ${theNewCodeWeGot}`);
     await writeFile(await manipulator.generateCode());
 }
 
 
 export async function applySnippets(targetFile, snippets) {
     let cleanedSnippets = await snippets.join('\n\n\n\n\n', true);
-    const manipulator = await new codeManipulator(await readFile(targetFile));
-    return await manipulator.mergeCode(cleanedSnippets);
+    const originalCode = await readFile(targetFile);
+    const manipulator = await new codeManipulator();
+    await manipulator.setCode(originalCode);
+    const returnValue = await manipulator.mergeCode(cleanedSnippets);
+    await writeFile(targetFile, await manipulator.generateCode());
+    return returnValue;
 }
+
 
 
 
@@ -28,6 +37,12 @@ export async function applySnippets(targetFile, snippets) {
 export class codeManipulator {
     constructor(code = '') {
         this.code = code;
+    }
+
+    async setCode(code) {
+        this.code = code;
+        await this.parse();
+        return this.code;
     }
 
     async mergeCode(newCode) {
@@ -40,18 +55,21 @@ export class codeManipulator {
             });
         } catch (e) {
             console.error(e);
+            console.log('Error parsing the new code snippet');
             return false;
         }
 
-        this.code += '\n\n\n\n' + newCode;
+        this.code = this.code + '\n\n\n\n' + newCode;
+        console.log(this.code);
         await this.parse();
-        await this.mergeDuplcates();
+        await this.mergeDuplicates();
         return await this.generateCode();
     }
 
 
 
-    async mergeDuplcates() {
+    async mergeDuplicates() {
+        await this.parse();
         await this.makeAllFunctionsExported();
 
         await this.makeAllClassesExported();
@@ -63,7 +81,7 @@ export class codeManipulator {
         await this.mergeDuplicateClasses();
 
         // Remove empty export statements
-        estraverse.replace(this.ast, {
+        await estraverse.replace(this.ast, {
             enter: (node, parent) => {
                 if (
                     node.type === 'ExportNamedDeclaration' &&
@@ -76,7 +94,8 @@ export class codeManipulator {
             }
         });
 
-        return this.generateCode();
+        return await this.generateCode();
+
     }
 
 
@@ -291,7 +310,7 @@ export class codeManipulator {
             throw new Error("AST not parsed. Call the `parse` method first.");
         }
 
-        estraverse.replace(this.ast, {
+        await estraverse.replace(this.ast, {
             enter: (node, parent) => {
                 // Check if the node is a class declaration
                 if (node.type === 'ClassDeclaration') {
@@ -365,6 +384,7 @@ export class codeManipulator {
 
 
     async parse() {
+        this.ast = {};
         this.ast = await esprima.parseScript(this.code, {
             tolerant: true,
             range: true,
@@ -374,7 +394,7 @@ export class codeManipulator {
 
 
         // remove trailing comments from the original code except for the last one under the particular node
-        await estraverse.traverse(this.ast, {
+        estraverse.traverse(this.ast, {
             enter: (node) => {
                 if (node.trailingComments) {
                     node.trailingComments = [];
@@ -384,7 +404,7 @@ export class codeManipulator {
 
 
         // iterate over the AST and remove adjacent duplicate leading comments
-        await estraverse.traverse(this.ast, {
+        estraverse.traverse(this.ast, {
             enter: (node) => {
                 if (node.leadingComments) {
                     for (let i = 0; i < node.leadingComments.length - 1; i++) {
@@ -399,16 +419,17 @@ export class codeManipulator {
 
 
 
-        console.log(this.ast);
+        //console.log(this.ast);
         return this.ast;
     }
 
     async generateCode() {
+        console.log('Generating code', this.code);
         if (!this.ast) {
             throw new Error("AST not parsed. Call the `parse` method first.");
         }
 
-
+        console.log(this.ast)
         const newCode = await escodegen.generate(this.ast, {
             comment: true,
             format: {
@@ -430,14 +451,13 @@ export class codeManipulator {
                 safeConcatenation: true,
             },
         });
+        console.log(`this is the new code: ${newCode}`);
         //console.log(this.ast);
         this.code = newCode;
-        await this.parse();
+        //await this.parse();
         return this.code;
     }
 }
-
-
 
 
 
