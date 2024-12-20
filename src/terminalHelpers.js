@@ -47,7 +47,7 @@ function getCallerInfo(level = 3) {
 export async function clearTerminal() {
 
   //return console.log("----------------------------------------------------------------------------");
-  return;
+  
   if (ctx.ws) {
     ctx.ws.send("clear");
   }
@@ -78,7 +78,7 @@ export async function printAndPause(message, secondsToPause = 0) {
   if (secondsToPause === 0) {
     return;
   } else {
-    await new Promise(resolve => setTimeout(resolve, secondsToPause * 1000));
+    return await new Promise(resolve => setTimeout(resolve, secondsToPause * 1000));
   }
 }
 

@@ -19,15 +19,24 @@ let lastCallTime = 0;
 
 
 async function setupMode() {
-    if (readArg('-setup')) {
-        await printAndPause('Entering setup mode');
+    if (await readArg('-setup')) {
+        //loop 5 times to clear the terminal from 5 to 1
+        for (let i = 5; i > 0; i--) {
+            await clearTerminal();
+            await printAndPause(`Setting up LLM mode in ${i} seconds.`, 1);
+        }
+        
         await clearTerminal();
-        await printAndPause('Installing ollama', 5);
+        await printAndPause('Installing ollama . . . ', 1);
         await installOllama();
         await printAndPause('Ollama installed');
+        await printAndPause('Waiting for ollama service to start', 10);
         await printAndPause('Pulling the default model');
         await pullOllamaModelWithProgress('granite3.1-dense:8b');
         await pullOllamaModelWithProgress('granite3.1-moe');
+
+        await writeSetting(`llmConfig/ai-service.txt`, 'ollama');
+        await writeSetting(`llmConfig/ollama-model.txt`, 'granite3.1-dense:8b');
     }
 }
 
@@ -219,7 +228,7 @@ async function installOllama() {
 
 
 async function pullOllamaModelWithProgress(model) {
-    console.log(`downloading ${model}...`)
+    await printAndPause(`downloading ${model}...`, 5)
     const progressBar = new cliProgress.SingleBar({
         format: 'Downloading {model} | {bar} | {percentage}%        ',
         barCompleteChar: '#',

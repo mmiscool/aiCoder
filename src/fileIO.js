@@ -83,7 +83,8 @@ export async function readSetting(fileName) {
     }
 }
 export async function writeSetting(fileName, content) {
-    console.log('Writing setting:', fileName, content);
+    printDebugMessage('Writing setting:', fileName, content);
+    console.log('Writing setting:', fileName);
     // by default the settings are stored in the ./.aiCoder folder.
     await writeFile(`./.aiCoder/${ fileName }`, content);
 }
