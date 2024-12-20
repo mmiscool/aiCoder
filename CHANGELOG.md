@@ -3,6 +3,12 @@
 [![semantic versioning](https://img.shields.io/badge/semantic%20versioning-2.0.0-green.svg)](https://semver.org)
 > All notable changes to this project will be documented in this file
 
+## [1.0.61](https://github.com/mmiscool/aiCoder/compare/v1.0.60...v1.0.61) (2024-12-20)
+
+### 🤖 Build System
+
+* improve local llm setup script. ([4b0e981](https://github.com/mmiscool/aiCoder/commit/4b0e9812716d9780ab9e022c9c5162bb862b8863))
+
 ## [1.0.60](https://github.com/mmiscool/aiCoder/compare/v1.0.59...v1.0.60) (2024-12-20)
 
 ### 🤖 Build System
