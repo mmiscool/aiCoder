@@ -26,7 +26,8 @@ async function setupMode() {
         await installOllama();
         await printAndPause('Ollama installed');
         await printAndPause('Pulling the default model');
-        await pullOllamaModelWithProgress('granite3-dense:latest');
+        await pullOllamaModelWithProgress('granite3.1-dense:8b');
+        await pullOllamaModelWithProgress('granite3.1-moe');
     }
 }
 
@@ -295,7 +296,6 @@ async function getGroqModels() {
 // openAI related functions -----------------------------------------------------------------------------------------------
 async function getOpenAIResponse(messages) {
     const apiKey = await readSetting('llmConfig/openai-api-key.txt');
-    console.log('apiKey:', apiKey);
     let openai = new OpenAI({ apiKey });
 
     let responseText = '';

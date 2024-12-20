@@ -60,7 +60,7 @@ export class codeManipulator {
         }
 
         this.code = this.code + '\n\n\n\n' + newCode;
-  
+
         await this.parse();
         await this.mergeDuplicates();
         return await this.generateCode();
@@ -70,6 +70,9 @@ export class codeManipulator {
 
     async mergeDuplicates() {
         await this.parse();
+
+        await this.cleanUpComments();
+
         await this.makeAllFunctionsExported();
         await this.makeAllClassesExported();
 
@@ -79,6 +82,13 @@ export class codeManipulator {
         await this.mergeDuplicateFunctions();
         await this.mergeDuplicateClasses();
 
+        await this.removeEmptyExports();
+
+        return await this.generateCode();
+
+    }
+
+    async removeEmptyExports() {
         // Remove empty export statements
         await estraverse.replace(this.ast, {
             enter: (node, parent) => {
@@ -92,9 +102,6 @@ export class codeManipulator {
                 return node;
             }
         });
-
-        return await this.generateCode();
-
     }
 
 
@@ -125,13 +132,34 @@ export class codeManipulator {
                             existingFunction.body.body &&
                             existingFunction.body.body.length > 0;
 
+                        // Handle JSDoc comments
+                        const jsDocComment = node.leadingComments?.find(
+                            (comment) => comment.type === 'Block' && comment.value.startsWith('*')
+                        );
+
                         if (hasCode) {
                             // Replace the existing function with the new one
                             functionMap.set(functionName, node);
+
+                            if (jsDocComment) {
+                                existingFunction.leadingComments = [
+                                    ...(existingFunction.leadingComments || []),
+                                    jsDocComment,
+                                ];
+                            }
                         } else if (existingHasCode) {
-                            // Do nothing, as the existing function contains code
+                            // If the existing function has code but the new one has a JSDoc comment, copy it
+                            if (jsDocComment) {
+                                existingFunction.leadingComments = [
+                                    ...(existingFunction.leadingComments || []),
+                                    jsDocComment,
+                                ];
+                            }
                         } else {
                             // Both are stubs; retain the first one
+                            if (jsDocComment && !existingFunction.leadingComments) {
+                                existingFunction.leadingComments = [jsDocComment];
+                            }
                         }
 
                         // Mark the duplicate function for removal
@@ -159,15 +187,16 @@ export class codeManipulator {
 
 
 
+
     async mergeDuplicateImports() {
         if (!this.ast) {
             throw new Error("AST not parsed. Call the `parse` method first.");
         }
-    
+
         const importMap = new Map();
         const importNodes = [];
         console.log('Merging duplicate imports');
-    
+
         // Traverse the AST to collect and combine imports
         estraverse.traverse(this.ast, {
             enter: (node, parent) => {
@@ -179,7 +208,7 @@ export class codeManipulator {
                         const existingNode = importMap.get(source);
                         const existingSpecifiers = existingNode.specifiers;
                         const newSpecifiers = node.specifiers;
-    
+
                         // Avoid duplicates in specifiers
                         newSpecifiers.forEach((specifier) => {
                             if (
@@ -191,7 +220,7 @@ export class codeManipulator {
                                 existingSpecifiers.push(specifier);
                             }
                         });
-    
+
                         // Mark the duplicate node for removal
                         node.remove = true;
                     } else {
@@ -202,7 +231,7 @@ export class codeManipulator {
                 }
             }
         });
-    
+
         // Remove duplicate import nodes
         estraverse.replace(this.ast, {
             enter: (node, parent) => {
@@ -212,25 +241,25 @@ export class codeManipulator {
                 return node;
             }
         });
-    
+
         // Move all imports to the top of the program
         estraverse.replace(this.ast, {
             enter: (node) => {
                 if (node.type === 'Program') {
                     // Remove all imports from their original position
                     node.body = node.body.filter((child) => child.type !== 'ImportDeclaration');
-    
+
                     // Add the combined import statements to the top
                     node.body.unshift(...importNodes);
                 }
                 return node;
             }
         });
-    
+
         return this.ast;
     }
-    
-    
+
+
 
 
 
@@ -325,12 +354,34 @@ export class codeManipulator {
                                 if (existingMethods.has(methodName)) {
                                     const existingMethod = existingMethods.get(methodName);
 
+                                    // Handle JSDoc comments
+                                    const jsDocComment = method.leadingComments?.find(
+                                        (comment) =>
+                                            comment.type === 'Block' &&
+                                            comment.value.startsWith('*')
+                                    );
+
                                     // Replace method only if the new method has code
                                     if (
                                         method.value.body &&
                                         method.value.body.body.length > 0
                                     ) {
                                         existingMethod.value = method.value;
+
+                                        if (jsDocComment) {
+                                            existingMethod.leadingComments = [
+                                                ...(existingMethod.leadingComments || []),
+                                                jsDocComment,
+                                            ];
+                                        }
+                                    } else {
+                                        // If the existing method has code but the new one has a JSDoc comment, copy it
+                                        if (jsDocComment) {
+                                            existingMethod.leadingComments = [
+                                                ...(existingMethod.leadingComments || []),
+                                                jsDocComment,
+                                            ];
+                                        }
                                     }
                                 } else {
                                     // Add the new method if it does not exist
@@ -361,6 +412,58 @@ export class codeManipulator {
 
         return this.ast;
     }
+
+
+
+
+
+    async cleanUpComments() {
+        // iterate over the AST and remove adjacent duplicate leading comments
+        await estraverse.traverse(this.ast, {
+            enter: (node) => {
+                if (node.leadingComments) {
+                    for (let i = 0; i < node.leadingComments.length - 1; i++) {
+                        if (node.leadingComments[i].value === node.leadingComments[i + 1].value) {
+                            node.leadingComments.splice(i, 1);
+                        }
+                    }
+                }
+            }
+        });
+
+        // remove leading comments that start with ""... existing" being case insensitive
+        await estraverse.traverse(this.ast, {
+            enter: (node) => {
+                if (node.leadingComments) {
+                    node.leadingComments = node.leadingComments.filter(
+                        (comment) => !comment.value.match(/... existing/i)
+                    );
+                }
+            }
+        });
+
+        // if a comment includes "New method:" remove the string "New method:" (case insensitive)
+        await estraverse.traverse(this.ast, {
+            enter: (node) => {
+                if (node.leadingComments) {
+                    node.leadingComments = node.leadingComments.map(
+                        (comment) => {
+                            return {
+                                type: comment.type,
+                                value: comment.value.replace(/New method:/i, '')
+                            }
+                        }
+                    );
+                }
+            }
+        });
+    }
+
+
+
+
+
+
 
     removeNodeFromParent(node, parent) {
         if (!parent) return null;
