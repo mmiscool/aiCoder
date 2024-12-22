@@ -266,8 +266,11 @@ function ${functionName}(${args.join(', ')}) {
     }
     async verifyTargetFileSpecified() {
         if (!ctx.targetFile) {
-            await alert('Please select a file first');
-            ctx.tabs.switchToTab('chat');
+            // check if tools tab is active
+            if (ctx.tabs.activeTab == 'Tools') {
+                await alert('Please select a file first');
+                ctx.tabs.switchToTab('chat');
+            }
             return false;
         }
         return true;
