@@ -5,6 +5,31 @@ import { wss } from './apiServer.js';
 import { readSetting, writeSetting } from "./fileIO.js";
 
 
+async function showHelp() {
+  if (await readArg('-help') | await readArg('-h')) {
+    console.log(`
+Usage: a [options]
+Options:
+  -help:     Show this  help message
+
+  -p [port]: Sets the http server port number. 
+             Defaults to 3000
+
+  -debug:    Print debug messages
+
+  -editor:   Set the preferred editor (vscode, neovim, nano, vim)
+             Default is vscode
+
+  -setup:    Install Ollama LLM for local use and pull default models
+  `);
+    process.exit(0);
+  }
+}
+
+showHelp();
+
+
+
 export async function printDebugMessage(...message) {
   if (await readArg('-debug')) {
     //const stack = new Error().stack;
@@ -47,7 +72,7 @@ function getCallerInfo(level = 3) {
 export async function clearTerminal() {
 
   //return console.log("----------------------------------------------------------------------------");
-  
+
   if (ctx.ws) {
     ctx.ws.send("clear");
   }

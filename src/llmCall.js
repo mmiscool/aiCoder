@@ -109,6 +109,12 @@ export async function llmSettings() {
     const currentService = await readSetting(`llmConfig/ai-service.txt`);
 
     const settingsObject = {
+        ollama: {
+            model:  await readSetting(`llmConfig/ollama-model.txt`),
+            apiKey: await  readSetting(`llmConfig/ollama-api-key.txt`),
+            models: await getOllamaModels(),
+            active: currentService === 'ollama',
+        },
         openai: {
             model: await readSetting(`llmConfig/openai-model.txt`),
             apiKey: await  readSetting(`llmConfig/openai-api-key.txt`),
@@ -121,12 +127,7 @@ export async function llmSettings() {
             models: await getGroqModels(),
             active: currentService === 'groq',
         },
-        ollama: {
-            model:  await readSetting(`llmConfig/ollama-model.txt`),
-            apiKey: await  readSetting(`llmConfig/ollama-api-key.txt`),
-            models: await getOllamaModels(),
-            active: currentService === 'ollama',
-        },
+
         anthropic: {
             model:  await readSetting(`llmConfig/anthropic-model.txt`),
             apiKey: await  readSetting(`llmConfig/anthropic-api-key.txt`),
@@ -142,14 +143,14 @@ export async function llmSettings() {
 
 export async function llmSettingsUpdate(settings) {
     // write the new settings to the files
+    await writeSetting(`llmConfig/ollama-model.txt`, settings.ollama.model);
+    await writeSetting(`llmConfig/ollama-api-key.txt`, settings.ollama.apiKey);
+
     await writeSetting(`llmConfig/openai-model.txt`, settings.openai.model);
     await writeSetting(`llmConfig/openai-api-key.txt`, settings.openai.apiKey);
 
     await writeSetting(`llmConfig/groq-model.txt`, settings.groq.model);
     await writeSetting(`llmConfig/groq-api-key.txt`, settings.groq.apiKey);
-
-    await writeSetting(`llmConfig/ollama-model.txt`, settings.ollama.model);
-    await writeSetting(`llmConfig/ollama-api-key.txt`, settings.ollama.apiKey);
 
     await writeSetting(`llmConfig/anthropic-model.txt`, settings.anthropic.model);
     await writeSetting(`llmConfig/anthropic-api-key.txt`, settings.anthropic.apiKey);
@@ -284,7 +285,9 @@ export async function getGroqResponse(messages) {
 
 
 async function getGroqModels() {
-    const groq = new Groq({ apiKey: await readSetting('llmConfig/groq-api-key.txt') });
+    const apiKey = await readSetting('llmConfig/groq-api-key.txt');
+    if (!apiKey) return [];
+    const groq = new Groq({ apiKey });
     try {
         const response = await groq.models.list();
         const models = response.data;
@@ -328,6 +331,8 @@ async function getOpenAIResponse(messages) {
 
 async function getOpenAIModels() {
     const apiKey = await readSetting('llmConfig/openai-api-key.txt');
+    if (!apiKey) return [];
+
     let openai = new OpenAI({ apiKey });
     try {
         const response = await openai.models.list();

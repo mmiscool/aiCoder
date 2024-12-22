@@ -1,4 +1,14 @@
 #!/usr/bin/env node
+console.log(`                                                             
+      _/_/    _/_/_/        _/_/_/    _/_/    _/_/_/    _/_/_/_/  _/_/_/    
+   _/    _/    _/        _/        _/    _/  _/    _/  _/        _/    _/   
+  _/_/_/_/    _/        _/        _/    _/  _/    _/  _/_/_/    _/_/_/      
+ _/    _/    _/        _/        _/    _/  _/    _/  _/        _/    _/     
+_/    _/  _/_/_/        _/_/_/    _/_/    _/_/_/    _/_/_/_/  _/    _/      
+
+https://github.com/mmiscool/aiCoder
+`);
+
 import {
   printAndPause,
 } from './terminalHelpers.js';
