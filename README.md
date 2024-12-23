@@ -10,7 +10,9 @@ The magic lies in aiCoder’s advanced merging logic, which keeps your original 
 
 ![NEW UI](./images/aiCoder.gif)
 
+[Slide Deck discussing the AST approach to merging snippets](https://docs.google.com/presentation/d/1xdX09ELgW7lMU1E9KWIrpibUYVT1wdaiSvUhFhAT7EI/edit?usp=sharing)
 
+[Code manipulator source file](./src/intelligentMerge.js)
 
 <a href="https://star-history.com/#mmiscool/aiCoder&Date">
  <picture>
