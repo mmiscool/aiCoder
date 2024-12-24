@@ -86,7 +86,7 @@ To run on a different port use `aicoder -p 3001`
 ## Chat Interface
 ![NEW UI](./images/CHAT.png)
 
-## aiCoder provides two difrent specialized chat modes:
+## aiCoder provides two different specialized chat modes:
 
 ## New Chat
 Use **New Chat** to interactively modify a selected file. Before starting a conversation, be sure to choose a file from the **Files** tab. The LLM uses a system prompt specifying the snippet format. Correctly formatted snippets can be merged automatically, updating existing functions or class methods without disturbing the rest of the code.
