@@ -14,13 +14,7 @@ The magic lies in aiCoder’s advanced merging logic, which keeps your original 
 
 [Code manipulator source file](./src/intelligentMerge.js)
 
-<a href="https://star-history.com/#mmiscool/aiCoder&Date">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=mmiscool/aiCoder&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=mmiscool/aiCoder&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=mmiscool/aiCoder&type=Date" />
- </picture>
-</a>
+
 
 ## Purpose and Benefits
 **aiCoder** is designed to enhance your coding experience by leveraging the power of AI. It helps you:
@@ -149,6 +143,7 @@ Before using aiCoder, configure your LLM provider and model. After providing an 
 - Groq is less tested and has a smaller context window.
 - Ollama runs locally but may be slower. Its `granite3-dense:8b` model works well enough, though sometimes requires additional prompting to get properly formatted snippets.
 
+
 ## Backup Functionality
 Every time aiCoder modifies a file, it creates a backup in `./.aiCoder/backups/`, preserving your original code with timestamped filenames.
 
@@ -175,12 +170,22 @@ aiCoder is more than a tool—it’s your personal AI development partner. By ma
 
 Embark on your journey with aiCoder today, and experience a whole new world of coding! 🌟
 
+## A star chart if you care about that kind of thing
+<a href="https://star-history.com/#mmiscool/aiCoder&Date">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=mmiscool/aiCoder&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=mmiscool/aiCoder&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=mmiscool/aiCoder&type=Date" />
+ </picture>
+</a>
 
 
 ## FAQs
 1. **How do I reset my settings?**
-   - Delete the `./.aiCoder/` folder and restart aiCoder. This will recreate the default settings and prompts.
+   - Delete the `./.aiCoder/` folder in your project directory and restart aiCoder. This will recreate the default settings and prompts.
 2. **Can I use aiCoder with other programming languages?**
-   - Currently, aiCoder is optimized for JavaScript. Support for other languages is planned for future releases.
+   - Currently, aiCoder is works only for JavaScript. Support for other languages is planned for future releases.
 3. **How do I update aiCoder?**
    - If installed via npm, run `npm update aicodertool -g`. If installed from source, pull the latest changes from the repository and reinstall.
+4. **What front end library are you using?**
+   - Front end library. Who needs a front end library when you can just touch the DOM. 

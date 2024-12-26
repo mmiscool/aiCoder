@@ -1,0 +1,33 @@
+{
+  "messages": [
+    {
+      "role": "system",
+      "content": "./.aiCoder/prompts/default-system-prompt.md",
+      "filePath": "./.aiCoder/prompts/default-system-prompt.md",
+      "description": ""
+    },
+    {
+      "role": "user",
+      "content": "./.aiCoder/prompts/default-plan-prompt.md",
+      "filePath": "./.aiCoder/prompts/default-plan-prompt.md",
+      "description": ""
+    },
+    {
+      "role": "user",
+      "content": "public/MarkdownToHtml.js",
+      "filePath": "public/MarkdownToHtml.js",
+      "description": "// Code file to be edited"
+    },
+    {
+      "role": "system",
+      "content": "./.aiCoder/prompts/snippet-production-prompt.md",
+      "filePath": "./.aiCoder/prompts/snippet-production-prompt.md",
+      "description": ""
+    }
+  ],
+  "title": "Chat about public/MarkdownToHtml.js",
+  "id": "20241218_022745933Z",
+  "targetFile": "public/MarkdownToHtml.js",
+  "chatMode": "chat",
+  "lastModified": "2024-12-18T02:27:45.937Z"
+}
