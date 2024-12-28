@@ -616,7 +616,7 @@ export class codeManipulator {
                 renumber: false,
                 hexadecimal: false,
                 quotes: 'single',
-                escapeless: false,
+                escapeless: true,
                 compact: false,
                 parentheses: true,
                 semicolons: true,
