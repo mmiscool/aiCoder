@@ -3,6 +3,12 @@
 [![semantic versioning](https://img.shields.io/badge/semantic%20versioning-2.0.0-green.svg)](https://semver.org)
 > All notable changes to this project will be documented in this file
 
+## [1.0.65](https://github.com/mmiscool/aiCoder/compare/v1.0.64...v1.0.65) (2024-12-28)
+
+### 🤖 Build System
+
+* prevent replacement of unicode characters ([e2e926d](https://github.com/mmiscool/aiCoder/commit/e2e926d02ceefad47c962de668f0cc614077a659))
+
 ## [1.0.64](https://github.com/mmiscool/aiCoder/compare/v1.0.63...v1.0.64) (2024-12-26)
 
 ### 📝 Documentation
