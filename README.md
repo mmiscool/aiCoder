@@ -23,8 +23,7 @@ The magic lies in aiCoder’s advanced merging logic, which keeps your original 
 - Focus on higher-level design and problem-solving.
 - Seamlessly integrate new features and improvements into your existing codebase.
 
-## UNSTABLE
-**Note:** This project is under rapid development. Settings and prompt files may need to be recreated as updates are released, since more settings and file renames are on the horizon.
+
 
 # Standard Workflow
 1. Run `aiCoder` in your project’s directory.
