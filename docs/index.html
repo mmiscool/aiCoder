@@ -48,6 +48,8 @@
             flex-wrap: wrap;
             align-items: center;
             padding: 40px 20px;
+            /* rounded corners */
+            border-radius: 8px;
         }
 
         section:nth-child(even) {
@@ -142,7 +144,7 @@
             overflow: hidden;
             box-sizing: border-box;
             color: #00d1b2;
- 
+
         }
 
         button {
@@ -170,6 +172,19 @@
         </nav>
     </header>
     <div class="container">
+
+
+
+
+        <section class="cta">
+            <h2>Ready to Revolutionize Your Coding?</h2>
+            <p>Experience the power of AI-assisted coding and transform your workflow today!</p>
+            <div class="button-group">
+                <a href="https://github.com/mmiscool/aiCoder" target="_blank">View on GitHub</a>
+                <a href="#installation">Install Now</a>
+            </div>
+        </section>
+
         <section id="overview">
             <div class="content">
                 <h2>Overview</h2>
@@ -196,6 +211,7 @@
                         <button class="copy-btn" onclick="copyText('install-command')">📋</button>
                     </div>
                 </div>
+                <br>
                 <div class="code-block">
                     <strong>Step 2: Start aiCoder in your project directory</strong>
                     <div style="position: relative;">
@@ -205,7 +221,8 @@ aicoder
                         <button class="copy-btn" onclick="copyText('run-command')">📋</button>
                     </div>
                 </div>
-                <p>Once started, open <a href="http://localhost:3000" target="_blank" style="color:#00d1b2;">http://localhost:3000</a> in your
+                <p>Once started, open <a href="http://localhost:3000" target="_blank"
+                        style="color:#00d1b2;">http://localhost:3000</a> in your
                     browser to access the web UI and begin coding with AI assistance.</p>
             </div>
         </section>
@@ -344,9 +361,6 @@ aicoder
 
                 </div>
             </div>
-
-
-
         </section>
         <section id="features">
             <div class="image-container">
@@ -369,7 +383,8 @@ aicoder
                 <h2>Usage</h2>
                 <ol>
                     <li>Run <code>aiCoder</code> or <code>a</code> in your project directory.</li>
-                    <li>Visit <a href="http://localhost:3000" target="_blank" style="color:#00d1b2;">http://localhost:3000</a> to access the
+                    <li>Visit <a href="http://localhost:3000" target="_blank"
+                            style="color:#00d1b2;">http://localhost:3000</a> to access the
                         web UI.</li>
                     <li>Define your project goals in the <strong>New Plan Chat</strong>.</li>
                     <li>Select files to modify and request changes through natural language prompts.</li>
@@ -377,8 +392,9 @@ aicoder
                 </ol>
             </div>
             <br>
-                <img src="./TOOLS.png" alt="Usage workflow">
-         
+            <div class="image-container"><img src="./TOOLS.png" alt="Usage workflow"></div>
+
+
         </section>
         <section id="faqs">
             <div class="image-container">
@@ -395,14 +411,7 @@ aicoder
                 </ul>
             </div>
         </section>
-        <section class="cta">
-            <h2>Ready to Revolutionize Your Coding?</h2>
-            <p>Experience the power of AI-assisted coding and transform your workflow today!</p>
-            <div class="button-group">
-                <a href="https://github.com/mmiscool/aiCoder" target="_blank">View on GitHub</a>
-                <a href="#installation">Install Now</a>
-            </div>
-        </section>
+
     </div>
     <script>
         function copyText(elementId) {
