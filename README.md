@@ -8,7 +8,7 @@ With **aiCoder** as your coding co-pilot, you can simplify development, refine y
 The magic lies in aiCoder’s advanced merging logic, which keeps your original code intact while integrating new snippets precisely and reliably.
 
 
-![NEW UI](./images/aiCoder.gif)
+![NEW UI](./docs/aiCoder.gif)
 
 [Slide Deck discussing the AST approach to merging snippets](https://docs.google.com/presentation/d/1xdX09ELgW7lMU1E9KWIrpibUYVT1wdaiSvUhFhAT7EI/edit?usp=sharing)
 
@@ -77,7 +77,7 @@ Then open [http://localhost:3000](http://localhost:3000/) in your browser to beg
 To run on a different port use `aicoder -p 3001`
 
 ## Chat Interface
-![NEW UI](./images/CHAT.png)
+![NEW UI](./docs/CHAT.png)
 
 ## aiCoder provides two different specialized chat modes:
 
@@ -90,7 +90,7 @@ Begin by describing your project goals. You can ask the LLM to produce a detaile
 
 
 # Tools
-![NEW TOOLS](./images/TOOLS.png)
+![NEW TOOLS](./docs/TOOLS.png)
 
 ## Methods List
 Displays all detected methods.  
@@ -103,7 +103,7 @@ Clicking on a method passes it into a new chat, allowing you to modify or implem
 
 ## Merge and Format
 If you’re using ChatGPT or another external LLM, you can copy and paste suggested snippets to the end of the file. They must follow the guidelines in `snippet_production_prompt.md` for automatic merging.
-![NEW TOOLS](./images/TOOLS-AUTOMERGE.png)
+![NEW TOOLS](./docs/TOOLS-AUTOMERGE.png)
 
 You can also just past your snippet in to the text area that appears when you click the merge and format button. 
 
@@ -115,7 +115,7 @@ Project-specific settings are stored in `./.aiCoder/`. This folder includes back
 
 You can customize system prompts for your project in the `./aiCoder/` folder. Access these settings in your IDE or from the **Project Settings** tab.
 
-![NEW TOOLS](./images/PROJECT-SETTINGS.png)
+![NEW TOOLS](./docs/PROJECT-SETTINGS.png)
 
 
 ## default_plan_prompt
@@ -137,7 +137,7 @@ class exampleClass {
 ```
 
 # LLM Settings
-![NEW LLM SETTINGS](./images/SETTINGS.png)
+![NEW LLM SETTINGS](./docs/SETTINGS.png)
 
 Before using aiCoder, configure your LLM provider and model. After providing an API key, you can view available models.
 
