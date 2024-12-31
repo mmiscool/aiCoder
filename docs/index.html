@@ -133,7 +133,8 @@
             border-radius: 5px;
             border-color: #00d1b2;
             border-width: 3px;
-            margin: 0px;
+
+            justify-content: center;
             padding: 10px;
             height: 70px;
             padding-right: 40px;
@@ -141,6 +142,7 @@
             overflow: hidden;
             box-sizing: border-box;
             color: #00d1b2;
+ 
         }
 
         button {
@@ -190,14 +192,14 @@
                 <div class="code-block">
                     <strong>Step 1: Install aiCoder globally</strong>
                     <div style="position: relative;">
-                        <textarea id="install-command">npm install -g aicodertool</textarea>
+                        <textarea id="install-command" disabled>npm install -g aicodertool</textarea>
                         <button class="copy-btn" onclick="copyText('install-command')">📋</button>
                     </div>
                 </div>
                 <div class="code-block">
                     <strong>Step 2: Start aiCoder in your project directory</strong>
                     <div style="position: relative;">
-                        <textarea id="run-command">cd your-project-folder
+                        <textarea id="run-command" disabled>cd your-project-folder
 aicoder
 </textarea>
                         <button class="copy-btn" onclick="copyText('run-command')">📋</button>
@@ -221,7 +223,7 @@ aicoder
                     <br>
                     This guarantees only syntactically correct code in merged and prevents code modifications that
                     delete or mangle code unrelated to the edit. <br>
-                    Say goodby to copying and pasting code chucks between an LLM conversation and your existing editor .
+                    Say goodby to copying and pasting code chucks between an LLM conversation and your existing editor.
                 </p>
             </div>
 
