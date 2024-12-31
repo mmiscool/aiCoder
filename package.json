@@ -3,6 +3,7 @@
   "version": "1.0.67",
   "homepage": "https://github.com/mmiscool/aiCoder",
   "bin": {
+    "aicodertool": "src/main.js",
     "aiCoder": "src/main.js",
     "aicoder": "src/main.js",
     "a": "src/main.js"
