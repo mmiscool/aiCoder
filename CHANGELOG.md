@@ -3,6 +3,12 @@
 [![semantic versioning](https://img.shields.io/badge/semantic%20versioning-2.0.0-green.svg)](https://semver.org)
 > All notable changes to this project will be documented in this file
 
+## [1.0.66](https://github.com/mmiscool/aiCoder/compare/v1.0.65...v1.0.66) (2024-12-31)
+
+### 🤖 Build System
+
+* added gemini LLM support. ([9b1a9df](https://github.com/mmiscool/aiCoder/commit/9b1a9df9c2616ef19022ff100737eacec743c213))
+
 ## [1.0.65](https://github.com/mmiscool/aiCoder/compare/v1.0.64...v1.0.65) (2024-12-28)
 
 ### 🤖 Build System
