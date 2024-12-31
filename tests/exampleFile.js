@@ -24,11 +24,3 @@ class exampleClass{
     }
 }
 
-
-exampleMethod2(){
-    return 'example2';
-}
-
-exampleMethod3(){
-    return 'example3';
-}

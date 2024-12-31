@@ -26,7 +26,7 @@ The magic lies in aiCoder’s advanced merging logic, which keeps your original 
 
 
 # Standard Workflow
-1. Run `aiCoder` in your project’s directory.
+1. Run `aiCoder` or just the `a` command in your project’s directory.
 2. Visit [http://localhost:3000](http://localhost:3000) to access the web UI.
 3. Use **New Plan Chat** to discuss and define your project requirements, then save the plan. The saved plan guides future implementations.
 4. Open the **Files** tab to select the target file you want to modify.
@@ -97,13 +97,15 @@ Displays all detected methods.
 - **Green** methods: Implemented methods with code.
 - **Red** methods: Stubs that need implementation.
 
-Clicking on a method passes it into a new chat, allowing you to modify or implement it.
+To only dhow the red stubs in the list use the "Show Only Stubs" checkbox. 
 
-## Stubs List
-Shows only stub methods, making it easy to identify and implement missing functionality.
+Clicking on a method passes it into a new chat, allowing you to modify or implement it.
 
 ## Merge and Format
 If you’re using ChatGPT or another external LLM, you can copy and paste suggested snippets to the end of the file. They must follow the guidelines in `snippet_production_prompt.md` for automatic merging.
+![NEW TOOLS](./images/TOOLS-AUTOMERGE.png)
+
+You can also just past your snippet in to the text area that appears when you click the merge and format button. 
 
 ## Prepend Class Structure
 Adds a skeleton of all existing classes and methods to the top of the file. You can reorder classes and methods here. After adjusting the structure, run **Merge and Format** to clean up and integrate the changes into the stubs.
@@ -112,6 +114,8 @@ Adds a skeleton of all existing classes and methods to the top of the file. You 
 Project-specific settings are stored in `./.aiCoder/`. This folder includes backups of modified files stored in `./.aiCoder/backups/`.
 
 You can customize system prompts for your project in the `./aiCoder/` folder. Access these settings in your IDE or from the **Project Settings** tab.
+![NEW TOOLS](./images/PROJECT-SETTINGS.png)
+
 
 ## default_plan_prompt
 Describes your project, goals, and requirements. Edit it directly, or use **New Plan Chat** to interactively refine it.
@@ -137,11 +141,14 @@ class exampleClass {
 Before using aiCoder, configure your LLM provider and model. After providing an API key, you can view available models.
 
 ## Choosing an LLM Provider
-- OpenAI’s `gpt-4o-mini` or `gpt-4o` models work well.
-- Anthropics’s `claude-3-5-haiku` is an option.
-- Groq is less tested and has a smaller context window.
-- Ollama runs locally but may be slower. Its `granite3-dense:8b` model works well enough, though sometimes requires additional prompting to get properly formatted snippets.
+Right now the recommend LLM provider to use is OpenAI or GoogleAI. 
+Ollama is supported for completely local and private LMM code generation.  
 
+- OpenAI’s `gpt-4o-mini` or `gpt-4o` models work well.
+- Anthropics’s `claude-3-5-haiku` works fine. It is more expensive. 
+- Groq is less tested and has a smaller context window. Not recommended for use. 
+- Ollama runs locally but may be slower. Its `granite3-dense:8b` model works well enough, though sometimes requires additional prompting to get properly formatted snippets.
+- GoogleAI using the free `gemini-1.5-flash` seems to work on par with OpenAI `gpt-4o-mini`. To get a free api key go to [https://aistudio.google.com/apikey](https://aistudio.google.com/apikey)
 
 ## Backup Functionality
 Every time aiCoder modifies a file, it creates a backup in `./.aiCoder/backups/`, preserving your original code with timestamped filenames.
