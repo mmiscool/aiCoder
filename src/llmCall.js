@@ -9,7 +9,6 @@ import {
     readArg,
 } from "./terminalHelpers.js";
 import Anthropic from '@anthropic-ai/sdk';
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import cliProgress from 'cli-progress';
 import { spawn } from 'child_process';
 import { get } from "http";
