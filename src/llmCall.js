@@ -9,8 +9,10 @@ import {
     readArg,
 } from "./terminalHelpers.js";
 import Anthropic from '@anthropic-ai/sdk';
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import cliProgress from 'cli-progress';
 import { spawn } from 'child_process';
+import { get } from "http";
 
 
 
@@ -25,7 +27,7 @@ async function setupMode() {
             await clearTerminal();
             await printAndPause(`Setting up LLM mode in ${i} seconds.`, 1);
         }
-        
+
         await clearTerminal();
         await printAndPause('Installing ollama . . . ', 1);
         await installOllama();
@@ -66,7 +68,7 @@ export async function callLLM(messages) {
     for (let i = 0; i < messages.length; i++) {
         if (messages[i].filePath) {
             console.log('file type message description:', messages[i].description);
-            messages[i].content = messages[i].description + "\n\n" +await readFile(messages[i].filePath);
+            messages[i].content = messages[i].description + "\n\n" + await readFile(messages[i].filePath);
         }
     }
 
@@ -83,6 +85,9 @@ export async function callLLM(messages) {
     }
     else if (llmToUse === 'anthropic') {
         response = await getClaudeResponse(messages);
+    }
+    else if (llmToUse === 'googleAI') {
+        response = await getGoogleAIResponse(messages);
     }
     else {
         await printAndPause('Error:   No LLM selected.', 1.5);
@@ -110,30 +115,37 @@ export async function llmSettings() {
 
     const settingsObject = {
         ollama: {
-            model:  await readSetting(`llmConfig/ollama-model.txt`),
-            apiKey: await  readSetting(`llmConfig/ollama-api-key.txt`),
+            model: await readSetting(`llmConfig/ollama-model.txt`),
+            apiKey: await readSetting(`llmConfig/ollama-api-key.txt`),
             models: await getOllamaModels(),
             active: currentService === 'ollama',
         },
         openai: {
             model: await readSetting(`llmConfig/openai-model.txt`),
-            apiKey: await  readSetting(`llmConfig/openai-api-key.txt`),
+            apiKey: await readSetting(`llmConfig/openai-api-key.txt`),
             models: await getOpenAIModels(),
             active: currentService === 'openai',
         },
         groq: {
-            model: await  readSetting(`llmConfig/groq-model.txt`),
-            apiKey: await  readSetting(`llmConfig/groq-api-key.txt`),
+            model: await readSetting(`llmConfig/groq-model.txt`),
+            apiKey: await readSetting(`llmConfig/groq-api-key.txt`),
             models: await getGroqModels(),
             active: currentService === 'groq',
         },
 
         anthropic: {
-            model:  await readSetting(`llmConfig/anthropic-model.txt`),
-            apiKey: await  readSetting(`llmConfig/anthropic-api-key.txt`),
+            model: await readSetting(`llmConfig/anthropic-model.txt`),
+            apiKey: await readSetting(`llmConfig/anthropic-api-key.txt`),
             models: await getClaudeModels(),
             active: currentService === 'anthropic',
-        }
+        },
+
+        googleAI: {
+            model: await readSetting(`llmConfig/googleAI-model.txt`),
+            apiKey: await readSetting(`llmConfig/googleAI-api-key.txt`),
+            models: await getGoogleAIModels(),
+            active: currentService === 'googleAI',
+        },
 
     }
 
@@ -155,11 +167,15 @@ export async function llmSettingsUpdate(settings) {
     await writeSetting(`llmConfig/anthropic-model.txt`, settings.anthropic.model);
     await writeSetting(`llmConfig/anthropic-api-key.txt`, settings.anthropic.apiKey);
 
+    await writeSetting(`llmConfig/googleAI-model.txt`, settings.googleAI.model);
+    await writeSetting(`llmConfig/googleAI-api-key.txt`, settings.googleAI.apiKey);
+
     await writeSetting(`llmConfig/ai-service.txt`,
         settings.openai.active ? 'openai' :
             settings.groq.active ? 'groq' :
                 settings.ollama.active ? 'ollama' :
-                    settings.anthropic.active ? 'anthropic' : '');
+                    settings.anthropic.active ? 'anthropic' :
+                        settings.googleAI.active ? 'googleAI' : '');
 
 
     return { success: true };
@@ -444,4 +460,45 @@ async function getClaudeModels() {
     ];
 
     return models;
+}
+
+
+
+
+// google AI related functions -----------------------------------------------------------------------------------------------
+
+async function getGoogleAIResponse(messages) {
+    const apiKey = await readSetting('llmConfig/googleAI-api-key.txt');
+    let openai = new OpenAI({
+        apiKey,
+        baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/"
+    });
+
+    let responseText = '';
+
+    const resultStream = await openai.chat.completions.create({
+        model: await readSetting('llmConfig/googleAI-model.txt'),
+        messages,
+        stream: true
+    });
+
+    for await (const chunk of resultStream) {
+        const content = chunk.choices[0]?.delta?.content || '';
+        await printToTerminal(content); // Real-time printing to console
+        responseText += content;
+    }
+    // clear the console
+    //clearTerminal();
+    return responseText;
+
+}
+
+
+
+async function getGoogleAIModels() {
+    return [
+        "gemini-1.5-flash",
+        "gemini-1.5-pro",
+        "gemini-1.5-flash-8b",
+    ]
 }
