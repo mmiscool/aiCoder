@@ -114,6 +114,7 @@ Adds a skeleton of all existing classes and methods to the top of the file. You 
 Project-specific settings are stored in `./.aiCoder/`. This folder includes backups of modified files stored in `./.aiCoder/backups/`.
 
 You can customize system prompts for your project in the `./aiCoder/` folder. Access these settings in your IDE or from the **Project Settings** tab.
+
 ![NEW TOOLS](./images/PROJECT-SETTINGS.png)
 
 
