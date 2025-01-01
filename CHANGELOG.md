@@ -3,6 +3,24 @@
 [![semantic versioning](https://img.shields.io/badge/semantic%20versioning-2.0.0-green.svg)](https://semver.org)
 > All notable changes to this project will be documented in this file
 
+## [1.0.69](https://github.com/mmiscool/aiCoder/compare/v1.0.68...v1.0.69) (2025-01-01)
+
+### 📝 Documentation
+
+* added landing page ([8283726](https://github.com/mmiscool/aiCoder/commit/82837262eede7da61c6b93e5baa0e9ab12de51f0))
+* landing page tweaks ([b2322d9](https://github.com/mmiscool/aiCoder/commit/b2322d94070e392893661b985ccaf33074eb88de))
+* landing page tweaks ([a6ebd0f](https://github.com/mmiscool/aiCoder/commit/a6ebd0f054a72224f6c0cb6ef72ab6e2e3229a85))
+* Reduce gif image size ([1910623](https://github.com/mmiscool/aiCoder/commit/19106238303aead196b772e4fde70406191044a2))
+* setting up github pages ([3cedc15](https://github.com/mmiscool/aiCoder/commit/3cedc155d0b9689629c685f0346ca080e4aab762))
+* spelling on landing page. ([2c510b8](https://github.com/mmiscool/aiCoder/commit/2c510b80df04b6e91ef75411086dd489ae0e9cb4))
+* tweaking landing page ([89ae2d3](https://github.com/mmiscool/aiCoder/commit/89ae2d38bd5dce9bed13220a51d0591979fe89d9))
+* Tweaks to landing page ([c0dbe61](https://github.com/mmiscool/aiCoder/commit/c0dbe61f54d95147d2868b25d65d588610df1878))
+* tweaks to site landing page ([ae8b48b](https://github.com/mmiscool/aiCoder/commit/ae8b48b53c94e2acd704f6496066eca0704eabc2))
+
+### 🤖 Build System
+
+* Trying to make aicoder work with npx ([2ba17aa](https://github.com/mmiscool/aiCoder/commit/2ba17aa31da9856db983bf4d3aecf36404367842))
+
 ## [1.0.68](https://github.com/mmiscool/aiCoder/compare/v1.0.67...v1.0.68) (2024-12-31)
 
 ### 📝 Documentation
