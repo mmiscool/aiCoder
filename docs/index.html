@@ -178,7 +178,7 @@
         <nav>
             <a href="#overview">Overview</a>
             <a href="#features">Features</a>
-            <a href="#installation">Installation</a>
+            <a href="#QuickStart">Quick Start</a>
             <a href="#usage">Usage</a>
             <a href="#faqs">FAQs</a>
         </nav>
@@ -212,11 +212,22 @@
             </div>
         </section>
 
-        <section id="installation">
+        <section id="QuickStart">
             <div class="image-container">
                 <img src="./TOOLS.png" alt="Installation guide">
             </div>
             <div class="content">
+                <h2>Quick Start</h2>
+                <p>
+                    You can just run it with npx without installing it globally.<br>
+                    make sure you are in the correct folder
+                </p>
+                <div style="position: relative;">
+                    <textarea id="run-command" disabled>
+                            npx aicodertool</textarea>
+                    <button class="copy-btn" onclick="copyText('run-command')">📋</button>
+                </div>
+
                 <h2>Installation</h2>
                 <p>Follow these simple steps to install and start aiCoder:</p>
                 <div class="code-block">
@@ -237,7 +248,8 @@ aicoder</textarea>
                 </div>
                 <p>Once started, open <a href="http://localhost:3000" target="_blank"
                         style="color:#00d1b2;">http://localhost:3000</a> in your
-                    browser to access the web UI and begin coding with AI assistance.</p>
+                    browser to access the web UI and begin coding with AI assistance.
+                </p>
             </div>
         </section>
         <section id="overview">
@@ -265,7 +277,9 @@ aicoder</textarea>
                     <img src="./ast_merge_result.svg" alt="AST merge" />
                 </div>
             </div>
-            <span style="width:100%;text-align:center;"><hr></span>
+            <span style="width:100%;text-align:center;">
+                <hr>
+            </span>
 
 
 
@@ -336,6 +350,9 @@ aicoder</textarea>
                     <li><strong>Can I use aiCoder with other languages?</strong> Currently, it supports only JavaScript.
                     </li>
                     <li><strong>How do I update aiCoder?</strong> Run <code>npm update aicodertool -g</code>.</li>
+                    <li><strong>Is it linux only or can I use it on windows?</strong> Windows support was recently added
+                        and is still experimental.</li>
+                    </li>
                 </ul>
             </div>
         </section>

@@ -196,6 +196,8 @@ Embark on your journey with aiCoder today, and experience a whole new world of c
    - If installed via npm, run `npm update aicodertool -g`. If installed from source, pull the latest changes from the repository and reinstall.
 4. **What front end library are you using?**
    - Front end library. Who needs a front end library when you can just touch the DOM. 
+5. **Is it linux only or can I use it on windows?**
+   - Windows support was recently added and is still experimental.
 
 
 ## Related projects
