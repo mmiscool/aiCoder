@@ -23,7 +23,7 @@ async function buildFrontend() {
     
     try {
         // Resolve the script directory
-        const scriptPath = await getScriptFolderPath();
+        let scriptPath = await getScriptFolderPath();
         console.log('scriptPath:', scriptPath);
         
         // Define paths for the dist and cache directories
@@ -35,9 +35,13 @@ async function buildFrontend() {
             fs.rm(distPath, { recursive: true, force: true }),
             fs.rm(cachePath, { recursive: true, force: true }),
         ]);
+
+        // remove /src from the end of the scriptPath
+        scriptPath = scriptPath.substring(0, scriptPath.length - 4);
+
         
         // Execute Parcel build command
-        const buildCommand = `npx parcel build ../public/index.html`;
+        const buildCommand = `npx parcel build ./public/index.html`;
         console.log(`Running command: ${buildCommand} in ${scriptPath}`);
         execSync(buildCommand, { cwd: scriptPath, stdio: 'inherit' });
         
