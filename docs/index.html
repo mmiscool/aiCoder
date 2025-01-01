@@ -13,6 +13,7 @@
             margin: 0;
             padding: 0;
             scroll-behavior: smooth;
+            transition-duration: 1s;
         }
 
         header {
@@ -68,6 +69,7 @@
 
         section p,
         section ul li {
+            color: white;
             line-height: 1.8;
             margin-bottom: 10px;
         }
@@ -104,7 +106,7 @@
         }
 
         .cta a {
-            background: #121212;
+            background:#000000da;
             color: #00d1b2;
             padding: 12px 24px;
             text-decoration: none;
@@ -157,6 +159,15 @@
 
             box-sizing: border-box;
         }
+
+        code {
+            background-color: black;
+            color: yellow;
+            padding: 5px;
+            border-radius: 5px;
+            /* preformatted text */
+            white-space: pre;
+        }
     </style>
 </head>
 
@@ -177,12 +188,15 @@
 
 
         <section class="cta">
-            <h2>Ready to Revolutionize Your Coding?</h2>
-            <p>Experience the power of AI-assisted coding and transform your workflow today!</p>
-            <div class="button-group">
-                <a href="https://github.com/mmiscool/aiCoder" target="_blank">View on GitHub</a>
-                <a href="#installation">Install Now</a>
+            <div class="content">
+                <h2>Ready to Revolutionize Your Coding?</h2>
+                <p>Experience the power of AI-assisted coding and transform your workflow today!</p>
+                <div class="button-group">
+                    <a href="https://github.com/mmiscool/aiCoder" target="_blank">View on GitHub</a>
+                    <a href="#installation">Install Now</a>
+                </div>
             </div>
+
         </section>
 
         <section id="overview">
@@ -216,8 +230,7 @@
                     <strong>Step 2: Start aiCoder in your project directory</strong>
                     <div style="position: relative;">
                         <textarea id="run-command" disabled>cd your-project-folder
-aicoder
-</textarea>
+aicoder</textarea>
                         <button class="copy-btn" onclick="copyText('run-command')">📋</button>
                     </div>
                 </div>
@@ -381,7 +394,7 @@ aicoder
         <section id="usage">
             <div class="content">
                 <h2>Usage</h2>
-                <ol>
+                <ul>
                     <li>Run <code>aiCoder</code> or <code>a</code> in your project directory.</li>
                     <li>Visit <a href="http://localhost:3000" target="_blank"
                             style="color:#00d1b2;">http://localhost:3000</a> to access the
@@ -389,7 +402,7 @@ aicoder
                     <li>Define your project goals in the <strong>New Plan Chat</strong>.</li>
                     <li>Select files to modify and request changes through natural language prompts.</li>
                     <li>Review AI-generated snippets and merge them seamlessly.</li>
-                </ol>
+                </ul>
             </div>
             <br>
             <div class="image-container"><img src="./TOOLS.png" alt="Usage workflow"></div>
