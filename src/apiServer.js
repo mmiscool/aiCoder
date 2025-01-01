@@ -24,7 +24,7 @@ async function buildFrontend() {
     try {
         // Resolve the script directory
         let scriptPath = await getScriptFolderPath();
-        console.log('scriptPath:', scriptPath);
+        //console.log('scriptPath:', scriptPath);
 
         // Define paths for the dist and cache directories
         const distPath = path.join(scriptPath, '../dist');
@@ -42,10 +42,10 @@ async function buildFrontend() {
 
         // Execute Parcel build command
         const buildCommand = `npx parcel build ./public/index.html`;
-        console.log(`Running command: ${buildCommand} in ${scriptPath}`);
+        //console.log(`Running command: ${buildCommand} in ${scriptPath}`);
         execSync(buildCommand, { cwd: scriptPath, stdio: 'inherit' });
 
-        console.log('Frontend built successfully.');
+        //console.log('Frontend built successfully.');
     } catch (error) {
         console.error('Error during frontend build:', error);
     }
@@ -154,7 +154,7 @@ export function setupServer() {
         // Start the server
         server.listen(PORT, HOST, () => {
             console.log(`Server is running at http://localhost:${PORT}`);
-            console.log(`Serving files from: ${ctx.appData.serveDirectory}`);
+            //console.log(`Serving files from: ${ctx.appData.serveDirectory}`);
 
             // WebSocket server setup
             wss = new WebSocketServer({ server });

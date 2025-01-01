@@ -6,7 +6,9 @@ console.log(`
  _/    _/    _/        _/        _/    _/  _/    _/  _/        _/    _/     
 _/    _/  _/_/_/        _/_/_/    _/_/    _/_/_/    _/_/_/_/  _/    _/      
 
-https://github.com/mmiscool/aiCoder
+https://aicodertool.com/
+
+Source: https://github.com/mmiscool/aiCoder
 `);
 
 import {
