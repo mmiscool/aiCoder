@@ -25,8 +25,16 @@ async function buildFrontend() {
 
     // delete the folders named 'dist' and '.parcel-cache' before building the frontend
     // these folders are located in the parent directory of the scriptPath
-    await execSync(`rm -rf ${scriptPath}/../dist`);
-    await execSync(`rm -rf ${scriptPath}/../.parcel-cache`);
+    // await execSync(`rm -rf ${scriptPath}/../dist`);
+    // await execSync(`rm -rf ${scriptPath}/../.parcel-cache`);
+    // use built in node.js fs module to delete the folders
+    try {
+        await fs.rmdir(`${scriptPath}/../dist`, { recursive: true });
+        await fs.rmdir(`${scriptPath}/../.parcel-cache`, { recursive: true });
+    }
+    catch (error) {
+        console.log('Error deleting folders:', error);
+    }
 
     //execSync('npm run buildFrontend &', { stdio: 'inherit' });
     execSync(`cd ${scriptPath} && npm run buildFrontend &`, { stdio: 'inherit' });
