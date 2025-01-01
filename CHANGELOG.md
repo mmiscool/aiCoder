@@ -3,6 +3,18 @@
 [![semantic versioning](https://img.shields.io/badge/semantic%20versioning-2.0.0-green.svg)](https://semver.org)
 > All notable changes to this project will be documented in this file
 
+## [1.0.73](https://github.com/mmiscool/aiCoder/compare/v1.0.72...v1.0.73) (2025-01-01)
+
+### 📝 Documentation
+
+* add AST merge images to landing page ([1d776cc](https://github.com/mmiscool/aiCoder/commit/1d776ccaa50218a88c7705c4e3e71161d85b7096))
+* landing page updates ([cbf4f68](https://github.com/mmiscool/aiCoder/commit/cbf4f6871a2fbc2447f5d148385ffac563532b89))
+* Make the landing page better looking ([b25870c](https://github.com/mmiscool/aiCoder/commit/b25870cd61844c5322602e80fcb2a92f947f5929))
+
+### 🤖 Build System
+
+* Made it start on the next available port if 3000 is already in use. ([0141bba](https://github.com/mmiscool/aiCoder/commit/0141bba7a20f464e156eddf3caa828a1c2e117c1))
+
 ## [1.0.72](https://github.com/mmiscool/aiCoder/compare/v1.0.71...v1.0.72) (2025-01-01)
 
 ### 🤖 Build System
