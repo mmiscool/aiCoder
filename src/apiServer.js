@@ -20,27 +20,35 @@ export let wss;
 
 async function buildFrontend() {
     console.log('Building frontend...');
-    const scriptPath = await getScriptFolderPath();
-    console.log('scriptPath:', scriptPath);
-
-    // delete the folders named 'dist' and '.parcel-cache' before building the frontend
-    // these folders are located in the parent directory of the scriptPath
-    // await execSync(`rm -rf ${scriptPath}/../dist`);
-    // await execSync(`rm -rf ${scriptPath}/../.parcel-cache`);
-    // use built in node.js fs module to delete the folders
+    
     try {
-        await fs.rmdir(`${scriptPath}/../dist`, { recursive: true });
-        await fs.rmdir(`${scriptPath}/../.parcel-cache`, { recursive: true });
+        // Resolve the script directory
+        const scriptPath = await getScriptFolderPath();
+        console.log('scriptPath:', scriptPath);
+        
+        // Define paths for the dist and cache directories
+        const distPath = path.join(scriptPath, '../dist');
+        const cachePath = path.join(scriptPath, '../.parcel-cache');
+        
+        // Clean up old build artifacts
+        await Promise.all([
+            fs.rm(distPath, { recursive: true, force: true }),
+            fs.rm(cachePath, { recursive: true, force: true }),
+        ]);
+        
+        // Execute Parcel build command
+        const buildCommand = `npx parcel build ../public/index.html`;
+        console.log(`Running command: ${buildCommand} in ${scriptPath}`);
+        execSync(buildCommand, { cwd: scriptPath, stdio: 'inherit' });
+        
+        console.log('Frontend built successfully.');
+    } catch (error) {
+        console.error('Error during frontend build:', error);
     }
-    catch (error) {
-        console.log('Error deleting folders:', error);
-    }
-
-    //execSync('npm run buildFrontend &', { stdio: 'inherit' });
-    execSync(`cd ${scriptPath} && npm run buildFrontend &`, { stdio: 'inherit' });
 }
 
 buildFrontend();
+
 
 export function setupServer() {
     // ctx variables
