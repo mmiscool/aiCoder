@@ -3,6 +3,16 @@
 [![semantic versioning](https://img.shields.io/badge/semantic%20versioning-2.0.0-green.svg)](https://semver.org)
 > All notable changes to this project will be documented in this file
 
+## [1.0.76](https://github.com/mmiscool/aiCoder/compare/v1.0.75...v1.0.76) (2025-01-02)
+
+### 📝 Documentation
+
+* add meta tags to landing page for SEO ([d96a94d](https://github.com/mmiscool/aiCoder/commit/d96a94de59b5c50d97036d4ad149adc834e99d25))
+
+### 🤖 Build System
+
+* fix bug with the codeManipulator not correctly merging functions ([2681d49](https://github.com/mmiscool/aiCoder/commit/2681d4938a988ac20911f15190002028ebbfdebb))
+
 ## [1.0.75](https://github.com/mmiscool/aiCoder/compare/v1.0.74...v1.0.75) (2025-01-02)
 
 ### 🤖 Build System
