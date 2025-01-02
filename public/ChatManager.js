@@ -358,7 +358,17 @@ export class ChatManager {
 
 
             const contentDiv = document.createElement('div');
+            console.log('message.content', message.content);
             const markdown = await new MarkdownToHtml(contentDiv, message.content);
+            console.log(contentDiv);
+
+            if (contentDiv.innerHTML === '') {
+                contentDiv.textContent = message.content;
+                // set the content div to be preformatted text
+
+
+                contentDiv.style.whiteSpace = 'pre-wrap';
+            }
             individualMessageDiv.appendChild(contentDiv);
 
             if (message.role === 'assistant') {
