@@ -3,6 +3,13 @@
 [![semantic versioning](https://img.shields.io/badge/semantic%20versioning-2.0.0-green.svg)](https://semver.org)
 > All notable changes to this project will be documented in this file
 
+## [1.0.75](https://github.com/mmiscool/aiCoder/compare/v1.0.74...v1.0.75) (2025-01-02)
+
+### 🤖 Build System
+
+* failback to regular rex if markdown fails to render ([6f45968](https://github.com/mmiscool/aiCoder/commit/6f4596893fbab90097594e8dfb1e5171cca5f7d6))
+* update landing page to be nice on mobile. ([3d7f373](https://github.com/mmiscool/aiCoder/commit/3d7f373ef204ef781422ef87affc0d94b3aeac4f))
+
 ## [1.0.74](https://github.com/mmiscool/aiCoder/compare/v1.0.73...v1.0.74) (2025-01-01)
 
 ### 🤖 Build System
