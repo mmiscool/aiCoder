@@ -6,9 +6,9 @@ import {
     appendFile,
     readFile,
     writeFile
-} from './fileIO.js';
-import { createBackup } from './backupSystem.js';
-import { clearTerminal } from './terminalHelpers.js';
+} from '../fileIO.js';
+import { createBackup } from '../backupSystem.js';
+import { clearTerminal } from '../terminalHelpers.js';
 export async function intelligentlyMergeSnippets(filename) {
     console.log(`Intelligently merging snippets for file: ${ filename }`);
     const originalCode = await readFile(filename);

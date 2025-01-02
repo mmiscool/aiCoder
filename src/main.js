@@ -6,7 +6,7 @@ console.log(`
  _/    _/    _/        _/        _/    _/  _/    _/  _/        _/    _/     
 _/    _/  _/_/_/        _/_/_/    _/_/    _/_/_/    _/_/_/_/  _/    _/      
 
-https://aicodertool.com/
+https://aicoderproject.com/
 
 Source: https://github.com/mmiscool/aiCoder
 `);

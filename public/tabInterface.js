@@ -43,6 +43,9 @@ export class tabInterface {
         tabButton.style.border = 'none';
         tabButton.style.backgroundColor = this.colors.tabButtonBackground;
         tabButton.style.color = 'white';
+        // make text not wrap
+        tabButton.style.whiteSpace = 'nowrap';
+
         // Set text color to white
         tabButton.style.cursor = 'pointer';
         tabButton.style.outline = '1px solid black';

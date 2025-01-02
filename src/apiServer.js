@@ -19,7 +19,7 @@ export let wss;
 
 
 async function buildFrontend() {
-    console.log('Building frontend...');
+    //console.log('Building frontend...');
 
     try {
         // Resolve the script directory

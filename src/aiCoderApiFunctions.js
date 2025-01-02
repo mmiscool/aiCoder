@@ -1,7 +1,7 @@
-import { applySnippets } from "./intelligentMerge.js"
+import { applySnippets, intelligentlyMergeSnippets} from "./mergeTools/languages/javascript/js.js"
 import { getListOfFunctions, getMethodsWithArguments } from "./classListing.js";
 import { getAllFiles, moveFile, readFile, readSetting, writeFile, writeSetting } from "./fileIO.js";
-import { intelligentlyMergeSnippets } from "./intelligentMerge.js";
+
 import { llmSettings, llmSettingsUpdate } from "./llmCall.js";
 import { launchEditor } from "./terminalHelpers.js";
 import { prependClassStructure } from './classListing.js';
@@ -11,9 +11,8 @@ import { scrapeToMarkdown } from '@mmiscool/scrape_to_markdown'
 
 
 
-
 async function setupConfigFiles() {
-    console.log('Setting up default files');
+    //console.log('Setting up default files');
     // fix the existing prompt files
     await moveFile('./.aiCoder/default-plan-prompt.md', './.aiCoder/prompts/default-plan-prompt.md');
     await moveFile('./.aiCoder/default-system-prompt.md', './.aiCoder/prompts/default-system-prompt.md');

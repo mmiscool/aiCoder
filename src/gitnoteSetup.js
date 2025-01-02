@@ -26,7 +26,7 @@ function addFilesToGitignore(files) {
     const newEntries = files.filter(file => !gitignoreLines.has(file));
 
     if (newEntries.length === 0) {
-        console.log('All files are already in .gitignore.');
+        //console.log('All files are already in .gitignore.');
         return;
     }
 
