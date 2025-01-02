@@ -44,6 +44,11 @@
             color: #00d1b2;
         }
 
+        .button-group{
+            display: flex;
+            justify-content: center;
+        }
+
         section {
             display: flex;
             flex-wrap: wrap;
@@ -83,6 +88,7 @@
         .content {
             flex: 1;
             padding: 20px;
+            min-width: 300px;
         }
 
         .image-container {
@@ -114,6 +120,10 @@
             border-radius: 5px;
             font-weight: bold;
             transition: background 0.3s, color 0.3s;
+            /* prevent text wrapping */
+            white-space: nowrap;
+            margin: 5px
+
         }
 
         .cta a:hover {
@@ -207,15 +217,21 @@
                     advanced merging logic and intelligent suggestions, aiCoder simplifies your workflow while
                     maintaining your codebase's integrity.</p>
             </div>
-            <div class="image-container">
-                <img src="./aiCoder.gif" alt="AI overview">
+            <div class="content">
+                <div class="image-container">
+                    <img src="./aiCoder.gif" alt="AI overview">
+                </div>
             </div>
+
         </section>
 
         <section id="QuickStart">
-            <div class="image-container">
-                <img src="./TOOLS.png" alt="Installation guide">
+            <div class="content">
+                <div class="image-container">
+                    <img src="./TOOLS.png" alt="Installation guide">
+                </div>
             </div>
+
             <div class="content">
                 <h2>Quick Start</h2>
                 <p>
@@ -305,9 +321,12 @@ aicoder</textarea>
 
 
         <section id="features">
-            <div class="image-container">
-                <img src="./CHAT.png" alt="Features showcase">
+            <div class="content">
+                <div class="image-container">
+                    <img src="./CHAT.png" alt="Features showcase">
+                </div>
             </div>
+
             <div class="content">
                 <h2>Key Features</h2>
                 <ul>
@@ -334,14 +353,21 @@ aicoder</textarea>
                 </ul>
             </div>
             <br>
-            <div class="image-container"><img src="./TOOLS.png" alt="Usage workflow"></div>
+            <div class="content">
+                <div class="image-container">
+                    <img src="./TOOLS.png" alt="Usage workflow">
+                </div>
+            </div>
 
 
         </section>
         <section id="faqs">
-            <div class="image-container">
-                <img src="./FAQ.png" alt="FAQs">
+            <div class="content">
+                <div class="image-container">
+                    <img src="./FAQ.png" alt="FAQs">
+                </div>
             </div>
+
             <div class="content">
                 <h2>FAQs</h2>
                 <ul>
