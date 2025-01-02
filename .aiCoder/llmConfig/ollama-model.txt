@@ -1,0 +1,1 @@
+granite3.1-dense:latest
