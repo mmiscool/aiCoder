@@ -4,23 +4,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="aiCoder - An innovative tool leveraging Abstract Syntax Trees (ASTs) to streamline your coding process, eliminating manual copy-pasting and ensuring seamless integration with your existing editor.">
-    <meta name="keywords" content="aiCoder, AST, coding tools, LLM workflows, code automation, AI-powered coding, developer tools">
+    <meta name="description"
+        content="aiCoder - An innovative tool leveraging Abstract Syntax Trees (ASTs) to streamline your coding process, eliminating manual copy-pasting and ensuring seamless integration with your existing editor.">
+    <meta name="keywords"
+        content="aiCoder, AST, coding tools, LLM workflows, code automation, AI-powered coding, developer tools">
     <meta name="author" content="Your Name or Organization">
     <meta name="robots" content="index, follow">
     <meta property="og:title" content="aiCoder - Streamlining Your Coding Workflow">
-    <meta property="og:description" content="Enhance your coding experience with aiCoder, leveraging Abstract Syntax Trees (ASTs) for seamless code automation and integration.">
+    <meta property="og:description"
+        content="Enhance your coding experience with aiCoder, leveraging Abstract Syntax Trees (ASTs) for seamless code automation and integration.">
     <meta property="og:image" content="https://aicoderproject.com/path-to-image.jpg">
     <meta property="og:url" content="https://aicoderproject.com">
     <meta property="og:type" content="website">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="aiCoder - Streamlining Your Coding Workflow">
-    <meta name="twitter:description" content="Enhance your coding experience with aiCoder, leveraging Abstract Syntax Trees (ASTs) for seamless code automation and integration.">
+    <meta name="twitter:description"
+        content="Enhance your coding experience with aiCoder, leveraging Abstract Syntax Trees (ASTs) for seamless code automation and integration.">
     <meta name="twitter:image" content="https://aicoderproject.com/path-to-image.jpg">
 
 
     <title>aiCoder - AI-Powered Coding Assistant</title>
     <style>
+
         body {
             font-family: 'Arial', sans-serif;
             background-color: #121212;
@@ -29,6 +34,17 @@
             padding: 0;
             scroll-behavior: smooth;
             transition-duration: 1s;
+        }
+
+        .background{
+            z-index: -1;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: rgb(2, 0, 36);
+            background: linear-gradient(156deg, rgba(2, 0, 36, 1) 0%, rgba(0, 0, 0, 1) 65%, rgba(0, 212, 255, 0.8297443977591037) 88%);
         }
 
         header {
@@ -74,11 +90,11 @@
         }
 
         section:nth-child(even) {
-            background: #1f1f1f;
+            background: #1f1f1f77;
         }
 
         section:nth-child(odd) {
-            background: #121212;
+            /*background: #121212;*/
         }
 
         section h2 {
@@ -121,7 +137,6 @@
 
         .cta {
             text-align: center;
-            background: linear-gradient(135deg, #00d1b2, #008c84);
             color: #121212;
             padding: 50px 20px;
             border-radius: 8px;
@@ -197,6 +212,7 @@
 </head>
 
 <body>
+    <div class="background"></div>
     <header>
         <h1>aiCoder</h1>
         <nav>
