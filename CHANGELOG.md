@@ -3,6 +3,17 @@
 [![semantic versioning](https://img.shields.io/badge/semantic%20versioning-2.0.0-green.svg)](https://semver.org)
 > All notable changes to this project will be documented in this file
 
+## [1.0.77](https://github.com/mmiscool/aiCoder/compare/v1.0.76...v1.0.77) (2025-01-02)
+
+### 📝 Documentation
+
+* make landing page a little bit more pretty ([e86ee11](https://github.com/mmiscool/aiCoder/commit/e86ee11de7598e93650d65c4a94e7eed00206cba))
+* tweak landing page background ([63e1164](https://github.com/mmiscool/aiCoder/commit/63e116498892a0046c4f9ec48fa01619ffc120e0))
+
+### 🤖 Build System
+
+* updated the colors to handle both light and dark mode. ([fd0e1a6](https://github.com/mmiscool/aiCoder/commit/fd0e1a63cc07eb75ca6119c17505093274517fbd))
+
 ## [1.0.76](https://github.com/mmiscool/aiCoder/compare/v1.0.75...v1.0.76) (2025-01-02)
 
 ### 📝 Documentation
