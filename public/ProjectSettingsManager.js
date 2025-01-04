@@ -38,7 +38,7 @@ export class ProjectSettingsManager {
         this.container.appendChild(resetButton);
     }
     async reset() {
-        if (!confirm('Are you sure you want to reset the system prompts to their default values?',0)) return
+        if (!await confirm('Are you sure you want to reset the system prompts to their default values?',0)) return
         await doAjax('./resetSystemPrompts', {});
         await this.init();
     }

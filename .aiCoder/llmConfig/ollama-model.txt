@@ -1,1 +1,1 @@
-granite3.1-dense:latest
+granite3.1-dense:8b-instruct-q8_0

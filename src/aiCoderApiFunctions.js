@@ -393,7 +393,7 @@ export class conversation {
             conversationNew: this.conversationNew || false,
             lastModified: new Date().toISOString()
         };
-        const conversationJSON = JSON.stringify(conversationObject, null, 2);
+        const conversationJSON = await JSON.stringify(conversationObject, null, 2);
         const filePath = `./.aiCoder/conversations/${id}.json`;
         await writeFile(filePath, conversationJSON);
 
