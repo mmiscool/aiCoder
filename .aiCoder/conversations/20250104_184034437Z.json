@@ -1,0 +1,48 @@
+{
+  "messages": [
+    {
+      "role": "system",
+      "content": "./.aiCoder/prompts/default-system-prompt.md",
+      "filePath": "./.aiCoder/prompts/default-system-prompt.md",
+      "description": "",
+      "hidden": true
+    },
+    {
+      "role": "user",
+      "content": "./.aiCoder/prompts/default-plan-prompt.md",
+      "filePath": "./.aiCoder/prompts/default-plan-prompt.md",
+      "description": "",
+      "hidden": true
+    },
+    {
+      "role": "user",
+      "content": "./src/aiCoderApiFunctions.js",
+      "filePath": "./src/aiCoderApiFunctions.js",
+      "description": "// Code file to be edited",
+      "hidden": true
+    },
+    {
+      "role": "system",
+      "content": "./.aiCoder/prompts/snippet-production-prompt.md",
+      "filePath": "./.aiCoder/prompts/snippet-production-prompt.md",
+      "description": "",
+      "hidden": true
+    },
+    {
+      "role": "user",
+      "content": "Tell me about this code",
+      "hidden": false
+    },
+    {
+      "role": "assistant",
+      "content": "This code implements a JavaScript API for interacting with a large language model (LLM) to generate and manage code snippets within a given project.  It's structured around several classes and functions, primarily focused on managing conversations with the LLM and manipulating files. Let's break down the key components:\n\n**1. `aiCoderApiFunctions` Class:** This class acts as the primary interface for external applications or scripts. It exposes several asynchronous methods (`async` functions) to handle various operations:\n\n* **`addMessage`, `setConversationTitle`, `pullMessages`:**  These methods manage a conversation object (`conversation` class, described below).  They allow adding messages, setting titles, and retrieving messages from a conversation.\n\n* **`writeMethodWithLLM`, `newChat`, `newPlanChat`:** These are core functions for interacting with the LLM.  They initiate conversations with the LLM, providing prompts and system instructions to generate code snippets or plans. `writeMethodWithLLM` is specifically designed to write methods within classes.\n\n* **`callLLM`:**  This method explicitly calls the LLM using the `callLLM` function (from `llmCall.js`), passing the current conversation messages as context.\n\n* **`getConversationsList`:** Retrieves a list of existing conversations.\n\n* **`applySnippet`:** Applies a code snippet to a target file, likely using a merge tool (`mergeTools/mergeTool.js`).\n\n* **`getMethodsList`, `getFunctionList`:**  These retrieve lists of methods and functions from a given file using parsing logic from `classListing.js`.\n\n* **`llmSettings`, `llmSettingsUpdate`:** Manage LLM settings (API keys, models, etc.) from `llmCall.js`.\n\n* **`getSystemPrompts`, `updateSystemPrompts`:** Get and update system prompts used in LLM interactions.  These prompts likely provide instructions and context for the LLM.\n\n* **`savePlan`:** Saves a plan (likely a high-level description of the coding task) to a configuration file.\n\n* **`gotoLineNumber`:** Opens a file in an editor at a specified line number.\n\n* **`mergeAndFormat`:** Merges and formats code snippets in a target file.\n\n* **`getFilesList`:**  Lists all files in the project directory.\n\n* **`prependClassStructure`:** Adds a class structure to the top of a file.\n\n* **`readFile`, `writeFile`:** Basic file I/O operations.\n\n* **`resetSystemPrompts`:** Resets the system prompts to their default values.\n\n\n**2. `conversation` Class:** This class represents a single conversation with the LLM.  It manages:\n\n* **`messages`:** An array storing the conversation history (user and LLM messages).\n\n* **`title`, `targetFile`, `chatMode`:** Metadata about the conversation.\n\n* **`storeConversation`, `loadConversation`:** Methods for persisting and loading conversations from JSON files in the `./.aiCoder/conversations` directory.\n\n* **`addMessage`, `addFileMessage`, `addTargetFileMessage`:** Methods for adding messages to the conversation, including handling file paths and URLs.  URL handling includes scraping the linked page content.\n\n* **`callLLM`:** Calls the LLM with the current conversation messages.\n\n* **`getMessages`, `getConversation`:** Methods to retrieve the conversation data.\n\n* **`clearMessages`, `generateTitle`:** Helper functions for clearing the messages and generating a title for the conversation based on its content.\n\n* **`deleteConversation`:** Deletes the conversation file.\n\n\n**3. Utility Functions and Modules:**\n\n* **`mergeTools/mergeTool.js`:** Contains functions (`applySnippets`, `intelligentlyMergeSnippets`) for merging code snippets into existing files.\n\n* **`classListing.js`:** Contains functions (`getListOfFunctions`, `getMethodsWithArguments`, `prependClassStructure`) for parsing JavaScript code to extract methods and functions.\n\n* **`fileIO.js`:** Provides file I/O functions (`deleteDirectory`, `deleteFile`, `getAllFiles`, `moveFile`, `readFile`, `readSetting`, `writeFile`, `writeSetting`).\n\n* **`llmCall.js`:** Contains functions (`llmSettings`, `llmSettingsUpdate`, `callLLM`) for interacting with the LLM (likely uses an API like OpenAI).\n\n* **`terminalHelpers.js`:** Contains the `launchEditor` function for opening files in an editor.\n\n\n**4. `setupConfigFiles` Function:** This function sets up the necessary configuration files and directories for the application.\n\n\n**Overall Structure:** The code is designed as a modular system, with clear separation of concerns.  It leverages asynchronous programming extensively to handle I/O operations and LLM calls efficiently.  The use of configuration files allows for customization of prompts and LLM settings.  The system is geared towards iterative code development guided by an LLM, allowing for step-by-step code generation and refinement.",
+      "hidden": false
+    }
+  ],
+  "title": "aiCoder API Documentation",
+  "id": "20250104_184034437Z",
+  "targetFile": "./src/aiCoderApiFunctions.js",
+  "chatMode": "chat",
+  "conversationNew": false,
+  "lastModified": "2025-01-04T18:40:50.717Z"
+}

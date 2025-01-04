@@ -70,6 +70,7 @@ export async function callLLM(messages) {
             messages[i].content = messages[i].description + "\n\n" + await readFile(messages[i].filePath);
         }
     }
+    console.log('messages:', messages);
 
 
     let response = '';
@@ -480,6 +481,7 @@ async function getGoogleAIResponse(messages) {
         messages,
         stream: true
     });
+
 
     for await (const chunk of resultStream) {
         const content = chunk.choices[0]?.delta?.content || '';
