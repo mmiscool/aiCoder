@@ -162,6 +162,32 @@
             color: #121212;
         }
 
+
+        #mergeButton {
+            background: #064448;
+            color: #00d1b2;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background 0.3s, color 0.3s;
+            /* prevent text wrapping */
+            white-space: nowrap;
+            margin: 5px;
+            width: 100%;
+            height: 50px;
+            text-align: center;
+
+            margin-left: 20%;
+            margin-right: 20%;
+
+        }
+
+        #mergeButton:hover {
+            background: #00d1b2;
+            color: #121212;
+        }
+
         footer {
             text-align: center;
             padding: 20px;
@@ -250,6 +276,18 @@
                 animation: octocat-wave 560ms ease-in-out
             }
         }
+
+
+        .codeTextArea {
+            background-color: black;
+            color: yellow;
+            padding: 5px;
+            border-radius: 5px;
+            /* preformatted text */
+            white-space: pre;
+            width: 100%;
+            height: 350px;
+        }
     </style>
 </head>
 
@@ -309,8 +347,8 @@
 
         <section id="QuickStart">
             <div class="content">
-                <div class="image-container">
-                    <img src="./TOOLS.png" alt="Installation guide">
+                <div class="image-container"><img src="./CHAT.png" alt="Features showcase">
+
                 </div>
             </div>
 
@@ -351,7 +389,7 @@ aicoder</textarea>
                 </p>
             </div>
         </section>
-        <section id="overview">
+        <section id="demoFun">
             <div class="content">
 
                 <h2>aiCoder is different leveraging ASTs</h2>
@@ -378,8 +416,57 @@ aicoder</textarea>
             </div>
             <span style="width:100%;text-align:center;">
                 <hr>
+                <h2>Live merging demo</h2>
             </span>
 
+            <div class="content">
+
+                <h2>Original code</h2>
+                <textarea id="original" class="codeTextArea" autocomplete="off" autocorrect="off" autocapitalize="off"
+                    spellcheck="false">
+
+export class exampleClass {
+    exampleMethod() {
+        return 'example';
+    }
+    exampleMethod2() {
+        return 'example2';
+    }
+    exampleMethod3() {
+        return 'example3';
+    }
+}
+                </textarea>
+            </div>
+
+            <div class="content">
+
+                <h2>snippet</h2>
+                <textarea id="snippet" class="codeTextArea" autocomplete="off" autocorrect="off" autocapitalize="off"
+                    spellcheck="false">
+
+export class exampleClass {
+    exampleMethod() {
+        // we make some changes here 
+        console.log('do something else');
+        // how about a friendly alert
+        alert('hello world');
+        return 'example';
+    }
+}
+
+export function newFunction(){
+    console.log('new function');
+}
+                </textarea>
+
+
+            </div>
+            <div id="mergeButton">Click me to do an Auto magic merge 🤖✎⚡</div>
+
+            <span style="width:100%;text-align:center;">
+                <hr>
+            </span>
 
 
             <div class="content">
@@ -406,7 +493,7 @@ aicoder</textarea>
         <section id="features">
             <div class="content">
                 <div class="image-container">
-                    <img src="./CHAT.png" alt="Features showcase">
+                    <img src="./TOOLS.png" alt="Installation guide">
                 </div>
             </div>
 
@@ -487,9 +574,7 @@ aicoder</textarea>
 
 
 
-    <script type="module">
-        import {mer} from '../src/mergeTools/languages/javascript/javascript.js'
-    </script>
+    <script type="module" src="./demo.js"></script>
 </body>
 
 </html>
