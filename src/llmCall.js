@@ -100,7 +100,7 @@ export async function callLLM(messages) {
         }
     }
 
-    lastCallTime = new Date().getTime();
+    lastCallTime = await new Date().getTime();
     return response;
 }
 

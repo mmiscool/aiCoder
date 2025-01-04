@@ -295,15 +295,15 @@ export class conversation {
     }
 
     async generateTitle() {
+        console.log('generateTitle');
+        await this.storeConversation();
+        console.log('generateTitle, saved first.');
         // ask the LLM to generate the title. 
         this.conversationNew = false;
-        await this.addMessage('system', 'Generate a title for this conversation. Respond with a single line of text.');
-        const title = await this.callLLM();
-        //Remove the last 2 messages from the conversation
-        await this.messages.pop();
-        await this.messages.pop();
-        
-        await this.setTitle(title);
+        const title = await this.noStoreCallLLM('system', 'Generate a title for this conversation. Respond with a single line of text.');
+        console.log('generateTitle', title);
+
+        return await this.setTitle(title);
     }
 
     async setTargetFile(targetFile) {
@@ -340,7 +340,7 @@ export class conversation {
 
     async addFileMessage(role, filePath, description = '') {
         await this.messages.push({ role, content: filePath, filePath, description, hidden: true });
-        this.storeConversation();
+        await this.storeConversation();
     }
 
     async addTargetFileMessage(user, description = '') {
@@ -353,12 +353,24 @@ export class conversation {
 
     async callLLM() {
         let llmResponse = await callLLM(this.messages);
-        llmResponse = llmResponse.trim();
+        llmResponse = await llmResponse.trim();
         await this.addMessage('assistant', llmResponse);
         await this.storeConversation();
         if (this.conversationNew === true) {
-            await this.generateTitle();
+            // pause for a moment to let the conversation be saved before generating the title
+            //await new Promise(resolve => setTimeout(resolve, 1000));
+            //await this.generateTitle();
         }
+        return llmResponse;
+    }
+
+    async noStoreCallLLM(role, content) {
+        console.log('noStoreCallLLM', role, content);
+        const messagesForLLM = this.messages;
+        await messagesForLLM.push({ role, content });
+        let llmResponse = await callLLM(messagesForLLM);
+        llmResponse = await llmResponse.trim();
+
         return llmResponse;
     }
 
@@ -379,7 +391,7 @@ export class conversation {
 
     async clearMessages() {
         this.messages = [];
-        this.storeConversation();
+        await this.storeConversation();
     }
 
     async storeConversation(id = this.id) {
@@ -396,7 +408,7 @@ export class conversation {
         const conversationJSON = await JSON.stringify(conversationObject, null, 2);
         const filePath = `./.aiCoder/conversations/${id}.json`;
         await writeFile(filePath, conversationJSON);
-
+        return { success: true };
     }
 
     async loadConversation(id = this.id) {
@@ -423,7 +435,7 @@ export class conversation {
     async deleteConversation() {
         const filePath = `./.aiCoder/conversations/${this.id}.json`;
         if (fs.existsSync(filePath)) {
-            fs.unlinkSync(filePath);
+            await fs.unlinkSync(filePath);
         }
     }
 
