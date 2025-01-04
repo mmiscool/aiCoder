@@ -12,8 +12,10 @@ export class ProjectSettingsManager {
     async init() {
         this.container.innerHTML = '';
         this.addRefreshButton();
+        this.resetButton();
         this.systemPrompts = await this.fetchPrompts();
         this.createPromptsDiv();
+
     }
     async addRefreshButton() {
         const refreshButton = document.createElement('button');
@@ -24,6 +26,21 @@ export class ProjectSettingsManager {
         refreshButton.style.backgroundColor = 'blue';
         refreshButton.addEventListener('click', () => this.refresh());
         this.container.appendChild(refreshButton);
+    }
+    async resetButton() {
+        const resetButton = document.createElement('button');
+        resetButton.textContent = 'RESET TO DEFAULTS';
+        resetButton.title = 'Reset settings';
+        resetButton.style.padding = '10px';
+        resetButton.style.margin = '10px';
+        resetButton.style.backgroundColor = 'red';
+        resetButton.addEventListener('click', () => this.reset());
+        this.container.appendChild(resetButton);
+    }
+    async reset() {
+        if (!confirm('Are you sure you want to reset the system prompts to their default values?',0)) return
+        await doAjax('./resetSystemPrompts', {});
+        await this.init();
     }
     async refresh() {
         this.init();

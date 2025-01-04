@@ -1,0 +1,33 @@
+{
+  "messages": [
+    {
+      "role": "system",
+      "content": "./.aiCoder/prompts/default-system-prompt.md",
+      "filePath": "./.aiCoder/prompts/default-system-prompt.md",
+      "description": ""
+    },
+    {
+      "role": "user",
+      "content": "./.aiCoder/prompts/default-plan-prompt.md",
+      "filePath": "./.aiCoder/prompts/default-plan-prompt.md",
+      "description": ""
+    },
+    {
+      "role": "user",
+      "content": "src/mergeTools/languages/css/css.js",
+      "filePath": "src/mergeTools/languages/css/css.js",
+      "description": "// Code file to be edited"
+    },
+    {
+      "role": "system",
+      "content": "./.aiCoder/prompts/snippet-production-prompt.md",
+      "filePath": "./.aiCoder/prompts/snippet-production-prompt.md",
+      "description": ""
+    }
+  ],
+  "title": "Chat about src/mergeTools/languages/css/css.js",
+  "id": "20250103_020854291Z",
+  "targetFile": "src/mergeTools/languages/css/css.js",
+  "chatMode": "chat",
+  "lastModified": "2025-01-03T02:08:54.304Z"
+}

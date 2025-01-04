@@ -7,10 +7,11 @@ import {
     readFile,
     writeFile
 } from '../fileIO.js';
-import { createBackup } from '../backupSystem.js';
-import { clearTerminal } from '../terminalHelpers.js';
+const debug = false;
+
+
 export async function intelligentlyMergeSnippets(filename) {
-    console.log(`Intelligently merging snippets for file: ${ filename }`);
+    debugLog(`Intelligently merging snippets for file: ${ filename }`);
     const originalCode = await readFile(filename);
     const manipulator = new codeManipulator();
     await manipulator.setCode(originalCode);
@@ -20,7 +21,7 @@ export async function intelligentlyMergeSnippets(filename) {
     await writeFile(filename, theNewCodeWeGot);
 }
 export async function applySnippets(targetFile, snippets) {
-    console.log(`Applying snippets to file: ${ targetFile }`);
+    debugLog(`Applying snippets to file: ${ targetFile }`);
     let cleanedSnippets = await snippets.join('\n\n\n\n\n', true);
     const originalCode = await readFile(targetFile);
     const manipulator = await new codeManipulator();
@@ -48,7 +49,7 @@ export class codeManipulator {
             });
         } catch (e) {
             console.error(e);
-            console.log('Error parsing the new code snippet');
+            debugLog('Error parsing the new code snippet');
             return false;
         }
         this.code = this.code + '\n\n\n\n' + newCode;
@@ -89,17 +90,17 @@ export class codeManipulator {
             enter: node => {
                 if (node.type === 'FunctionDeclaration') {
                     const functionName = node.id.name;
-                    console.log(`Processing function: ${ functionName }`);
+                    debugLog(`Processing function: ${ functionName }`);
                     if (functionMap.has(functionName)) {
                         const existingFunction = functionMap.get(functionName);
-                        console.log(`Duplicate function found: ${ functionName }`);
+                        debugLog(`Duplicate function found: ${ functionName }`);
                         // Check if the new function contains code
                         const hasCode = node.body.body && node.body.body.length > 0;
                         const existingHasCode = existingFunction.body.body && existingFunction.body.body.length > 0;
                         // Handle JSDoc comments
                         const jsDocComment = node.leadingComments?.find(comment => comment.type === 'Block' && comment.value.startsWith('*'));
                         if (hasCode) {
-                            console.log(`Replacing existing function '${ functionName }' with new implementation.`);
+                            debugLog(`Replacing existing function '${ functionName }' with new implementation.`);
                             functionMap.set(functionName, node);
                             // Update map to hold the new function
                             // Copy JSDoc comments from the new function if exists
@@ -110,9 +111,9 @@ export class codeManipulator {
                                 ];
                             }
                         } else if (existingHasCode) {
-                            console.log(`Keeping existing function '${ functionName }' as it has valid implementation.`);
+                            debugLog(`Keeping existing function '${ functionName }' as it has valid implementation.`);
                         } else {
-                            console.log(`Both functions '${ functionName }' are stubs; keeping the first one.`);
+                            debugLog(`Both functions '${ functionName }' are stubs; keeping the first one.`);
                         }
                         // Keep the original stub
                         // Mark the duplicate function for removal (the one that is lower in the file)
@@ -126,7 +127,7 @@ export class codeManipulator {
                     } else
                         // If duplicate stubs, mark the later one for removal
                         {
-                            console.log(`Adding function '${ functionName }' to map.`);
+                            debugLog(`Adding function '${ functionName }' to map.`);
                             functionMap.set(functionName, node);
                         }
                 }
@@ -137,7 +138,7 @@ export class codeManipulator {
         estraverse.replace(this.ast, {
             enter: (node, parent) => {
                 if (node.remove) {
-                    console.log(`Removing duplicate function: ${ node.id.name }`);
+                    debugLog(`Removing duplicate function: ${ node.id.name }`);
                     return this.removeNodeFromParent(node, parent);
                 }
                 return node;
@@ -148,11 +149,11 @@ export class codeManipulator {
             enter: node => {
                 if (node.type === 'ExportNamedDeclaration' && node.declaration && node.declaration.type === 'FunctionDeclaration') {
                     const functionName = node.declaration.id.name;
-                    console.log(`Processing exported function: ${ functionName }`);
+                    debugLog(`Processing exported function: ${ functionName }`);
                     if (functionMap.has(functionName)) {
                         const existingFunction = functionMap.get(functionName);
                         if (existingFunction !== node.declaration) {
-                            console.log(`Marking old exported function '${ functionName }' for removal.`);
+                            debugLog(`Marking old exported function '${ functionName }' for removal.`);
                             existingFunction.remove = true;
                         }
                     }
@@ -168,13 +169,13 @@ export class codeManipulator {
         }
         const importMap = new Map();
         const importNodes = [];
-        console.log('Merging duplicate imports');
+        debugLog('Merging duplicate imports');
         // Traverse the AST to collect and combine imports
         estraverse.traverse(this.ast, {
             enter: (node, parent) => {
                 if (node.type === 'ImportDeclaration') {
                     const source = node.source.value;
-                    console.log(`import {${ node.specifiers.map(s => s.local.name).join(', ') }} from '${ source }'`);
+                    debugLog(`import {${ node.specifiers.map(s => s.local.name).join(', ') }} from '${ source }'`);
                     if (importMap.has(source)) {
                         // Merge specifiers from the duplicate import
                         const existingNode = importMap.get(source);
@@ -463,15 +464,15 @@ export class codeManipulator {
                 }
             }
         });
-        //console.log(this.ast);
+        //debugLog(this.ast);
         return this.ast;
     }
     async generateCode() {
-        //console.log('Generating code', this.code);
+        //debugLog('Generating code', this.code);
         if (!this.ast) {
             throw new Error('AST not parsed. Call the `parse` method first.');
         }
-        //console.log(this.ast)
+        //debugLog(this.ast)
         const newCode = await escodegen.generate(this.ast, {
             comment: true,
             format: {
@@ -493,10 +494,17 @@ export class codeManipulator {
                 safeConcatenation: true
             }
         });
-        //console.log(`this is the new code: ${newCode}`);
-        //console.log(this.ast);
+        //debugLog(`this is the new code: ${newCode}`);
+        //debugLog(this.ast);
         this.code = newCode;
         await this.parse();
         return this.code;
+    }
+}
+
+
+async function debugLog(...args) {
+    if (debug) {
+        debugLog(...args);
     }
 }

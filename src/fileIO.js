@@ -1,7 +1,7 @@
 
 import fs from 'fs';
 import path, { dirname } from 'path';
-import { createBackup } from './backupSystem.js';
+//import { createBackup } from './backupSystem.js';
 import {
     printAndPause,
     printDebugMessage
@@ -32,7 +32,7 @@ export async function writeFile(filePath, content, makeBackup = false) {
     if (makeBackup)
         await createBackup(filePath);
     await fs.writeFileSync(filePath, content, 'utf8');
-    await printAndPause(`File written: ${ filePath }`);
+    await printDebugMessage(`File written: ${ filePath }`);
 }
 export async function appendFile(filePath, content, makeBackup = false) {
     await printDebugMessage('Appending to file:', filePath);
@@ -107,24 +107,50 @@ export function getScriptFolderPath() {
 }
 export function getAllFiles(folderPath) {
     const result = [];
-    function readDirRecursively(currentPath) {
-        const items = fs.readdirSync(currentPath, { withFileTypes: true });
-        items.forEach(item => {
-            const itemPath = path.join(currentPath, item.name);
-            const relativePath = path.relative(folderPath, itemPath);
-            if (item.isDirectory()) {
-                readDirRecursively(itemPath);
-            } else {
-                if (relativePath.startsWith('.aiCoder'))
-                    return;
-                if (relativePath.startsWith('node_modules'))
-                    return;
-                if (relativePath.startsWith('.git'))
-                    return;
-                result.push('./' + relativePath);
-            }
-        });
-    }
     readDirRecursively(folderPath);
     return result;
+}
+export function readDirRecursively(currentPath) {
+    const items = fs.readdirSync(currentPath, { withFileTypes: true });
+    items.forEach(item => {
+        const itemPath = path.join(currentPath, item.name);
+        const relativePath = path.relative(folderPath, itemPath);
+        if (item.isDirectory()) {
+            readDirRecursively(itemPath);
+        } else {
+            if (relativePath.startsWith('.aiCoder'))
+                return;
+            if (relativePath.startsWith('node_modules'))
+                return;
+            if (relativePath.startsWith('.git'))
+                return;
+            result.push('./' + relativePath);
+        }
+    });
+}
+export async function deleteDirectory(directoryPath) {
+    try {
+        const items = fs.readdirSync(directoryPath, { withFileTypes: true });
+        for (const item of items) {
+            const itemPath = path.join(directoryPath, item.name);
+            if (item.isDirectory()) {
+                await deleteDirectory(itemPath);
+            } else {
+                fs.unlinkSync(itemPath);
+            }
+        }
+        fs.rmdirSync(directoryPath);
+        printDebugMessage(`Directory deleted: ${ directoryPath }`);
+    } catch (error) {
+        console.log(`Error deleting directory: ${ directoryPath }`, error);
+    }
+}
+export async function deleteFile(filePath) {
+    console.log('Deleting file:', filePath);
+    try {
+        await fs.unlinkSync(filePath);
+        printDebugMessage(`File deleted: ${ filePath }`);
+    } catch (error) {
+        console.log(`Error deleting file: ${ filePath }`, error);
+    }
 }

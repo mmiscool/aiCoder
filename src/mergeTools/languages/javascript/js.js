@@ -2,14 +2,10 @@
 import * as escodegen from 'escodegen';
 import esprima from 'esprima-next';
 import estraverse from 'estraverse';
-
-
 import { readFile, writeFile } from '../../../fileIO.js';
 
-
-
 export async function intelligentlyMergeSnippets(filename) {
-    console.log(`Intelligently merging snippets for file: ${ filename }`);
+    console.log(`Intelligently merging snippets for file: ${filename}`);
     const originalCode = await readFile(filename);
     const manipulator = new codeManipulator();
     await manipulator.setCode(originalCode);
@@ -19,7 +15,7 @@ export async function intelligentlyMergeSnippets(filename) {
     await writeFile(filename, theNewCodeWeGot);
 }
 export async function applySnippets(targetFile, snippets) {
-    console.log(`Applying snippets to file: ${ targetFile }`);
+    console.log(`Applying snippets to file: ${targetFile}`);
     let cleanedSnippets = await snippets.join('\n\n\n\n\n', true);
     const originalCode = await readFile(targetFile);
     const manipulator = await new codeManipulator();
@@ -88,17 +84,17 @@ export class codeManipulator {
             enter: node => {
                 if (node.type === 'FunctionDeclaration') {
                     const functionName = node.id.name;
-                    console.log(`Processing function: ${ functionName }`);
+                    console.log(`Processing function: ${functionName}`);
                     if (functionMap.has(functionName)) {
                         const existingFunction = functionMap.get(functionName);
-                        console.log(`Duplicate function found: ${ functionName }`);
+                        console.log(`Duplicate function found: ${functionName}`);
                         // Check if the new function contains code
                         const hasCode = node.body.body && node.body.body.length > 0;
                         const existingHasCode = existingFunction.body.body && existingFunction.body.body.length > 0;
                         // Handle JSDoc comments
                         const jsDocComment = node.leadingComments?.find(comment => comment.type === 'Block' && comment.value.startsWith('*'));
                         if (hasCode) {
-                            console.log(`Replacing existing function '${ functionName }' with new implementation.`);
+                            console.log(`Replacing existing function '${functionName}' with new implementation.`);
                             functionMap.set(functionName, node);
                             // Update map to hold the new function
                             // Copy JSDoc comments from the new function if exists
@@ -109,25 +105,25 @@ export class codeManipulator {
                                 ];
                             }
                         } else if (existingHasCode) {
-                            console.log(`Keeping existing function '${ functionName }' as it has valid implementation.`);
+                            console.log(`Keeping existing function '${functionName}' as it has valid implementation.`);
                         } else {
-                            console.log(`Both functions '${ functionName }' are stubs; keeping the first one.`);
+                            console.log(`Both functions '${functionName}' are stubs; keeping the first one.`);
                         }
                         // Keep the original stub
                         // Mark the duplicate function for removal (the one that is lower in the file)
                         if (hasCode) {
                             existingFunction.remove = true;
                         } else
-                            // We want to remove the earlier one only if hasCode is true
-                            {
-                                node.remove = true;
-                            }
-                    } else
-                        // If duplicate stubs, mark the later one for removal
+                        // We want to remove the earlier one only if hasCode is true
                         {
-                            console.log(`Adding function '${ functionName }' to map.`);
-                            functionMap.set(functionName, node);
+                            node.remove = true;
                         }
+                    } else
+                    // If duplicate stubs, mark the later one for removal
+                    {
+                        console.log(`Adding function '${functionName}' to map.`);
+                        functionMap.set(functionName, node);
+                    }
                 }
             }
         });
@@ -136,7 +132,7 @@ export class codeManipulator {
         estraverse.replace(this.ast, {
             enter: (node, parent) => {
                 if (node.remove) {
-                    console.log(`Removing duplicate function: ${ node.id.name }`);
+                    console.log(`Removing duplicate function: ${node.id.name}`);
                     return this.removeNodeFromParent(node, parent);
                 }
                 return node;
@@ -147,11 +143,11 @@ export class codeManipulator {
             enter: node => {
                 if (node.type === 'ExportNamedDeclaration' && node.declaration && node.declaration.type === 'FunctionDeclaration') {
                     const functionName = node.declaration.id.name;
-                    console.log(`Processing exported function: ${ functionName }`);
+                    console.log(`Processing exported function: ${functionName}`);
                     if (functionMap.has(functionName)) {
                         const existingFunction = functionMap.get(functionName);
                         if (existingFunction !== node.declaration) {
-                            console.log(`Marking old exported function '${ functionName }' for removal.`);
+                            console.log(`Marking old exported function '${functionName}' for removal.`);
                             existingFunction.remove = true;
                         }
                     }
@@ -173,7 +169,7 @@ export class codeManipulator {
             enter: (node, parent) => {
                 if (node.type === 'ImportDeclaration') {
                     const source = node.source.value;
-                    console.log(`import {${ node.specifiers.map(s => s.local.name).join(', ') }} from '${ source }'`);
+                    console.log(`import {${node.specifiers.map(s => s.local.name).join(', ')}} from '${source}'`);
                     if (importMap.has(source)) {
                         // Merge specifiers from the duplicate import
                         const existingNode = importMap.get(source);
@@ -499,3 +495,8 @@ export class codeManipulator {
         return this.code;
     }
 }
+
+
+
+
+

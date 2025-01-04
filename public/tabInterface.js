@@ -45,13 +45,14 @@ export class tabInterface {
         tabButton.style.color = 'white';
         // make text not wrap
         tabButton.style.whiteSpace = 'nowrap';
-
         // Set text color to white
         tabButton.style.cursor = 'pointer';
         tabButton.style.outline = '1px solid black';
         tabButton.style.padding = '10px';
         tabButton.style.height = '40px';
         tabButton.style.transition = 'background-color 0.3s';
+        // Force square corners
+        tabButton.style.borderRadius = '0';
         // Highlight the active tab
         const updateTabStyles = () => {
             this.tabBar.childNodes.forEach((btn, idx) => {
@@ -90,6 +91,8 @@ export class tabInterface {
     }
     // Return the newly created content element
     switchToTab(tabName) {
+         // set the URL hash to the tab name
+
         // case insensitive search
         const idx = this.tabs.findIndex(tab => tab.name.toLowerCase() === tabName.toLowerCase());
         if (idx !== -1) {
@@ -104,9 +107,13 @@ export class tabInterface {
                     btn.style.borderBottom = this.colors.inactiveTabBorder;
                 }
             });
+
+           
         }
     }
     showActiveTab() {
+        window.location.hash = this.activeTab;
+       // alert(tabName);
         // Clear the content area
         this.contentArea.innerHTML = '';
         // Add the active tab's content

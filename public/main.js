@@ -9,19 +9,19 @@ let ctx = {};
 
 
 async function setup() {
-    ctx.autoApplyTimeout = 3;
+    ctx.autoApplyTimeout = 10;
     const tabs = new tabInterface();
     ctx.tabs = tabs;
-    const chatTab = tabs.createTab("Chat","💬");
+    const chatTab = tabs.createTab("Chat", "💬");
     ctx.chat = new ChatManager(chatTab, ctx);
 
-    const toolsTab = tabs.createTab("Tools","🛠️");
+    const toolsTab = tabs.createTab("Tools", "🛠️");
     ctx.tools = new toolsManager(toolsTab, ctx);
 
-    const projectSettings = tabs.createTab("Project Settings","⚙️");
+    const projectSettings = tabs.createTab("Project Settings", "⚙️");
     ctx.projectSettings = new ProjectSettingsManager(projectSettings, ctx);
 
-    const llmSettingsTab = tabs.createTab("LLM Settings","🧠");
+    const llmSettingsTab = tabs.createTab("LLM Settings", "🧠");
     ctx.llmSettings = new LLMSettingsManager(llmSettingsTab, ctx);
 
 
@@ -30,8 +30,14 @@ async function setup() {
     document.body.style.display = "flex";
 
     document.body.appendChild(tabs.getElement());
-
     window.ctx = ctx;
+
+    // Extract the hash from the URL
+    const hashText = window.location.hash;
+
+    // Remove the leading '#' if it exists
+    const extractedText = await hashText.startsWith('#') ? hashText.substring(1) : hashText;
+    tabs.switchToTab(extractedText);
 
 }
 
@@ -44,5 +50,7 @@ async function setDefaultLocalStorageKey(key, value) {
 
 // call the setup function only after the DOM has loaded
 document.addEventListener('DOMContentLoaded', setup);
+
+
 
 

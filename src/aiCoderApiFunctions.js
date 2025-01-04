@@ -1,6 +1,6 @@
-import { applySnippets, intelligentlyMergeSnippets} from "./mergeTools/languages/javascript/js.js"
+import { applySnippets, intelligentlyMergeSnippets } from "./mergeTools/intelligentMerge.js"
 import { getListOfFunctions, getMethodsWithArguments } from "./classListing.js";
-import { getAllFiles, moveFile, readFile, readSetting, writeFile, writeSetting } from "./fileIO.js";
+import { deleteDirectory, deleteFile, getAllFiles, moveFile, readFile, readSetting, writeFile, writeSetting } from "./fileIO.js";
 
 import { llmSettings, llmSettingsUpdate } from "./llmCall.js";
 import { launchEditor } from "./terminalHelpers.js";
@@ -78,8 +78,8 @@ export class aiCoderApiFunctions {
             return { error: "No target file provided" };
         }
         const webUIConversation = new conversation();
-        console.log('newChat', webUIConversation);
-        console.log('newChat', webUIConversation);
+        //console.log('newChat', webUIConversation);
+        //console.log('newChat', webUIConversation);
         await webUIConversation.setMode('chat');
         await webUIConversation.setTitle(`Chat about ${parsedBody.targetFile}`);
         if (parsedBody.title) await webUIConversation.setTitle(parsedBody.title);
@@ -224,6 +224,18 @@ export class aiCoderApiFunctions {
 
     async writeFile(parsedBody) {
         await writeFile(parsedBody.targetFile, parsedBody.fileContent);
+        return { success: true };
+    }
+
+    async resetSystemPrompts() {
+        await deleteFile('./.aiCoder/prompts/default-system-prompt.md');
+        await deleteFile('./.aiCoder/prompts/snippet-production-prompt.md');
+        await deleteFile('./.aiCoder/prompts/snippet-validation-prompt.md');
+        await deleteFile('./.aiCoder/prompts/plan-edit-prompt.md');
+        await deleteFile('./.aiCoder/prompts/customPrompts.json');
+
+
+        await setupConfigFiles();
         return { success: true };
     }
 }

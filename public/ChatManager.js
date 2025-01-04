@@ -293,21 +293,56 @@ export class ChatManager {
             }
             individualMessageDiv.appendChild(contentDiv);
             if (message.role === 'assistant') {
-                const savePlanButton = document.createElement('button');
-                savePlanButton.textContent = '💾 Replace plan';
-                savePlanButton.addEventListener('click', async () => {
-                    await doAjax('./savePlan', { plan: message.content });
-                });
-                individualMessageDiv.appendChild(savePlanButton);
-                const appendPlanButton = document.createElement('button');
-                appendPlanButton.textContent = '📝 Append to plan';
-                appendPlanButton.addEventListener('click', async () => {
-                    await doAjax('./savePlan', {
-                        plan: message.content,
-                        append: true
+                // check if the conversation name starts with "plan"
+
+                if (this.conversationTitleInput.value.startsWith('plan')) {
+                    const savePlanButton = document.createElement('button');
+                    savePlanButton.textContent = '💾 Replace plan';
+                    savePlanButton.addEventListener('click', async () => {
+                        await doAjax('./savePlan', { plan: message.content });
                     });
-                });
-                individualMessageDiv.appendChild(appendPlanButton);
+                    individualMessageDiv.appendChild(savePlanButton);
+                    const appendPlanButton = document.createElement('button');
+                    appendPlanButton.textContent = '📝 Append to plan';
+                    appendPlanButton.addEventListener('click', async () => {
+                        await doAjax('./savePlan', {
+                            plan: message.content,
+                            append: true
+                        });
+                    });
+                    individualMessageDiv.appendChild(appendPlanButton);
+                }
+
+                // check if this message contains a <h2> element with the inner text of "ACTION LIST"
+                const actionListHeader = contentDiv.querySelector('h2');
+                if (actionListHeader && actionListHeader.innerHTML.startsWith("ACTION LIST")) {
+                    const actionListItems = contentDiv.querySelectorAll('p');
+                    actionListItems.forEach(async actionListItem => {
+                        const newButtonElement = await changeTagName(actionListItem, 'button');
+
+                        const actionText = newButtonElement.textContent;
+
+                        const actionString = `Perform action ${actionText}`;
+                        newButtonElement.title = actionString;
+                        newButtonElement.addEventListener('click', async () => {
+                            await this.setInput(actionString);
+                            await this.submitButtonHandler();
+                        });
+
+                        // set the tooltip to the action text
+                        
+
+                        newButtonElement.style.width = '100%';
+                        newButtonElement.style.margin = '5px';
+                        newButtonElement.style.padding = '5px';
+                        // make text in button justify left
+                        newButtonElement.style.textAlign = 'left';
+                        
+                        // change the actionItem to a button
+                        
+                    });
+
+                }
             }
             if (message.role === 'user') {
                 const addPromptButton = document.createElement('button');
@@ -426,7 +461,7 @@ export class ChatManager {
             trashIcon.addEventListener('click', async event => {
                 event.stopPropagation();
                 this.promptsDialog.close();
-                const confirmDelete = await confirm(`Delete prompt: \n "${ prompt }"?`, 0, false);
+                const confirmDelete = await confirm(`Delete prompt: \n "${prompt}"?`, 0, false);
                 if (confirmDelete) {
                     customPrompts = customPrompts.filter(p => p !== prompt);
                     await doAjax('./writeFile', {
@@ -577,4 +612,32 @@ export class ChatManager {
         }
         return isCodeGood;
     }
+}
+
+
+
+/**
+ * Change the tag name of an existing DOM element.
+ * @param {HTMLElement} element - The element to change.
+ * @param {string} newTagName - The desired tag name.
+ * @returns {HTMLElement} The newly created element with the updated tag name.
+ */
+function changeTagName(element, newTagName) {
+    // Create a new element with the desired tag name
+    const newElement = document.createElement(newTagName);
+
+    // Copy attributes
+    Array.from(element.attributes).forEach(attr => {
+        newElement.setAttribute(attr.name, attr.value);
+    });
+
+    // Move child nodes
+    while (element.firstChild) {
+        newElement.appendChild(element.firstChild);
+    }
+
+    // Replace the old element with the new one
+    element.parentNode.replaceChild(newElement, element);
+
+    return newElement;
 }
