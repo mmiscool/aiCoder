@@ -262,6 +262,7 @@ export class ChatManager {
             individualMessageDiv.style.border = '1px solid black';
             individualMessageDiv.style.padding = '10px';
             individualMessageDiv.style.marginBottom = '10px';
+            if (message.hidden) individualMessageDiv.style.display = 'none';
             if (message.role === 'user') {
                 individualMessageDiv.style.backgroundColor = 'rgba(0, 0, 255, 0.2)';
             }

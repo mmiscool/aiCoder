@@ -44,5 +44,8 @@
     "parcel": "^2.13.2",
     "turndown": "^7.2.0",
     "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "svgo": "^3.3.2"
   }
 }

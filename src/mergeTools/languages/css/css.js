@@ -4,7 +4,7 @@ export class cssManipulator {
         this.parsedCSS = [];
     }
     // Method to parse CSS into an array of selector-declaration pairs
-    parseCSS(css) {
+    parse(css) {
         const regex = /([^{}]+)\{([^{}]*(?:\{[^{}]*\}[^{}]*)*)*\}/g;
         this.parsedCSS = [];
         let match;
@@ -18,7 +18,7 @@ export class cssManipulator {
         }
     }
     // Method to resolve duplicate selectors
-    resolveDuplicates() {
+    mergeDuplicates() {
         const selectorMap = new Map();
         // Traverse from the end to preserve the last occurrence
         for (let i = this.parsedCSS.length - 1; i >= 0; i--) {
@@ -62,8 +62,8 @@ const css = `
   }
   `;
 const manipulator = new cssManipulator();
-manipulator.parseCSS(css);
-manipulator.resolveDuplicates();
+manipulator.parse(css);
+manipulator.mergeDuplicates();
 const resolvedCSS = manipulator.toCSSString();
 console.log('Original CSS:\n', css);
 console.log('Resolved CSS:\n', resolvedCSS);

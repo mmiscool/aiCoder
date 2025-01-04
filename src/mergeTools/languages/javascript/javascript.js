@@ -2,35 +2,11 @@
 import * as escodegen from 'escodegen';
 import esprima from 'esprima-next';
 import estraverse from 'estraverse';
-import {
-    appendFile,
-    readFile,
-    writeFile
-} from '../fileIO.js';
+
 const debug = false;
 
 
-export async function intelligentlyMergeSnippets(filename) {
-    debugLog(`Intelligently merging snippets for file: ${filename}`);
-    const originalCode = await readFile(filename);
-    const manipulator = new codeManipulator();
-    await manipulator.setCode(originalCode);
-    await manipulator.parse();
-    await manipulator.mergeDuplicates();
-    const theNewCodeWeGot = await manipulator.generateCode();
-    await writeFile(filename, theNewCodeWeGot);
-}
-export async function applySnippets(targetFile, snippets) {
-    debugLog(`Applying snippets to file: ${targetFile}`);
-    let cleanedSnippets = await snippets.join('\n\n\n\n\n', true);
-    const originalCode = await readFile(targetFile);
-    const manipulator = await new codeManipulator();
-    await manipulator.setCode(originalCode);
-    const returnValue = await manipulator.mergeCode(cleanedSnippets);
-    await writeFile(targetFile, await manipulator.generateCode());
-    return returnValue;
-}
-export class codeManipulator {
+export class javascriptManipulator {
     constructor(code = '') {
         this.code = code;
     }

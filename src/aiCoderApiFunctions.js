@@ -1,4 +1,4 @@
-import { applySnippets, intelligentlyMergeSnippets } from "./mergeTools/intelligentMerge.js"
+import { applySnippets, intelligentlyMergeSnippets } from "./mergeTools/mergeTool.js";
 import { getListOfFunctions, getMethodsWithArguments } from "./classListing.js";
 import { deleteDirectory, deleteFile, getAllFiles, moveFile, readFile, readSetting, writeFile, writeSetting } from "./fileIO.js";
 
@@ -146,8 +146,14 @@ export class aiCoderApiFunctions {
     }
 
     async applySnippet(parsedBody) {
-        const mergeResult = await applySnippets(parsedBody.targetFile, [parsedBody.snippet]);
-        return { success: mergeResult };
+        try {
+            const mergeResult = await applySnippets(parsedBody.targetFile, [parsedBody.snippet]);
+            return { success: mergeResult };
+        }
+        catch (e) {
+            //console.log('Error applying snippet:', e);
+            return { error: e };
+        }
     }
 
     async getMethodsList(parsedBody) {
@@ -265,6 +271,7 @@ export class conversation {
         this.title = '';
         this.targetFile = targetFile;
         this.chatMode = 'chat';
+        this.conversationNew = true;
 
         if (id) {
             this.id = id;
@@ -289,11 +296,13 @@ export class conversation {
 
     async generateTitle() {
         // ask the LLM to generate the title. 
-        await this.addMessage('user', 'Generate a title for this conversation. Respond with a single line of text.');
+        this.conversationNew = false;
+        await this.addMessage('system', 'Generate a title for this conversation. Respond with a single line of text.');
         const title = await this.callLLM();
         //Remove the last 2 messages from the conversation
         await this.messages.pop();
         await this.messages.pop();
+        
         await this.setTitle(title);
     }
 
@@ -302,7 +311,7 @@ export class conversation {
         await this.storeConversation();
     }
 
-    async addMessage(role, content) {
+    async addMessage(role, content, hidden = false) {
         while (true) {
             const firstLine = content.split('\n')[0].trim();
             const everyThingElse = content.split('\n').slice(1).join('\n').trim();
@@ -320,7 +329,7 @@ export class conversation {
             } else {
                 // If the first line is not a URL, add the remaining content and exit
                 if (content.length > 0) {
-                    await this.messages.push({ role, content });
+                    await this.messages.push({ role, content, hidden });
                 }
                 break;
             }
@@ -330,7 +339,7 @@ export class conversation {
 
 
     async addFileMessage(role, filePath, description = '') {
-        await this.messages.push({ role, content: filePath, filePath, description });
+        await this.messages.push({ role, content: filePath, filePath, description, hidden: true });
         this.storeConversation();
     }
 
@@ -347,6 +356,9 @@ export class conversation {
         llmResponse = llmResponse.trim();
         await this.addMessage('assistant', llmResponse);
         await this.storeConversation();
+        if (this.conversationNew === true) {
+            await this.generateTitle();
+        }
         return llmResponse;
     }
 
@@ -378,6 +390,7 @@ export class conversation {
             id: this.id,
             targetFile: this.targetFile,
             chatMode: this.chatMode,
+            conversationNew: this.conversationNew || false,
             lastModified: new Date().toISOString()
         };
         const conversationJSON = JSON.stringify(conversationObject, null, 2);
@@ -397,6 +410,8 @@ export class conversation {
             this.title = conversationObject.title;
             this.id = conversationObject.id;
             this.targetFile = conversationObject.targetFile;
+            this.chatMode = conversationObject.chatMode;
+            this.conversationNew = conversationObject.conversationNew;
             return console.log('conversation loaded. wooot');
         } catch (e) {
             console.log('conversation not found');
