@@ -1,7 +1,7 @@
 
 import fs from 'fs';
 import path, { dirname } from 'path';
-//import { createBackup } from './backupSystem.js';
+import { createBackup } from './backupSystem.js';
 import {
     printAndPause,
     printDebugMessage
@@ -32,7 +32,7 @@ export async function writeFile(filePath, content, makeBackup = false) {
     if (makeBackup)
         await createBackup(filePath);
     await fs.writeFileSync(filePath, content, 'utf8');
-    await printDebugMessage(`File written: ${ filePath }`);
+    await printAndPause(`File written: ${ filePath }`);
 }
 export async function appendFile(filePath, content, makeBackup = false) {
     await printDebugMessage('Appending to file:', filePath);
@@ -107,26 +107,26 @@ export function getScriptFolderPath() {
 }
 export function getAllFiles(folderPath) {
     const result = [];
+    function readDirRecursively(currentPath) {
+        const items = fs.readdirSync(currentPath, { withFileTypes: true });
+        items.forEach(item => {
+            const itemPath = path.join(currentPath, item.name);
+            const relativePath = path.relative(folderPath, itemPath);
+            if (item.isDirectory()) {
+                readDirRecursively(itemPath);
+            } else {
+                if (relativePath.startsWith('.aiCoder'))
+                    return;
+                if (relativePath.startsWith('node_modules'))
+                    return;
+                if (relativePath.startsWith('.git'))
+                    return;
+                result.push('./' + relativePath);
+            }
+        });
+    }
     readDirRecursively(folderPath);
     return result;
-}
-export function readDirRecursively(currentPath) {
-    const items = fs.readdirSync(currentPath, { withFileTypes: true });
-    items.forEach(item => {
-        const itemPath = path.join(currentPath, item.name);
-        const relativePath = path.relative(folderPath, itemPath);
-        if (item.isDirectory()) {
-            readDirRecursively(itemPath);
-        } else {
-            if (relativePath.startsWith('.aiCoder'))
-                return;
-            if (relativePath.startsWith('node_modules'))
-                return;
-            if (relativePath.startsWith('.git'))
-                return;
-            result.push('./' + relativePath);
-        }
-    });
 }
 export async function deleteDirectory(directoryPath) {
     try {
