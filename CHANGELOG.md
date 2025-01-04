@@ -3,6 +3,17 @@
 [![semantic versioning](https://img.shields.io/badge/semantic%20versioning-2.0.0-green.svg)](https://semver.org)
 > All notable changes to this project will be documented in this file
 
+## [1.0.83](https://github.com/mmiscool/aiCoder/compare/v1.0.82...v1.0.83) (2025-01-04)
+
+### 📝 Documentation
+
+* embedded merging demo in to landing page. ([409cf50](https://github.com/mmiscool/aiCoder/commit/409cf50aa7d3c03544134a3b9494a691b9c129e9))
+* update site to be nicer ([d254d31](https://github.com/mmiscool/aiCoder/commit/d254d31baf9aa8fb57d5e19885d8edc351f6d5e5))
+
+### 🤖 Build System
+
+* Made refreshing the page stay on the current tab. ([5d1d484](https://github.com/mmiscool/aiCoder/commit/5d1d48419724d61a0771af539d4ebdc314af13ee))
+
 ## [1.0.82](https://github.com/mmiscool/aiCoder/compare/v1.0.81...v1.0.82) (2025-01-04)
 
 ### 🤖 Build System
