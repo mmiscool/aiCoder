@@ -226,7 +226,7 @@ async function installOllama() {
             installer.on('exit', (code) => {
                 if (code === 0) {
                     console.log('Ollama installed successfully!');
-                    pullOllamaModelWithProgress('granite3-dense:latest');
+                    pullOllamaModelWithProgress('granite3.1-dense:latest');
                     resolve();
                 } else {
                     console.log(`Installation failed with code: ${code}`);

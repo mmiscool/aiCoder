@@ -59,7 +59,7 @@ On linux you can run `aiCoder -setup` to automatically install ollama and pull t
 curl -fsSL https://ollama.com/install.sh | sh
 
 # Pull the preferred model
-ollama pull granite3-dense
+ollama pull granite3.1-dense
 ```
 
 You can find and install additional models to test with 
@@ -148,7 +148,7 @@ Ollama is supported for completely local and private LMM code generation.
 - OpenAI’s `gpt-4o-mini` or `gpt-4o` models work well.
 - Anthropics’s `claude-3-5-haiku` works fine. It is more expensive. 
 - Groq is less tested and has a smaller context window. Not recommended for use. 
-- Ollama runs locally but may be slower. Its `granite3-dense:8b` model works well enough, though sometimes requires additional prompting to get properly formatted snippets.
+- Ollama runs locally but may be slower. Its `granite3.1-dense` model works well enough, though sometimes requires additional prompting to get properly formatted snippets.
 - GoogleAI using the free `gemini-1.5-flash` seems to work on par with OpenAI `gpt-4o-mini`. To get a free api key go to [https://aistudio.google.com/apikey](https://aistudio.google.com/apikey)
 
 ## Backup Functionality
