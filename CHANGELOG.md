@@ -3,6 +3,12 @@
 [![semantic versioning](https://img.shields.io/badge/semantic%20versioning-2.0.0-green.svg)](https://semver.org)
 > All notable changes to this project will be documented in this file
 
+## [1.0.80](https://github.com/mmiscool/aiCoder/compare/v1.0.79...v1.0.80) (2025-01-04)
+
+### 🤖 Build System
+
+* fixed bug in fileIO. ([9b79393](https://github.com/mmiscool/aiCoder/commit/9b79393c1cd1ab70199cafd6a1abd3f1caa08e95))
+
 ## [1.0.79](https://github.com/mmiscool/aiCoder/compare/v1.0.78...v1.0.79) (2025-01-04)
 
 ### 🤖 Build System
