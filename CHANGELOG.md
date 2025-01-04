@@ -3,6 +3,12 @@
 [![semantic versioning](https://img.shields.io/badge/semantic%20versioning-2.0.0-green.svg)](https://semver.org)
 > All notable changes to this project will be documented in this file
 
+## [1.0.86](https://github.com/mmiscool/aiCoder/compare/v1.0.85...v1.0.86) (2025-01-04)
+
+### 🤖 Build System
+
+* disable automatic title generation. ([c7a4b54](https://github.com/mmiscool/aiCoder/commit/c7a4b5433b4d7b7d511874e9554df347089744a1))
+
 ## [1.0.85](https://github.com/mmiscool/aiCoder/compare/v1.0.84...v1.0.85) (2025-01-04)
 
 ### 🤖 Build System
