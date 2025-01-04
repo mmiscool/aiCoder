@@ -3,6 +3,12 @@
 [![semantic versioning](https://img.shields.io/badge/semantic%20versioning-2.0.0-green.svg)](https://semver.org)
 > All notable changes to this project will be documented in this file
 
+## [1.0.88](https://github.com/mmiscool/aiCoder/compare/v1.0.87...v1.0.88) (2025-01-04)
+
+### 🤖 Build System
+
+* fix problem with showing plan edit tools in chat related to conversation title. ([bcf345d](https://github.com/mmiscool/aiCoder/commit/bcf345dec7ec8584f671b530b34dc950984d81d3))
+
 ## [1.0.87](https://github.com/mmiscool/aiCoder/compare/v1.0.86...v1.0.87) (2025-01-04)
 
 ### 🤖 Build System
