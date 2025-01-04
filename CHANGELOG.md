@@ -3,6 +3,12 @@
 [![semantic versioning](https://img.shields.io/badge/semantic%20versioning-2.0.0-green.svg)](https://semver.org)
 > All notable changes to this project will be documented in this file
 
+## [1.0.81](https://github.com/mmiscool/aiCoder/compare/v1.0.80...v1.0.81) (2025-01-04)
+
+### 🤖 Build System
+
+* fixed bug in AST manipulation logic related to nested function definitions. ([2948752](https://github.com/mmiscool/aiCoder/commit/2948752eac14e42390e105d9e52f189fc68b428d))
+
 ## [1.0.80](https://github.com/mmiscool/aiCoder/compare/v1.0.79...v1.0.80) (2025-01-04)
 
 ### 🤖 Build System
