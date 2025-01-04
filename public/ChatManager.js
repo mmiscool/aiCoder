@@ -237,16 +237,6 @@ export class ChatManager {
     }
     async loadConversationsList() {
         const conversations = await doAjax('./getConversationsList', {});
-        //console.log('conversations', conversations);
-        // format the conversations list
-        // [
-        //     {
-        //         "id": "20241206_051509050Z",
-        //         "title": "",
-        //         "lastModified": "2024-12-06T05:15:09.050Z"
-        //     },
-        // ]
-        // sort the conversations by lastModified
         conversations.sort((a, b) => {
             return new Date(b.lastModified) - new Date(a.lastModified);
         });
