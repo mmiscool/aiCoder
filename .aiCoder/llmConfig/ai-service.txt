@@ -1,1 +1,1 @@
-openai
+ollama

@@ -9,6 +9,13 @@ let ctx = {};
 
 
 async function setup() {
+    // Extract the hash from the URL
+    const hashText = window.location.hash;
+    let extractedText = await hashText.startsWith('#') ? hashText.substring(1) : hashText;
+    // turn the extracted text back in to plain text
+    extractedText = await decodeURIComponent(extractedText);
+    //alert(extractedText);
+
     ctx.autoApplyTimeout = 10;
     const tabs = new tabInterface();
     ctx.tabs = tabs;
@@ -32,11 +39,10 @@ async function setup() {
     document.body.appendChild(tabs.getElement());
     window.ctx = ctx;
 
-    // Extract the hash from the URL
-    const hashText = window.location.hash;
+
 
     // Remove the leading '#' if it exists
-    const extractedText = await hashText.startsWith('#') ? hashText.substring(1) : hashText;
+
     tabs.switchToTab(extractedText);
 
 }

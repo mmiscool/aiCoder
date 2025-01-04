@@ -112,7 +112,7 @@ export class tabInterface {
         }
     }
     showActiveTab() {
-        window.location.hash = this.activeTab;
+        window.location.hash = this.tabs[this.activeTab].name;
        // alert(tabName);
         // Clear the content area
         this.contentArea.innerHTML = '';
