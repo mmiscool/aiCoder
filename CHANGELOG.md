@@ -3,6 +3,12 @@
 [![semantic versioning](https://img.shields.io/badge/semantic%20versioning-2.0.0-green.svg)](https://semver.org)
 > All notable changes to this project will be documented in this file
 
+## [1.0.87](https://github.com/mmiscool/aiCoder/compare/v1.0.86...v1.0.87) (2025-01-04)
+
+### 🤖 Build System
+
+* fix bug in auto generating conversation title. ([6f4ceb6](https://github.com/mmiscool/aiCoder/commit/6f4ceb6bb898597e0c20fc18f48d9f2b2fa74828))
+
 ## [1.0.86](https://github.com/mmiscool/aiCoder/compare/v1.0.85...v1.0.86) (2025-01-04)
 
 ### 🤖 Build System
