@@ -285,8 +285,7 @@ export class ChatManager {
             individualMessageDiv.appendChild(contentDiv);
             if (message.role === 'assistant') {
                 // check if the conversation name starts with "plan"
-
-                if (this.conversationTitleInput.value.startsWith('plan')) {
+                if (this.conversationTitleInput.value.toLowerCase().startsWith('plan')) {
                     const savePlanButton = document.createElement('button');
                     savePlanButton.textContent = '💾 Replace plan';
                     savePlanButton.addEventListener('click', async () => {

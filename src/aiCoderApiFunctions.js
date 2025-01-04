@@ -375,6 +375,10 @@ export class conversation {
         }
     }
     async generateTitle() {
+        // test if current title starts with word plan 
+        let titlePrefix = '';   
+        if (this.title.toLowerCase().startsWith('plan')) titlePrefix = 'Plan: ';
+
         if (this.conversationNew) {
             const prompt = 'Generate a title for the following conversation. Respond with a single short line of text: ';
 
@@ -383,7 +387,7 @@ export class conversation {
                     content: prompt
                 }];
             const llmResponse = await callLLM(tempMessages);
-            const suggestedTitle = llmResponse.trim();
+            const suggestedTitle = titlePrefix + llmResponse.trim();
             this.setTitle(suggestedTitle);
             this.conversationNew = false;
             await this.storeConversation();
