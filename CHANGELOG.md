@@ -3,6 +3,16 @@
 [![semantic versioning](https://img.shields.io/badge/semantic%20versioning-2.0.0-green.svg)](https://semver.org)
 > All notable changes to this project will be documented in this file
 
+## [1.0.84](https://github.com/mmiscool/aiCoder/compare/v1.0.83...v1.0.84) (2025-01-04)
+
+### 📝 Documentation
+
+* update docs to provide instructions for getting granite3.1-dense model for ollama ([0f5d7aa](https://github.com/mmiscool/aiCoder/commit/0f5d7aaec5ab963838e039903092da2c1a5f1a4c))
+
+### 🤖 Build System
+
+* remove leftover NURBS language from default system prompt. ([20ac3ba](https://github.com/mmiscool/aiCoder/commit/20ac3ba134f20f544a315e2f5f7f87e8f1db2822))
+
 ## [1.0.83](https://github.com/mmiscool/aiCoder/compare/v1.0.82...v1.0.83) (2025-01-04)
 
 ### 📝 Documentation
