@@ -1,15 +1,8 @@
 
+import { scrapeToMarkdown } from '@mmiscool/scrape_to_markdown';
+import fs from 'fs';
+import { getListOfFunctions, getMethodsWithArguments, prependClassStructure } from './classListing.js';
 import {
-    applySnippets,
-    intelligentlyMergeSnippets
-} from './mergeTools/mergeTool.js';
-import {
-    getListOfFunctions,
-    getMethodsWithArguments,
-    prependClassStructure
-} from './classListing.js';
-import {
-    deleteDirectory,
     deleteFile,
     getAllFiles,
     moveFile,
@@ -19,13 +12,25 @@ import {
     writeSetting
 } from './fileIO.js';
 import {
+    callLLM,
     llmSettings,
-    llmSettingsUpdate,
-    callLLM
+    llmSettingsUpdate
 } from './llmCall.js';
+import {
+    applySnippets,
+    intelligentlyMergeSnippets
+} from './mergeTools/mergeTool.js';
 import { launchEditor } from './terminalHelpers.js';
-import fs from 'fs';
-import { scrapeToMarkdown } from '@mmiscool/scrape_to_markdown';
+
+
+
+
+
+
+
+
+
+
 export async function setupConfigFiles() {
     //console.log('Setting up default files');
     await moveFile('./.aiCoder/default-plan-prompt.md', './.aiCoder/prompts/default-plan-prompt.md');
@@ -83,15 +88,15 @@ export class aiCoderApiFunctions {
         const webUIConversation = new conversation();
         //console.log('newChat', webUIConversation);
         await webUIConversation.setMode('chat');
-        await webUIConversation.setTitle(`Chat about ${ parsedBody.targetFile }`);
+        await webUIConversation.setTitle(`Chat about ${parsedBody.targetFile}`);
         if (parsedBody.title)
             await webUIConversation.setTitle(parsedBody.title);
         await webUIConversation.setTargetFile(parsedBody.targetFile);
         await webUIConversation.addFileMessage('system', './.aiCoder/prompts/default-system-prompt.md');
         await webUIConversation.addFileMessage('user', './.aiCoder/prompts/default-plan-prompt.md');
-        await webUIConversation.addTargetFileMessage('user', `// file:'${ parsedBody.targetFile }'`);
+        await webUIConversation.addTargetFileMessage('user', `// file:'${parsedBody.targetFile}'`);
         await webUIConversation.addFileMessage('system', './.aiCoder/prompts/snippet-production-prompt.md');
-        await webUIConversation.addMessage('user', `Write the ${ parsedBody.methodName } method in the ${ parsedBody.className } class.`);
+        await webUIConversation.addMessage('user', `Write the ${parsedBody.methodName} method in the ${parsedBody.className} class.`);
         //await webUIConversation.addMessage("user", `The method should ${parsedBody.methodDescription}`);
         await webUIConversation.callLLM();
         // extract the code snippets from the conversation
@@ -114,7 +119,7 @@ export class aiCoderApiFunctions {
         console.log('newChat', webUIConversation);
         console.log('newChat', webUIConversation);
         await webUIConversation.setMode('chat');
-        await webUIConversation.setTitle(`Chat about ${ parsedBody.targetFile }`);
+        await webUIConversation.setTitle(`Chat about ${parsedBody.targetFile}`);
         if (parsedBody.title)
             await webUIConversation.setTitle(parsedBody.title);
         await webUIConversation.setTargetFile(parsedBody.targetFile);
@@ -237,13 +242,13 @@ export class conversation {
         if (id) {
             this.id = id;
         } else
-            //this.loadConversation(id);
-            //console.log('loaded conversation', this);
-            {
-                //generate a unique id for the conversation based on the current time in the format
-                // of yyyy-mm-dd-hh-mm-ss
-                this.id = new Date().toISOString().replace(/[-:.]/g, '').replace('T', '_').split('.')[0];
-            }
+        //this.loadConversation(id);
+        //console.log('loaded conversation', this);
+        {
+            //generate a unique id for the conversation based on the current time in the format
+            // of yyyy-mm-dd-hh-mm-ss
+            this.id = new Date().toISOString().replace(/[-:.]/g, '').replace('T', '_').split('.')[0];
+        }
     }
     async setMode(mode) {
         this.chatMode = mode;
@@ -264,8 +269,8 @@ export class conversation {
             // Check if the first line is a URL
             if (firstLine.startsWith('https://') || firstLine.startsWith('http://')) {
                 //const scrapedContent = await scrapeToMarkdown(firstLine);
-                const markdownLink = `[${ firstLine }](${ firstLine })`;
-                const scrapedContent = `${ markdownLink }\n\n${ await scrapeToMarkdown(firstLine) }`;
+                const markdownLink = `[${firstLine}](${firstLine})`;
+                const scrapedContent = `${markdownLink}\n\n${await scrapeToMarkdown(firstLine)}`;
                 await this.messages.push({
                     role,
                     content: scrapedContent
@@ -345,14 +350,14 @@ export class conversation {
             lastModified: new Date().toISOString()
         };
         const conversationJSON = await JSON.stringify(conversationObject, null, 2);
-        const filePath = `./.aiCoder/conversations/${ id }.json`;
+        const filePath = `./.aiCoder/conversations/${id}.json`;
         await writeFile(filePath, conversationJSON);
         return { success: true };
     }
     async loadConversation(id = this.id) {
         this.id = id;
         // load the conversation from a file  
-        const filePath = `./.aiCoder/conversations/${ id }.json`;
+        const filePath = `./.aiCoder/conversations/${id}.json`;
         try {
             const conversationJSON = await readFile(filePath);
             const conversationObject = await JSON.parse(conversationJSON);
@@ -369,23 +374,23 @@ export class conversation {
         }
     }
     async deleteConversation() {
-        const filePath = `./.aiCoder/conversations/${ this.id }.json`;
+        const filePath = `./.aiCoder/conversations/${this.id}.json`;
         if (fs.existsSync(filePath)) {
             await fs.unlinkSync(filePath);
         }
     }
     async generateTitle() {
         // test if current title starts with word plan 
-        let titlePrefix = '';   
+        let titlePrefix = '';
         if (this.title.toLowerCase().startsWith('plan')) titlePrefix = 'Plan: ';
 
         if (this.conversationNew) {
             const prompt = 'Generate a title for the following conversation. Respond with a single short line of text: ';
 
-            const tempMessages = [...this.messages,{
-                    role: 'user',
-                    content: prompt
-                }];
+            const tempMessages = [...this.messages, {
+                role: 'user',
+                content: prompt
+            }];
             const llmResponse = await callLLM(tempMessages);
             const suggestedTitle = titlePrefix + llmResponse.trim();
             this.setTitle(suggestedTitle);
@@ -408,7 +413,7 @@ export async function listConversations() {
     const conversationFiles = fs.readdirSync(conversationFolder);
     const conversationIds = [];
     for (const file of conversationFiles) {
-        const filePath = `${ conversationFolder }/${ file }`;
+        const filePath = `${conversationFolder}/${file}`;
         const conversationJSON = await readFile(filePath);
         const conversationObject = JSON.parse(conversationJSON);
         conversationIds.push({

@@ -1,0 +1,261 @@
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #121212;
+    color: #f1f1f1;
+    margin: 0;
+    padding: 0;
+    scroll-behavior: smooth;
+    transition-duration: 1s;
+}
+
+.background {
+    z-index: -1;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: rgb(2, 0, 36);
+    background: linear-gradient(165deg, rgb(71, 3, 54) 0%, rgba(0, 0, 0, 1) 25%, rgba(0, 0, 0, 1) 70%, rgba(0, 212, 255, 0.8297443977591037));
+}
+
+header {
+    background: #1f1f1f;
+    padding: 20px;
+    text-align: center;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+}
+
+header h1 {
+    margin: 0;
+    font-size: 2.5em;
+    color: #00d1b2;
+}
+
+header nav a {
+    color: #f1f1f1;
+    text-decoration: none;
+    margin: 0 15px;
+    font-size: 1.1em;
+    transition: color 0.3s;
+}
+
+header nav a:hover {
+    color: #00d1b2;
+}
+
+.button-group {
+    display: flex;
+    justify-content: center;
+}
+
+
+section {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    padding: 40px 20px;
+    /* rounded corners */
+    border-radius: 8px;
+}
+
+section:nth-child(even) {
+    background: #1f1f1f77;
+}
+
+section:nth-child(odd) {
+    /*background: #121212;*/
+}
+
+section h2 {
+    font-size: 2em;
+    margin-bottom: 15px;
+    color: #00d1b2;
+}
+
+section p,
+section ul li {
+    color: white;
+    line-height: 1.8;
+    margin-bottom: 10px;
+}
+
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: auto;
+}
+
+.content {
+    flex: 1;
+    padding: 20px;
+    min-width: 300px;
+}
+
+.image-container {
+    flex: 1;
+    text-align: center;
+    margin: 20px;
+    box-sizing: border-box;
+    filter: drop-shadow(16px 16px rgba(0, 0, 0, 0.509));
+}
+
+.image-container img {
+    max-width: 100%;
+    border-radius: 8px;
+}
+
+.cta {
+    text-align: center;
+    color: #121212;
+    padding: 50px 20px;
+    border-radius: 8px;
+}
+
+.cta a {
+    background: #181818da;
+    color: #00d1b2;
+    padding: 12px 24px;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+    transition: background 0.3s, color 0.3s;
+    /* prevent text wrapping */
+    white-space: nowrap;
+    margin: 5px
+}
+
+.cta a:hover {
+    background: #00d1b2;
+    color: #121212;
+}
+
+
+#mergeButton {
+    background: #064448;
+    color: #00d1b2;
+    padding: 12px 24px;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+    transition: background 0.3s, color 0.3s;
+    /* prevent text wrapping */
+    white-space: nowrap;
+    margin: 5px;
+    width: 100%;
+    height: 50px;
+    text-align: center;
+
+    margin-left: 20%;
+    margin-right: 20%;
+
+}
+
+#mergeButton:hover {
+    background: #00d1b2;
+    color: #121212;
+}
+
+footer {
+    text-align: center;
+    padding: 20px;
+    background: #1f1f1f;
+    color: #777;
+}
+
+footer a {
+    color: #00d1b2;
+    text-decoration: none;
+}
+
+textarea {
+    background-color: rgb(0, 0, 0);
+    border-radius: 5px;
+    border-color: #00d1b2;
+    border-width: 3px;
+
+    justify-content: center;
+    padding: 10px;
+    height: 70px;
+    padding-right: 40px;
+    width: 250px;
+    overflow: hidden;
+    box-sizing: border-box;
+    color: #00d1b2;
+
+}
+
+button {
+    background-color: rgb(0, 0, 0);
+    border-radius: 5px;
+    border-color: #00d1b2;
+    border-width: 3px;
+    margin: 0px -30px;
+
+
+    box-sizing: border-box;
+}
+
+code {
+    background-color: black;
+    color: yellow;
+    padding: 5px;
+    border-radius: 5px;
+    /* preformatted text */
+    white-space: pre;
+}
+
+
+.github-corner {
+    z-index: 100000;
+    position: fixed;
+    right: 0px;
+    top: 0px;
+}
+
+.github-corner:hover .octo-arm {
+    animation: octocat-wave 560ms ease-in-out
+}
+
+@keyframes octocat-wave {
+
+    0%,
+    100% {
+        transform: rotate(0)
+    }
+
+    20%,
+    60% {
+        transform: rotate(-25deg)
+    }
+
+    40%,
+    80% {
+        transform: rotate(10deg)
+    }
+}
+
+@media (max-width:500px) {
+    .github-corner:hover .octo-arm {
+        animation: none
+    }
+
+    .github-corner .octo-arm {
+        animation: octocat-wave 560ms ease-in-out
+    }
+}
+
+
+.codeTextArea {
+    background-color: black;
+    color: yellow;
+    padding: 5px;
+    border-radius: 5px;
+    /* preformatted text */
+    white-space: pre;
+    width: 100%;
+    height: 350px;
+}
