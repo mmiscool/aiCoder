@@ -1,17 +1,16 @@
-import { OpenAI } from "openai";
+import Anthropic from '@anthropic-ai/sdk';
+import { spawn } from 'child_process';
+import cliProgress from 'cli-progress';
 import Groq from "groq-sdk";
 import ollama from 'ollama';
-import { readFile, readSetting, writeSetting } from "./fileIO.js"
+import { OpenAI } from "openai";
+import { readFile, readSetting, writeSetting } from "./fileIO.js";
 import {
     clearTerminal,
     printAndPause,
     printToTerminal,
     readArg,
 } from "./terminalHelpers.js";
-import Anthropic from '@anthropic-ai/sdk';
-import cliProgress from 'cli-progress';
-import { spawn } from 'child_process';
-import { get } from "http";
 
 
 
