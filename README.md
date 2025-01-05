@@ -66,7 +66,6 @@ You can find and install additional models to test with
 https://ollama.com/search
 
 
-
 ## Usage
 Launch `aiCoder` from within your project folder:
 ```
