@@ -3,6 +3,16 @@
 [![semantic versioning](https://img.shields.io/badge/semantic%20versioning-2.0.0-green.svg)](https://semver.org)
 > All notable changes to this project will be documented in this file
 
+## [1.0.89](https://github.com/mmiscool/aiCoder/compare/v1.0.88...v1.0.89) (2025-01-05)
+
+### 📝 Documentation
+
+* Update landing page ([aa3e37e](https://github.com/mmiscool/aiCoder/commit/aa3e37e0363484731a610233c0b20e5366acc07f))
+
+### 🤖 Build System
+
+* Update docs to reference CDN image links to show up in NPM readme. ([0515ad7](https://github.com/mmiscool/aiCoder/commit/0515ad7a0994f480f4e57c9ee32fbb0a15c04eb6))
+
 ## [1.0.88](https://github.com/mmiscool/aiCoder/compare/v1.0.87...v1.0.88) (2025-01-04)
 
 ### 🤖 Build System
