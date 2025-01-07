@@ -3,6 +3,17 @@
 [![semantic versioning](https://img.shields.io/badge/semantic%20versioning-2.0.0-green.svg)](https://semver.org)
 > All notable changes to this project will be documented in this file
 
+## [1.0.90](https://github.com/mmiscool/aiCoder/compare/v1.0.89...v1.0.90) (2025-01-07)
+
+### 📝 Documentation
+
+* trigger cloudflare pages rebuild. ([8f33d48](https://github.com/mmiscool/aiCoder/commit/8f33d489593d7c4ada7f2c15627169d71e0eb237))
+* trigger cloudflare website redeployment. ([49c12cc](https://github.com/mmiscool/aiCoder/commit/49c12cc1245a997d735a2c1aae73887b4fc65ea1))
+
+### 🤖 Build System
+
+* added support for LLM editing CSS files. ([60f586f](https://github.com/mmiscool/aiCoder/commit/60f586f179647065e6742b9c8e579bcaa1914820))
+
 ## [1.0.89](https://github.com/mmiscool/aiCoder/compare/v1.0.88...v1.0.89) (2025-01-05)
 
 ### 📝 Documentation
