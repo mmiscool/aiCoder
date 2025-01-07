@@ -42,6 +42,7 @@ async function buildFrontend() {
 
         // Execute Parcel build command
         const buildCommand = `npx parcel build ./public/index.html --no-optimize`;
+        //const buildCommand = `npx parcel watch ./public/index.html `;
         //console.log(`Running command: ${buildCommand} in ${scriptPath}`);
         execSync(buildCommand, { cwd: scriptPath, stdio: 'inherit' });
 

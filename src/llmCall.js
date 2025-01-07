@@ -66,10 +66,10 @@ export async function callLLM(messages) {
     for (let i = 0; i < messages.length; i++) {
         if (messages[i].filePath) {
             console.log('file type message description:', messages[i].description);
-            messages[i].content = messages[i].description + "\n\n" + await readFile(messages[i].filePath);
+            messages[i].content = `<code-snippet-xml fileName="${messages[i].filePath}">${await readFile(messages[i].filePath)}</code-snippet-xml>`;
         }
     }
-    console.log('messages:', messages);
+    //console.log('messages:', messages);
 
 
     let response = '';
@@ -94,11 +94,11 @@ export async function callLLM(messages) {
     }
 
     // for each message in the array, check if it is a file path and if it is delete the content from the messages array
-    for (let i = 0; i < messages.length; i++) {
-        if (messages[i].filePath) {
-            messages[i].content = messages[i].filePath;
-        }
-    }
+    // for (let i = 0; i < messages.length; i++) {
+    //     if (messages[i].filePath) {
+    //         messages[i].content = messages[i].filePath;
+    //     }
+    // }
 
     lastCallTime = await new Date().getTime();
     return response;
@@ -489,6 +489,15 @@ async function getGoogleAIResponse(messages) {
     }
     // clear the console
     //clearTerminal();
+
+    // remove the first and last line from the response text
+    responseText = responseText.trim();
+    // check if the response starts with ```
+    if (responseText.startsWith('```')) {
+        responseText = responseText.replace(/.*\n/, '');
+        responseText = responseText.replace(/\n.*$/, '');
+    }
+
     return responseText;
 
 }
@@ -501,6 +510,6 @@ async function getGoogleAIModels() {
         "gemini-1.5-pro",
         "gemini-1.5-flash-8b",
         "gemini-2.0-flash-exp",
-        
+
     ]
 }

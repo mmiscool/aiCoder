@@ -1,12 +1,13 @@
 
 import { doAjax } from './doAjax.js';
-import { MarkdownToHtml } from './MarkdownToHtml.js';
 import { makeElement } from './domElementFactory.js';
+import './customElements/elements/code-snippet-xml.js';
 import {
     choseFile,
     fileDialog
 } from './fileDialog.js';
 import { auto } from 'groq-sdk/_shims/registry.mjs';
+import { escapeCodeSnippetContent } from './customElements/xmlHelpers.js';
 let ctx = {};
 export class ChatManager {
     constructor(container, app_ctx) {
@@ -257,32 +258,56 @@ export class ChatManager {
         await this.setTargetFile(response.targetFile);
         this.conversationTitleInput.value = response.title;
         this.chatMessageDiv.innerHTML = '';
+
+
         response.messages.forEach(async message => {
             const individualMessageDiv = document.createElement('div');
             individualMessageDiv.style.border = '1px solid black';
             individualMessageDiv.style.padding = '10px';
             individualMessageDiv.style.marginBottom = '10px';
             if (message.hidden) individualMessageDiv.style.display = 'none';
+            individualMessageDiv.style.marginRight = '-10px';
+            individualMessageDiv.style.marginLeft = '10px';
+
+            // set a custom attribute to store the conversation ID
+            individualMessageDiv.setAttribute('conversationID', conversationId);
+
+            let messageRoleString = message.role;
+
             if (message.role === 'user') {
                 individualMessageDiv.style.backgroundColor = 'rgba(0, 0, 255, 0.2)';
+                // position 10px from the right
+                individualMessageDiv.style.marginRight = '10px';
+                individualMessageDiv.style.marginLeft = '-10px';
+                // add unicode human profile  emoji
+                messageRoleString = '👤 ' + messageRoleString;
             }
             if (message.role === 'system') {
                 individualMessageDiv.style.backgroundColor = 'rgba(255, 0, 0, 0.1)';
+                messageRoleString = '🤖 ' + messageRoleString;
             }
             if (message.role === 'assistant') {
                 individualMessageDiv.style.backgroundColor = 'rgba(0, 255, 0, 0.2)';
+                messageRoleString = '🤖 ' + messageRoleString;
+
             }
             const roleDiv = document.createElement('div');
-            roleDiv.textContent = message.role;
+            roleDiv.textContent = messageRoleString;
             roleDiv.style.fontWeight = 'bold';
+            // set text color to white
+            roleDiv.style.color = 'white';
             individualMessageDiv.appendChild(roleDiv);
             const contentDiv = document.createElement('div');
-            const markdown = await new MarkdownToHtml(contentDiv, message.content);
-            if (contentDiv.innerHTML === '') {
-                contentDiv.textContent = message.content;
-                contentDiv.style.whiteSpace = 'pre-wrap';
-            }
+
+            //console.log('message', message.content);
+            contentDiv.innerHTML = await escapeCodeSnippetContent(message.content);
+
+
             individualMessageDiv.appendChild(contentDiv);
+            // collect all elements of type <code-snippet-xml>
+            const codeSnippetElements = individualMessageDiv.querySelectorAll('code-snippet-xml');
+
+
             if (message.role === 'assistant') {
                 // check if the conversation name starts with "plan"
                 if (this.conversationTitleInput.value.toLowerCase().startsWith('plan')) {
@@ -301,37 +326,6 @@ export class ChatManager {
                         });
                     });
                     individualMessageDiv.appendChild(appendPlanButton);
-                }
-
-                // check if this message contains a <h2> element with the inner text of "ACTION LIST"
-                const actionListHeader = contentDiv.querySelector('h2');
-                if (actionListHeader && actionListHeader.innerHTML.startsWith("ACTION LIST")) {
-                    const actionListItems = contentDiv.querySelectorAll('p');
-                    actionListItems.forEach(async actionListItem => {
-                        const newButtonElement = await changeTagName(actionListItem, 'button');
-
-                        const actionText = newButtonElement.textContent;
-
-                        const actionString = `Perform action ${actionText}`;
-                        newButtonElement.title = actionString;
-                        newButtonElement.addEventListener('click', async () => {
-                            await this.setInput(actionString);
-                            await this.submitButtonHandler();
-                        });
-
-                        // set the tooltip to the action text
-                        
-
-                        newButtonElement.style.width = '100%';
-                        newButtonElement.style.margin = '5px';
-                        newButtonElement.style.padding = '5px';
-                        // make text in button justify left
-                        newButtonElement.style.textAlign = 'left';
-                        
-                        // change the actionItem to a button
-                        
-                    });
-
                 }
             }
             if (message.role === 'user') {
@@ -362,22 +356,16 @@ export class ChatManager {
             this.chatMessageDiv.appendChild(individualMessageDiv);
             this.submitButton.scrollIntoView();
             if (response.messages.indexOf(message) === response.messages.length - 1) {
-                individualMessageDiv.scrollIntoView();
                 if (message.role === 'assistant' && this.autoApplyMode) {
-                    if (markdown.codeBlocks.length > 0) {
-                        for (const codeBlock of markdown.codeBlocks) {
-                            const applyCodeBlock = await confirm('Apply code block?', ctx.autoApplyTimeout, true);
-                            if (applyCodeBlock) {
-                                await this.applySnippet(codeBlock);
-                                await ctx.tabs.switchToTab('Tools');
-                                await ctx.tools.displayListOfStubsAndMethods();
-                            }
-                        }
-                    }
+                    console.log("This is the message div", individualMessageDiv);
+                    codeSnippetElements.forEach(async codeSnippetElement => {
+                        
+                        await codeSnippetElement.applySnippet();
+                    });
+
                 }
             }
         });
-        await this.addCodeToolbars();
     }
     //await ctx.tools.displayListOfStubsAndMethods();
     async displayPremadePromptsList(newConversation = false) {
@@ -508,97 +496,16 @@ export class ChatManager {
         await this.loadConversation(conversationId);
     }
     // Fix method call
-    async addCodeToolbars() {
-        // Query all <code> elements on the page
-        let codeElements = [];
-        // querySelector for all elements of type <code>
-        if (this.chatMode === 'plan')
-            codeElements = await document.getElementsByTagName('code');
-        if (this.chatMode === 'chat') {
-            codeElements = await document.getElementsByTagName('code');
-            // filter out the code elements that are a single line
-            codeElements = Array.from(codeElements).filter(codeElement => {
-                return codeElement.textContent.split('\n').length > 1;
-            });
-        }
-        codeElements = Array.from(codeElements);
-        console.log('codeElements', codeElements);
-        if (codeElements.length === 0)
-            return;
-        codeElements.forEach(codeElement => {
-            console.log('codeElement', codeElement);
-            // Create a wrapper to hold the code and toolbar
-            const wrapper = document.createElement('div');
-            wrapper.style.position = 'relative';
-            wrapper.style.display = 'inline-block';
-            // Preserve inline flow of <code> elements
-            // Create the toolbar div
-            const toolbar = document.createElement('div');
-            toolbar.style.position = 'absolute';
-            toolbar.style.top = '0px';
-            toolbar.style.left = '0px';
-            toolbar.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-            toolbar.style.color = 'white';
-            toolbar.style.padding = '2px';
-            toolbar.style.borderRadius = '4px';
-            toolbar.style.zIndex = '10';
-            toolbar.style.display = 'flex';
-            toolbar.style.gap = '3px';
-            const buttonStyles = {
-                cursor: 'pointer',
-                background: 'none',
-                border: '1px solid white',
-                color: 'white',
-                padding: '2px 5px',
-                borderRadius: '3px'
-            };
-            //console.log('this.chatMode', this.chatMode);
-            //console.log("should be making buttons");
-            const copyButton = document.createElement('button');
-            copyButton.textContent = '📋';
-            copyButton.title = 'Copy code to clipboard';
-            Object.assign(copyButton.style, buttonStyles);
-            copyButton.addEventListener('click', () => {
-                navigator.clipboard.writeText(codeElement.textContent);
-            });
-            //alert('Code copied to clipboard!');
-            toolbar.appendChild(copyButton);
-            const editButton = document.createElement('button');
-            editButton.textContent = '🤖✎⚡';
-            editButton.title = 'Apply snippet';
-            Object.assign(editButton.style, buttonStyles);
-            editButton.addEventListener('click', async () => {
-                codeElement.style.color = 'red';
-                const codeString = codeElement.textContent;
-                await this.applySnippet(codeString);
-                codeElement.style.color = 'cyan';
-                ctx.tools.displayListOfStubsAndMethods();
-            });
-            toolbar.appendChild(editButton);
-            // Wrap the <code> element with the wrapper
-            const parent = codeElement.parentNode;
-            parent.insertBefore(wrapper, codeElement);
-            wrapper.appendChild(codeElement);
-            // Append the toolbar to the wrapper
-            wrapper.appendChild(toolbar);
-        });
-    }
     async applySnippet(codeString) {
         const conversationId = this.conversationPicker.value;
         const isCodeGood = await doAjax('./applySnippet', {
+            id: conversationId,
             snippet: codeString,
             targetFile: this.targetFileInput.value
         });
         if (!isCodeGood.success) {
             await alert('Merge failed. Please resolve the conflict manually.', 3);
-            // set the user input to say that the snippet was formatted incorrectly 
-            // and needs to be corrected. 
-            await this.setInput(`The last snippet was formatted incorrectly and needs to be corrected. 
-                Remember that methods must be encapsulated in a class.`);
-            if (this.autoApplyMode) {
-                await this.addMessage(this.userInput.value);
-                await this.callLLM();
-            }
+            await this.callLLM();
         }
         return isCodeGood;
     }
@@ -631,3 +538,7 @@ function changeTagName(element, newTagName) {
 
     return newElement;
 }
+
+
+
+

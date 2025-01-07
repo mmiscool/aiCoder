@@ -199,7 +199,7 @@ Embark on your journey with aiCoder today, and experience a whole new world of c
 5. **Is it linux only or can I use it on windows?**
    - Windows support was recently added and is still experimental.
 5. **Can I help?**
-   - Sure. If folks are interested we can set up a discord server. If you are knowledgeable about how LSPs and ASTs work it would be really great to chat. 
+   - Sure. If folks are interested we can chat on [discord.](https://discord.gg/KuZZs2er49) If you are knowledgeable about how LSPs and ASTs work it would be really great to chat. 
 
 ## Related projects
  - A python implementation of a similar AI assisted coding tool with AST merging of LLM snippets. [NVR-Editor](https://github.com/Nissyyy04/NVR-Editor)

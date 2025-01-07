@@ -33,11 +33,11 @@ import { launchEditor } from './terminalHelpers.js';
 
 export async function setupConfigFiles() {
     //console.log('Setting up default files');
-    await moveFile('./.aiCoder/default-plan-prompt.md', './.aiCoder/prompts/default-plan-prompt.md');
-    await moveFile('./.aiCoder/default-system-prompt.md', './.aiCoder/prompts/default-system-prompt.md');
-    await moveFile('./.aiCoder/snippet-production-prompt.md', './.aiCoder/prompts/snippet-production-prompt.md');
-    await moveFile('./.aiCoder/snippet-validation-prompt.md', './.aiCoder/prompts/snippet-validation-prompt.md');
-    await moveFile('./.aiCoder/plan-edit-prompt.md', './.aiCoder/prompts/plan-edit-prompt.md');
+    await moveFile('./.aiCoder/default-plan-prompt.xml', './.aiCoder/prompts/default-plan-prompt.xml');
+    await moveFile('./.aiCoder/default-system-prompt.xml', './.aiCoder/prompts/default-system-prompt.xml');
+    await moveFile('./.aiCoder/snippet-production-prompt.xml', './.aiCoder/prompts/snippet-production-prompt.xml');
+    await moveFile('./.aiCoder/snippet-validation-prompt.xml', './.aiCoder/prompts/snippet-validation-prompt.xml');
+    await moveFile('./.aiCoder/plan-edit-prompt.xml', './.aiCoder/prompts/plan-edit-prompt.xml');
     await moveFile('./.aiCoder/customPrompts.json', './.aiCoder/prompts/customPrompts.json');
     // move the llm api keys and models to the llmConfig folder
     await moveFile('./.aiCoder/openai-api-key.txt', './.aiCoder/llmConfig/openai-api-key.txt');
@@ -49,11 +49,11 @@ export async function setupConfigFiles() {
     await moveFile('./.aiCoder/anthropic-api-key.txt', './.aiCoder/llmConfig/anthropic-api-key.txt');
     await moveFile('./.aiCoder/anthropic-model.txt', './.aiCoder/llmConfig/anthropic-model.txt');
     await moveFile('./.aiCoder/ai-service.txt', './.aiCoder/llmConfig/ai-service.txt');
-    await readSetting('prompts/default-plan-prompt.md');
-    await readSetting('prompts/default-system-prompt.md');
-    await readSetting('prompts/snippet-production-prompt.md');
-    await readSetting('prompts/snippet-validation-prompt.md');
-    await readSetting('prompts/plan-edit-prompt.md');
+    await readSetting('prompts/default-plan-prompt.xml');
+    await readSetting('prompts/default-system-prompt.xml');
+    await readSetting('prompts/snippet-production-prompt.xml');
+    await readSetting('prompts/snippet-validation-prompt.xml');
+    await readSetting('prompts/plan-edit-prompt.xml');
     await readSetting('prompts/customPrompts.json');
 }
 setupConfigFiles();
@@ -92,10 +92,10 @@ export class aiCoderApiFunctions {
         if (parsedBody.title)
             await webUIConversation.setTitle(parsedBody.title);
         await webUIConversation.setTargetFile(parsedBody.targetFile);
-        await webUIConversation.addFileMessage('system', './.aiCoder/prompts/default-system-prompt.md');
-        await webUIConversation.addFileMessage('user', './.aiCoder/prompts/default-plan-prompt.md');
+        await webUIConversation.addFileMessage('system', './.aiCoder/prompts/default-system-prompt.xml');
+        await webUIConversation.addFileMessage('user', './.aiCoder/prompts/default-plan-prompt.xml');
         await webUIConversation.addTargetFileMessage('user', `// file:'${parsedBody.targetFile}'`);
-        await webUIConversation.addFileMessage('system', './.aiCoder/prompts/snippet-production-prompt.md');
+        await webUIConversation.addFileMessage('system', './.aiCoder/prompts/snippet-production-prompt.xml');
         await webUIConversation.addMessage('user', `Write the ${parsedBody.methodName} method in the ${parsedBody.className} class.`);
         //await webUIConversation.addMessage("user", `The method should ${parsedBody.methodDescription}`);
         await webUIConversation.callLLM();
@@ -123,10 +123,10 @@ export class aiCoderApiFunctions {
         if (parsedBody.title)
             await webUIConversation.setTitle(parsedBody.title);
         await webUIConversation.setTargetFile(parsedBody.targetFile);
-        await webUIConversation.addFileMessage('system', './.aiCoder/prompts/default-system-prompt.md');
-        await webUIConversation.addFileMessage('user', './.aiCoder/prompts/default-plan-prompt.md');
+        await webUIConversation.addFileMessage('system', './.aiCoder/prompts/default-system-prompt.xml');
+        await webUIConversation.addFileMessage('user', './.aiCoder/prompts/default-plan-prompt.xml');
         await webUIConversation.addTargetFileMessage('user', '// Code file to be edited');
-        await webUIConversation.addFileMessage('system', './.aiCoder/prompts/snippet-production-prompt.md');
+        await webUIConversation.addFileMessage('system', './.aiCoder/prompts/snippet-production-prompt.xml');
         return {
             id: webUIConversation.id,
             targetFile: webUIConversation.targetFile
@@ -136,8 +136,8 @@ export class aiCoderApiFunctions {
         const webUIConversation = new conversation();
         await webUIConversation.setMode('plan');
         await webUIConversation.setTitle(`Plan Chat`);
-        await webUIConversation.addFileMessage('system', './.aiCoder/prompts/plan-edit-prompt.md');
-        await webUIConversation.addFileMessage('user', './.aiCoder/prompts/default-plan-prompt.md', 'Plan to be edited:');
+        await webUIConversation.addFileMessage('system', './.aiCoder/prompts/plan-edit-prompt.xml');
+        await webUIConversation.addFileMessage('user', './.aiCoder/prompts/default-plan-prompt.xml', 'Plan to be edited:');
         return {
             id: webUIConversation.id,
             targetFile: webUIConversation.targetFile
@@ -158,8 +158,25 @@ export class aiCoderApiFunctions {
             const mergeResult = await applySnippets(parsedBody.targetFile, [parsedBody.snippet]);
             return { success: mergeResult };
         } catch (e) {
-            //console.log('Error applying snippet:', e);
-            return { error: e };
+            if (parsedBody.id) {
+                //console.log('Error applying snippet:', e);
+                await this.addMessage({
+                    id: parsedBody.id,
+                    message: {
+                        role: "assistant", content: `
+<instruction>
+<problem>Error applying snippet</problem>
+<errorMessage>${e}</errorMessage>
+<codeSnippet>${parsedBody.snippet}</codeSnippet>
+</instruction>`}
+                });
+
+                return { error: e };
+            }else{
+                return { error: e };
+            }
+
+
         }
     }
     async getMethodsList(parsedBody) {
@@ -178,23 +195,23 @@ export class aiCoderApiFunctions {
     }
     async getSystemPrompts() {
         return {
-            default_plan_prompt: await readSetting('prompts/default-plan-prompt.md'),
-            default_system_prompt: await readSetting('prompts/default-system-prompt.md'),
-            snippet_production_prompt: await readSetting('prompts/snippet-production-prompt.md')
+            default_plan_prompt: await readSetting('prompts/default-plan-prompt.xml'),
+            default_system_prompt: await readSetting('prompts/default-system-prompt.xml'),
+            snippet_production_prompt: await readSetting('prompts/snippet-production-prompt.xml')
         };
     }
     async updateSystemPrompts(parsedBody) {
-        await writeSetting('prompts/default-plan-prompt.md', parsedBody.default_plan_prompt);
-        await writeSetting('prompts/default-system-prompt.md', parsedBody.default_system_prompt);
-        await writeSetting('prompts/snippet-production-prompt.md', parsedBody.snippet_production_prompt);
+        await writeSetting('prompts/default-plan-prompt.xml', parsedBody.default_plan_prompt);
+        await writeSetting('prompts/default-system-prompt.xml', parsedBody.default_system_prompt);
+        await writeSetting('prompts/snippet-production-prompt.xml', parsedBody.snippet_production_prompt);
         return { success: true };
     }
     async savePlan(parsedBody) {
         if (parsedBody.append) {
-            const currentPlan = await readSetting('prompts/default-plan-prompt.md');
-            await writeSetting('prompts/default-plan-prompt.md', currentPlan + '\n' + parsedBody.plan);
+            const currentPlan = await readSetting('prompts/default-plan-prompt.xml');
+            await writeSetting('prompts/default-plan-prompt.xml', currentPlan + '\n' + parsedBody.plan);
         } else {
-            await writeSetting('prompts/default-plan-prompt.md', parsedBody.plan);
+            await writeSetting('prompts/default-plan-prompt.xml', parsedBody.plan);
         }
         return { success: true };
     }
@@ -223,10 +240,10 @@ export class aiCoderApiFunctions {
         return { success: true };
     }
     async resetSystemPrompts() {
-        await deleteFile('./.aiCoder/prompts/default-system-prompt.md');
-        await deleteFile('./.aiCoder/prompts/snippet-production-prompt.md');
-        await deleteFile('./.aiCoder/prompts/snippet-validation-prompt.md');
-        await deleteFile('./.aiCoder/prompts/plan-edit-prompt.md');
+        await deleteFile('./.aiCoder/prompts/default-system-prompt.xml');
+        await deleteFile('./.aiCoder/prompts/snippet-production-prompt.xml');
+        await deleteFile('./.aiCoder/prompts/snippet-validation-prompt.xml');
+        await deleteFile('./.aiCoder/prompts/plan-edit-prompt.xml');
         await deleteFile('./.aiCoder/prompts/customPrompts.json');
         await setupConfigFiles();
         return { success: true };

@@ -476,7 +476,8 @@ export class javascriptManipulator {
                 compact: false,
                 parentheses: true,
                 semicolons: true,
-                safeConcatenation: true
+                safeConcatenation: true,
+                preserveBlankLines: true,
             }
         });
         //debugLog(`this is the new code: ${newCode}`);
