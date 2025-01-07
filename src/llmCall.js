@@ -105,76 +105,63 @@ export async function callLLM(messages) {
 }
 
 
+const llmServices = ['ollama', 'openai', 'groq', 'anthropic', 'googleAI'];
 
 export async function llmSettings() {
-    // pull the current settings from the files
-    // pull the available models from each service
-
     const currentService = await readSetting(`llmConfig/ai-service.txt`);
 
-    const settingsObject = {
-        ollama: {
-            model: await readSetting(`llmConfig/ollama-model.txt`),
-            apiKey: await readSetting(`llmConfig/ollama-api-key.txt`),
-            models: await getOllamaModels(),
-            active: currentService === 'ollama',
-        },
-        openai: {
-            model: await readSetting(`llmConfig/openai-model.txt`),
-            apiKey: await readSetting(`llmConfig/openai-api-key.txt`),
-            models: await getOpenAIModels(),
-            active: currentService === 'openai',
-        },
-        groq: {
-            model: await readSetting(`llmConfig/groq-model.txt`),
-            apiKey: await readSetting(`llmConfig/groq-api-key.txt`),
-            models: await getGroqModels(),
-            active: currentService === 'groq',
-        },
+    try {
+        let settingsObject = {};
 
-        anthropic: {
-            model: await readSetting(`llmConfig/anthropic-model.txt`),
-            apiKey: await readSetting(`llmConfig/anthropic-api-key.txt`),
-            models: await getClaudeModels(),
-            active: currentService === 'anthropic',
-        },
+        for (let service of llmServices) {
+            const settings = {
+                model: await readSetting(`llmConfig/${service}-model.txt`),
+                apiKey: await readSetting(`llmConfig/${service}-api-key.txt`),
+                models: await getModels(service),
+                active: currentService === service,
+            }
+            settingsObject[service] = settings;
+        }
 
-        googleAI: {
-            model: await readSetting(`llmConfig/googleAI-model.txt`),
-            apiKey: await readSetting(`llmConfig/googleAI-api-key.txt`),
-            models: await getGoogleAIModels(),
-            active: currentService === 'googleAI',
-        },
-
+        return settingsObject;
+    } catch (error) { 
+        console.error('Error fetching settings:', error);
+        throw new Error('Error fetching settings:', error);
     }
 
-    return settingsObject;
+
     // return an object with the settings and options
+}
+
+async function getModels(service) {
+    if (service === 'ollama') {
+        return getOllamaModels();
+    } else if (service === 'openai') {
+        return getOpenAIModels();
+    } else if (service === 'groq') {
+        return getGroqModels();
+    } else if (service === 'anthropic') {
+        return getClaudeModels();
+    } else if (service === 'googleAI') {
+        return getGoogleAIModels();
+    }
+    return [];
 }
 
 export async function llmSettingsUpdate(settings) {
     // write the new settings to the files
-    await writeSetting(`llmConfig/ollama-model.txt`, settings.ollama.model);
-    await writeSetting(`llmConfig/ollama-api-key.txt`, settings.ollama.apiKey);
 
-    await writeSetting(`llmConfig/openai-model.txt`, settings.openai.model);
-    await writeSetting(`llmConfig/openai-api-key.txt`, settings.openai.apiKey);
+    // array of llm services
 
-    await writeSetting(`llmConfig/groq-model.txt`, settings.groq.model);
-    await writeSetting(`llmConfig/groq-api-key.txt`, settings.groq.apiKey);
 
-    await writeSetting(`llmConfig/anthropic-model.txt`, settings.anthropic.model);
-    await writeSetting(`llmConfig/anthropic-api-key.txt`, settings.anthropic.apiKey);
-
-    await writeSetting(`llmConfig/googleAI-model.txt`, settings.googleAI.model);
-    await writeSetting(`llmConfig/googleAI-api-key.txt`, settings.googleAI.apiKey);
-
-    await writeSetting(`llmConfig/ai-service.txt`,
-        settings.openai.active ? 'openai' :
-            settings.groq.active ? 'groq' :
-                settings.ollama.active ? 'ollama' :
-                    settings.anthropic.active ? 'anthropic' :
-                        settings.googleAI.active ? 'googleAI' : '');
+    for (let i = 0; i < llmServices.length; i++) {
+        const service = llmServices[i];
+        await writeSetting(`llmConfig/${service}-model.txt`, settings[service].model);
+        await writeSetting(`llmConfig/${service}-api-key.txt`, settings[service].apiKey);
+        if (settings[service].active) {
+            await writeSetting(`llmConfig/ai-service.txt`, service);
+        }
+    }
 
 
     return { success: true };
@@ -501,6 +488,6 @@ async function getGoogleAIModels() {
         "gemini-1.5-pro",
         "gemini-1.5-flash-8b",
         "gemini-2.0-flash-exp",
-        
+
     ]
 }

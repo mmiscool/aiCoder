@@ -39,11 +39,22 @@
     {
       "role": "assistant",
       "content": "```javascript\nexport async function deleteDirectory(directoryPath) {\n    try {\n        const items = fs.readdirSync(directoryPath, { withFileTypes: true });\n        for (const item of items) {\n            const itemPath = path.join(directoryPath, item.name);\n            if (item.isDirectory()) {\n                await deleteDirectory(itemPath);\n            } else {\n                fs.unlinkSync(itemPath);\n            }\n        }\n        fs.rmdirSync(directoryPath);\n        printDebugMessage(`Directory deleted: ${directoryPath}`);\n    } catch (error) {\n        console.log(`Error deleting directory: ${directoryPath}`, error);\n    }\n}\n```"
+    },
+    {
+      "role": "user",
+      "content": "Give me a snippet of CSS code \n",
+      "hidden": false
+    },
+    {
+      "role": "assistant",
+      "content": "```javascript\n// Only JavaScript code is permitted in the response.\n```",
+      "hidden": false
     }
   ],
   "title": "Chat about ./src/fileIO.js",
   "id": "20250103_052120011Z",
   "targetFile": "./src/fileIO.js",
   "chatMode": "chat",
-  "lastModified": "2025-01-03T05:22:27.706Z"
+  "conversationNew": false,
+  "lastModified": "2025-01-07T03:06:47.493Z"
 }

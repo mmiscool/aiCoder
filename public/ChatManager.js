@@ -233,7 +233,9 @@ export class ChatManager {
     async setTargetFile(targetFile) {
         this.targetFileInput.value = targetFile;
         ctx.targetFile = targetFile;
-        return await ctx.tools.displayListOfStubsAndMethods();
+        // test if target file ends with .css or .html
+
+        return this.displayStubs();
     }
     async loadConversationsList() {
         const conversations = await doAjax('./getConversationsList', {});
@@ -320,16 +322,16 @@ export class ChatManager {
                         });
 
                         // set the tooltip to the action text
-                        
+
 
                         newButtonElement.style.width = '100%';
                         newButtonElement.style.margin = '5px';
                         newButtonElement.style.padding = '5px';
                         // make text in button justify left
                         newButtonElement.style.textAlign = 'left';
-                        
+
                         // change the actionItem to a button
-                        
+
                     });
 
                 }
@@ -370,7 +372,7 @@ export class ChatManager {
                             if (applyCodeBlock) {
                                 await this.applySnippet(codeBlock);
                                 await ctx.tabs.switchToTab('Tools');
-                                await ctx.tools.displayListOfStubsAndMethods();
+                                await this.displayStubs();
                             }
                         }
                     }
@@ -572,7 +574,8 @@ export class ChatManager {
                 const codeString = codeElement.textContent;
                 await this.applySnippet(codeString);
                 codeElement.style.color = 'cyan';
-                ctx.tools.displayListOfStubsAndMethods();
+                this.displayStubs();
+                //ctx.tools.displayListOfStubsAndMethods();
             });
             toolbar.appendChild(editButton);
             // Wrap the <code> element with the wrapper
@@ -583,6 +586,12 @@ export class ChatManager {
             wrapper.appendChild(toolbar);
         });
     }
+    async displayStubs() {
+        const targetFile = this.targetFileInput.value;
+        if (targetFile.endsWith('.css') || targetFile.endsWith('.html')) return;
+        return await ctx.tools.displayListOfStubsAndMethods();
+    }
+
     async applySnippet(codeString) {
         const conversationId = this.conversationPicker.value;
         const isCodeGood = await doAjax('./applySnippet', {
@@ -593,12 +602,15 @@ export class ChatManager {
             await alert('Merge failed. Please resolve the conflict manually.', 3);
             // set the user input to say that the snippet was formatted incorrectly 
             // and needs to be corrected. 
-            await this.setInput(`The last snippet was formatted incorrectly and needs to be corrected. 
-                Remember that methods must be encapsulated in a class.`);
-            if (this.autoApplyMode) {
-                await this.addMessage(this.userInput.value);
-                await this.callLLM();
-            }
+            // await this.setInput(`The last snippet was formatted incorrectly and needs to be corrected. 
+            //     Remember that methods must be encapsulated in a class.`);
+            // if (this.autoApplyMode) {
+            //     await this.addMessage(this.userInput.value);
+            //     await this.callLLM();
+            // }
+
+            // refresh the conversation
+            await this.loadConversation(conversationId);
         }
         return isCodeGood;
     }

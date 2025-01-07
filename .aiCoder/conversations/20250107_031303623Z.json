@@ -1,0 +1,58 @@
+{
+  "messages": [
+    {
+      "role": "system",
+      "content": "./.aiCoder/prompts/default-system-prompt.md",
+      "filePath": "./.aiCoder/prompts/default-system-prompt.md",
+      "description": "",
+      "hidden": true
+    },
+    {
+      "role": "user",
+      "content": "./.aiCoder/prompts/default-plan-prompt.md",
+      "filePath": "./.aiCoder/prompts/default-plan-prompt.md",
+      "description": "",
+      "hidden": true
+    },
+    {
+      "role": "user",
+      "content": "./public/style.css",
+      "filePath": "./public/style.css",
+      "description": "// Code file to be edited",
+      "hidden": true
+    },
+    {
+      "role": "system",
+      "content": "./.aiCoder/prompts/snippet-production-prompt.md",
+      "filePath": "./.aiCoder/prompts/snippet-production-prompt.md",
+      "description": "",
+      "hidden": true
+    },
+    {
+      "role": "user",
+      "content": "Give me some css for buttons",
+      "hidden": false
+    },
+    {
+      "role": "assistant",
+      "content": "```css\nbutton {\n    padding: 0.5rem 1rem;\n    cursor: pointer;\n    border: none;\n    color: #fff;\n    border-radius: 5px;\n    background-color: #007BFF;\n    transition: background-color 0.3s ease, transform 0.2s ease;\n}\n\nbutton:hover {\n    background-color: #0056b3;\n    transform: scale(1.05);\n}\n\nbutton:disabled {\n    background-color: #6c757d;\n    cursor: not-allowed;\n    opacity: 0.65;\n}\n```",
+      "hidden": false
+    },
+    {
+      "role": "user",
+      "content": "Make the buttons have a yellow outline. ",
+      "hidden": false
+    },
+    {
+      "role": "assistant",
+      "content": "```css\nbutton {\n    padding: 0.5rem 1rem;\n    cursor: pointer;\n    border: 2px solid yellow;\n    color: #fff;\n    border-radius: 5px;\n    background-color: #007BFF;\n    transition: background-color 0.3s ease, transform 0.2s ease;\n}\n\nbutton:hover {\n    background-color: #0056b3;\n    transform: scale(1.05);\n}\n\nbutton:disabled {\n    background-color: #6c757d;\n    cursor: not-allowed;\n    opacity: 0.65;\n    border: 2px solid #495057; /* Darker border when disabled */\n}\n```",
+      "hidden": false
+    }
+  ],
+  "title": "\"Enhancing Button Styles: CSS Customization\"",
+  "id": "20250107_031303623Z",
+  "targetFile": "./public/style.css",
+  "chatMode": "chat",
+  "conversationNew": false,
+  "lastModified": "2025-01-07T03:56:40.272Z"
+}

@@ -1,0 +1,38 @@
+{
+  "messages": [
+    {
+      "role": "system",
+      "content": "./.aiCoder/prompts/default-system-prompt.md",
+      "filePath": "./.aiCoder/prompts/default-system-prompt.md",
+      "description": "",
+      "hidden": true
+    },
+    {
+      "role": "user",
+      "content": "./.aiCoder/prompts/default-plan-prompt.md",
+      "filePath": "./.aiCoder/prompts/default-plan-prompt.md",
+      "description": "",
+      "hidden": true
+    },
+    {
+      "role": "user",
+      "content": "./public/style.css",
+      "filePath": "./public/style.css",
+      "description": "// Code file to be edited",
+      "hidden": true
+    },
+    {
+      "role": "system",
+      "content": "./.aiCoder/prompts/snippet-production-prompt.md",
+      "filePath": "./.aiCoder/prompts/snippet-production-prompt.md",
+      "description": "",
+      "hidden": true
+    }
+  ],
+  "title": "Chat about ./public/style.css",
+  "id": "20250107_031116529Z",
+  "targetFile": "./public/style.css",
+  "chatMode": "chat",
+  "conversationNew": true,
+  "lastModified": "2025-01-07T03:11:16.542Z"
+}

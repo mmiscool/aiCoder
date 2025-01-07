@@ -162,6 +162,39 @@ export class aiCoderApiFunctions {
             return { error: e };
         }
     }
+    async applySnippet(parsedBody) {
+        try {
+            const mergeResult = await applySnippets(parsedBody.targetFile, [parsedBody.snippet]);
+            return { success: mergeResult };
+        } catch (e) {
+            if (parsedBody.id) {
+                //console.log('Error applying snippet:', e);
+                await this.addMessage({
+                    id: parsedBody.id,
+                    message: {
+                        role: "assistant", content: `
+Error applying snippet:
+\`\`\`
+${e}
+\`\`\`
+
+Snippet:
+\`\`\`
+${parsedBody.snippet}
+\`\`\`
+`}
+                });
+
+                await this.callLLM({ id: parsedBody.id });
+
+                return { success: false };
+            } else {
+                return { error: e };
+            }
+
+
+        }
+    }
     async getMethodsList(parsedBody) {
         const response = await getMethodsWithArguments(await readFile(parsedBody.targetFile));
         return response;

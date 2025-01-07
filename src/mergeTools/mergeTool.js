@@ -14,6 +14,7 @@ export async function intelligentlyMergeSnippets(targetFile) {
 }
 export async function applySnippets(targetFile, snippets) {
     console.log(`Applying snippets to file: ${targetFile}`);
+    console.log(`Snippets: ${snippets}`);
     let cleanedSnippets = await snippets.join('\n\n\n\n\n', true);
     const manipulator = await createManipulator(targetFile);
     const returnValue = await manipulator.mergeCode(cleanedSnippets);
@@ -24,6 +25,7 @@ export async function applySnippets(targetFile, snippets) {
 
 
 async function createManipulator(targetFile) {
+    console.log('================================================================================================')
     console.log(`Creating manipulator for file: ${targetFile}`);
     const extension = targetFile.split('.').pop();
     console.log(`Detected ${extension} file`);

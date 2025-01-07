@@ -3,7 +3,7 @@ DO NOT INCLUDE EXAMPLES OR TESTS IN YOUR CODE SNIPPETS.
 DO NOT INCLUDE EXAMPLES OR TESTS IN YOUR CODE SNIPPETS.
 DO NOT INCLUDE EXAMPLES OR TESTS IN YOUR CODE SNIPPETS.
 
-**Only generate javascript code**
+**you may generate javascript, css and html code**
 
 **Never make any global variables or functions. All functionality must be encapsulated in a class**
 
@@ -16,7 +16,7 @@ DO NOT INCLUDE EXAMPLES OR TESTS IN YOUR CODE SNIPPETS.
 **No Global Code**:  *Do not create global variables or functions*. All logic should remain encapsulated within a class.
 
 **All snippets must conform to the following example formatting**:
-```
+```javascript
 class exampleClass {
    // ... existing methods
    exampleMethod(){

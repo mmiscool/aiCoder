@@ -2,9 +2,10 @@ const testMode = process.env.NODE_ENV === 'test';
 export class cssManipulator {
   constructor() {
     this.parsedCSS = [];
+    this.code = '';
   }
   // Method to parse CSS into an array of selector-declaration pairs
-  parse(css) {
+  parse(css = this.code) {
     const regex = /([^{}]+)\{([^{}]*(?:\{[^{}]*\}[^{}]*)*)*\}/g;
     this.parsedCSS = [];
     let match;
@@ -17,8 +18,25 @@ export class cssManipulator {
       });
     }
   }
+  setCode(code) {
+    this.code = code;
+  }
+  async mergeCode(newCode) {
+    try {
+      
+      this.code = this.code + '\n\n' + newCode;
+      this.mergeDuplicates();
+      return this.generateCode();
+    }catch(e){
+      console.log(e);
+      return false;
+    }
+  }
+
   // Method to resolve duplicate selectors
   mergeDuplicates() {
+    this.parse();
+
     const selectorMap = new Map();
     // Traverse from the end to preserve the last occurrence
     for (let i = this.parsedCSS.length - 1; i >= 0; i--) {
@@ -32,7 +50,7 @@ export class cssManipulator {
     }
   }
   // Method to convert the parsed CSS structure back into a CSS string
-  toCSSString() {
+  generateCode() {
     return this.parsedCSS.map(({ selector, declarationBlock }) => {
       const indentedDeclarations = declarationBlock.split(';').map(declaration => declaration.trim()).filter(Boolean).map(declaration => `  ${declaration};`).join('\n');
       return `${selector} {\n${indentedDeclarations}\n}`;
@@ -66,7 +84,7 @@ if (testMode) {
   const manipulator = new cssManipulator();
   manipulator.parse(css);
   manipulator.mergeDuplicates();
-  const resolvedCSS = manipulator.toCSSString();
+  const resolvedCSS = manipulator.generateCode();
   console.log('Original CSS:\n', css);
   console.log('Resolved CSS:\n', resolvedCSS);
 }
