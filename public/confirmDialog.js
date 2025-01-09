@@ -37,7 +37,7 @@ const cancelButtonStyle = {
 
 
 
-window.confirm = async (message, timeoutInSeconds = 10, defaultValue = false) => {
+window.confirm = async (message, timeoutInSeconds = 0, defaultValue = false) => {
     return new Promise((resolve) => {
         const dialog = document.createElement('div');
         const messageDiv = document.createElement('div');

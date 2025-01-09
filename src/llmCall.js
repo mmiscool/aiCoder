@@ -15,8 +15,6 @@ import {
 
 
 let throttleTime = 20;
-let lastCallTime = 0;
-
 
 async function setupMode() {
     if (await readArg('-setup')) {
@@ -43,6 +41,7 @@ async function setupMode() {
 setupMode();
 
 
+let lastCallTime = 0;
 
 async function throttle() {
     // check if the current time is greater than the last call time + throttle time and if not wait until it is
@@ -150,10 +149,6 @@ async function getModels(service) {
 
 export async function llmSettingsUpdate(settings) {
     // write the new settings to the files
-
-    // array of llm services
-
-
     for (let i = 0; i < llmServices.length; i++) {
         const service = llmServices[i];
         await writeSetting(`llmConfig/${service}-model.txt`, settings[service].model);
@@ -162,7 +157,6 @@ export async function llmSettingsUpdate(settings) {
             await writeSetting(`llmConfig/ai-service.txt`, service);
         }
     }
-
 
     return { success: true };
 }

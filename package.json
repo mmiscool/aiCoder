@@ -29,8 +29,6 @@
     "@mmiscool/scrape_to_markdown": "^1.0.6",
     "@parcel/config-default": "^2.13.2",
     "@parcel/core": "^2.13.2",
-    "axios": "^1.7.9",
-    "cheerio": "^1.0.0",
     "cli-progress": "^3.12.0",
     "escodegen": "^2.1.0",
     "esm": "^3.2.25",
@@ -45,8 +43,5 @@
     "repomix": "^0.2.15",
     "turndown": "^7.2.0",
     "ws": "^8.18.0"
-  },
-  "devDependencies": {
-    "svgo": "^3.3.2"
   }
 }

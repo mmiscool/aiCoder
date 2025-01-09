@@ -5,6 +5,7 @@ import { getListOfFunctions, getMethodsWithArguments, prependClassStructure } fr
 import {
     deleteFile,
     getAllFiles,
+    listConversations,
     moveFile,
     readFile,
     readSetting,
@@ -31,8 +32,10 @@ import { launchEditor } from './terminalHelpers.js';
 
 
 
+
 export async function setupConfigFiles() {
-    //console.log('Setting up default files');
+    try{
+            //console.log('Setting up default files');
     await moveFile('./.aiCoder/default-plan-prompt.md', './.aiCoder/prompts/default-plan-prompt.md');
     await moveFile('./.aiCoder/default-system-prompt.md', './.aiCoder/prompts/default-system-prompt.md');
     await moveFile('./.aiCoder/snippet-production-prompt.md', './.aiCoder/prompts/snippet-production-prompt.md');
@@ -55,6 +58,10 @@ export async function setupConfigFiles() {
     await readSetting('prompts/snippet-validation-prompt.md');
     await readSetting('prompts/plan-edit-prompt.md');
     await readSetting('prompts/customPrompts.json');
+    }catch (e) {
+        console.log('Error setting up config files:', e);
+    }
+
 }
 setupConfigFiles();
 export class aiCoderApiFunctions {
@@ -431,29 +438,4 @@ export class conversation {
             await this.storeConversation();
         }
     }
-}
-export async function listConversations() {
-    // return an array of all the conversations in the following format:
-    //   [{
-    //     id: conversation.id,
-    //     title: conversation.title,
-    //     lastModified: new Date(conversation.lastModified)
-    //   }]
-    const conversationFolder = './.aiCoder/conversations';
-    if (!fs.existsSync(conversationFolder)) {
-        fs.mkdirSync(conversationFolder);
-    }
-    const conversationFiles = fs.readdirSync(conversationFolder);
-    const conversationIds = [];
-    for (const file of conversationFiles) {
-        const filePath = `${conversationFolder}/${file}`;
-        const conversationJSON = await readFile(filePath);
-        const conversationObject = JSON.parse(conversationJSON);
-        conversationIds.push({
-            id: conversationObject.id,
-            title: conversationObject.title,
-            lastModified: new Date(conversationObject.lastModified)
-        });
-    }
-    return conversationIds;
 }

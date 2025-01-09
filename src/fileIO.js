@@ -100,10 +100,15 @@ export async function moveFile(oldPath, newPath) {
     }
 }
 export function getScriptFolderPath() {
-    // Retrieve the current file's directory path
-    const __filename = fileURLToPath(import.meta.url);
-    const __dirname = dirname(__filename);
-    return __dirname;
+    try {
+        // Retrieve the current file's directory path
+        const __filename = fileURLToPath(import.meta.url);
+        const __dirname = dirname(__filename);
+        return __dirname;
+    } catch (error) {
+        console.log('Error getting script folder path:', error);
+    }
+
 }
 export function getAllFiles(folderPath) {
     const result = [];
@@ -151,6 +156,25 @@ export async function deleteFile(filePath) {
         await fs.unlinkSync(filePath);
         printDebugMessage(`File deleted: ${ filePath }`);
     } catch (error) {
-        console.log(`Error deleting file: ${ filePath }`, error);
+        console.log(`Error deleting file: ${filePath}`, error);
     }
+}
+export async function listConversations() {
+    const conversationFolder = './.aiCoder/conversations';
+    if (!fs.existsSync(conversationFolder)) {
+        fs.mkdirSync(conversationFolder);
+    }
+    const conversationFiles = fs.readdirSync(conversationFolder);
+    const conversationIds = [];
+    for (const file of conversationFiles) {
+        const filePath = `${conversationFolder}/${file}`;
+        const conversationJSON = await readFile(filePath);
+        const conversationObject = JSON.parse(conversationJSON);
+        conversationIds.push({
+            id: conversationObject.id,
+            title: conversationObject.title,
+            lastModified: new Date(conversationObject.lastModified)
+        });
+    }
+    return conversationIds;
 }
