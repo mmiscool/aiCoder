@@ -5,6 +5,7 @@ import { getListOfFunctions, getMethodsWithArguments, prependClassStructure } fr
 import {
     deleteFile,
     getAllFiles,
+    getScriptFolderPath,
     listConversations,
     moveFile,
     readFile,
@@ -34,6 +35,8 @@ import { launchEditor } from './terminalHelpers.js';
 
 
 export async function setupConfigFiles() {
+    // get the current version number from the package.json file
+    
     try{
             //console.log('Setting up default files');
     await moveFile('./.aiCoder/default-plan-prompt.md', './.aiCoder/prompts/default-plan-prompt.md');
