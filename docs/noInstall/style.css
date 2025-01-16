@@ -1,0 +1,51 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: monospace;
+}
+
+body {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+}
+
+code {
+  display: inline-block;
+  background-color: #282828d8;
+  color: yellow;
+  overflow: hidden;
+  max-width: 100%;
+}
+
+.hover-effect:hover {
+  background-color: bisque;
+  filter: invert(1);
+}
+
+button {
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  border: 2px solid yellow;
+  color: #fff;
+  border-radius: 5px;
+  background-color: #007BFF;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+button:hover {
+  background-color: #0056b3;
+  transform: scale(1.01);
+}
+
+button:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.65;
+  border: 2px solid #495057;
+  /* Darker border when disabled */;
+}

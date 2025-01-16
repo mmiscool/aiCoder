@@ -1,26 +1,49 @@
 let fs, isBrowser = false;
 
 export let fileSystem = {
-    
+
     async start() {
-        if (typeof window !== "undefined" && window.showDirectoryPicker) {
-            
-            isBrowser = true;
-            const { BrowserFileSystem } = await import('./browser.js');
-            fs = new BrowserFileSystem();
-            await fs.openDirectory();
-            window.fs = fs;
-            fileSystem = fs;
-        } else {
-            this.isBrowser = false;
-            const { NodeFileSystem } = await import('./node.js');
-            fs = new NodeFileSystem();
-            fileSystem = fs;
-        }
+
+        isBrowser = true;
+        const { BrowserFileSystem } = await import('./browser.js');
+        fs = new BrowserFileSystem();
+        await this.openDirectory();
+        globalThis.fs = fs;
+        fileSystem = fs;
+
     },
 
     async openDirectory() {
-        return await fs.openDirectory();
+        // create a full screen button that triggers the fs.openDirectory method
+        const button = document.createElement("button");
+        button.innerText = "Open Directory";
+        button.style.position = "fixed";
+        button.style.top = "0";
+        button.style.left = "0";
+        button.style.width = "100%";
+        button.style.height = "100%";
+        button.style.zIndex = "1000";
+        button.style.backgroundColor = "rgba(0,0,0,0.5)";
+        button.style.color = "white";
+        button.style.fontSize = "24px";
+        button.style.display = "flex";
+        button.style.justifyContent = "center";
+        button.style.alignItems = "center";
+
+        document.body.appendChild(button);
+        // make it so that this function returns a promise that resolves when the button is clicked
+        return new Promise((resolve, reject) => {
+            button.addEventListener("click", async () => {
+                try {
+                    await fs.openDirectory();
+                    // remove the button from the DOM
+                    button.remove();
+                    resolve();
+                } catch (e) {
+                    reject(e);
+                }
+            });
+        });
     },
 
     async listFiles() {

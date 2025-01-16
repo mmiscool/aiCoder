@@ -25,8 +25,15 @@ import {
 import { launchEditor } from './terminalHelpers.js';
 
 
-
-
+// fake ajax function that calls methods in the aiCoderApiFunctions class. The url is the method name and the data is the parsedBody object
+export async function fakeDoAjax(url, data) {
+    const api = new aiCoderApiFunctions();
+    if (url in api) {
+        return await api[url](data);
+    } else {
+        return { error: 'Method not found' };
+    }
+}
 
 
 
@@ -36,32 +43,32 @@ import { launchEditor } from './terminalHelpers.js';
 
 export async function setupConfigFiles() {
     // get the current version number from the package.json file
-
-    try {
-        //console.log('Setting up default files');
-        await moveFile('./.aiCoder/default-plan-prompt.md', './.aiCoder/prompts/default-plan-prompt.md');
-        await moveFile('./.aiCoder/default-system-prompt.md', './.aiCoder/prompts/default-system-prompt.md');
-        await moveFile('./.aiCoder/snippet-production-prompt.md', './.aiCoder/prompts/snippet-production-prompt.md');
-        await moveFile('./.aiCoder/snippet-validation-prompt.md', './.aiCoder/prompts/snippet-validation-prompt.md');
-        await moveFile('./.aiCoder/plan-edit-prompt.md', './.aiCoder/prompts/plan-edit-prompt.md');
-        await moveFile('./.aiCoder/customPrompts.json', './.aiCoder/prompts/customPrompts.json');
-        // move the llm api keys and models to the llmConfig folder
-        await moveFile('./.aiCoder/openai-api-key.txt', './.aiCoder/llmConfig/openai-api-key.txt');
-        await moveFile('./.aiCoder/openai-model.txt', './.aiCoder/llmConfig/openai-model.txt');
-        await moveFile('./.aiCoder/groq-api-key.txt', './.aiCoder/llmConfig/groq-api-key.txt');
-        await moveFile('./.aiCoder/groq-model.txt', './.aiCoder/llmConfig/groq-model.txt');
-        await moveFile('./.aiCoder/ollama-api-key.txt', './.aiCoder/llmConfig/ollama-api-key.txt');
-        await moveFile('./.aiCoder/ollama-model.txt', './.aiCoder/llmConfig/ollama-model.txt');
-        await moveFile('./.aiCoder/anthropic-api-key.txt', './.aiCoder/llmConfig/anthropic-api-key.txt');
-        await moveFile('./.aiCoder/anthropic-model.txt', './.aiCoder/llmConfig/anthropic-model.txt');
-        await moveFile('./.aiCoder/ai-service.txt', './.aiCoder/llmConfig/ai-service.txt');
-        await readSetting('prompts/default-plan-prompt.md');
-        await readSetting('prompts/default-system-prompt.md');
-        await readSetting('prompts/snippet-production-prompt.md');
-        await readSetting('prompts/snippet-validation-prompt.md');
-        await readSetting('prompts/plan-edit-prompt.md');
-        await readSetting('prompts/customPrompts.json');
-    } catch (e) {
+    
+    try{
+            //console.log('Setting up default files');
+    await moveFile('./.aiCoder/default-plan-prompt.md', './.aiCoder/prompts/default-plan-prompt.md');
+    await moveFile('./.aiCoder/default-system-prompt.md', './.aiCoder/prompts/default-system-prompt.md');
+    await moveFile('./.aiCoder/snippet-production-prompt.md', './.aiCoder/prompts/snippet-production-prompt.md');
+    await moveFile('./.aiCoder/snippet-validation-prompt.md', './.aiCoder/prompts/snippet-validation-prompt.md');
+    await moveFile('./.aiCoder/plan-edit-prompt.md', './.aiCoder/prompts/plan-edit-prompt.md');
+    await moveFile('./.aiCoder/customPrompts.json', './.aiCoder/prompts/customPrompts.json');
+    // move the llm api keys and models to the llmConfig folder
+    await moveFile('./.aiCoder/openai-api-key.txt', './.aiCoder/llmConfig/openai-api-key.txt');
+    await moveFile('./.aiCoder/openai-model.txt', './.aiCoder/llmConfig/openai-model.txt');
+    await moveFile('./.aiCoder/groq-api-key.txt', './.aiCoder/llmConfig/groq-api-key.txt');
+    await moveFile('./.aiCoder/groq-model.txt', './.aiCoder/llmConfig/groq-model.txt');
+    await moveFile('./.aiCoder/ollama-api-key.txt', './.aiCoder/llmConfig/ollama-api-key.txt');
+    await moveFile('./.aiCoder/ollama-model.txt', './.aiCoder/llmConfig/ollama-model.txt');
+    await moveFile('./.aiCoder/anthropic-api-key.txt', './.aiCoder/llmConfig/anthropic-api-key.txt');
+    await moveFile('./.aiCoder/anthropic-model.txt', './.aiCoder/llmConfig/anthropic-model.txt');
+    await moveFile('./.aiCoder/ai-service.txt', './.aiCoder/llmConfig/ai-service.txt');
+    await readSetting('prompts/default-plan-prompt.md');
+    await readSetting('prompts/default-system-prompt.md');
+    await readSetting('prompts/snippet-production-prompt.md');
+    await readSetting('prompts/snippet-validation-prompt.md');
+    await readSetting('prompts/plan-edit-prompt.md');
+    await readSetting('prompts/customPrompts.json');
+    }catch (e) {
         console.log('Error setting up config files:', e);
     }
 
@@ -206,26 +213,10 @@ ${parsedBody.snippet}
         }
     }
     async getMethodsList(parsedBody) {
-        if (!parsedBody.targetFile) {
-            return { error: 'No target file provided' };
-        }
-        // check if the file type is supported
-        const fileType = parsedBody.targetFile.split('.').pop();
-        if (fileType !== 'js' && fileType !== 'ts') return [];
-
         const response = await getMethodsWithArguments(await readFile(parsedBody.targetFile));
         return response;
     }
     async getFunctionList(parsedBody) {
-        if (!parsedBody.targetFile) {
-            return { error: 'No target file provided' };
-        }
-        // check if the file type is supported
-        const fileType = parsedBody.targetFile.split('.').pop();
-        if (fileType !== 'js' && fileType !== 'ts') return [];
-        
-
-
         const response = await getListOfFunctions(await readFile(parsedBody.targetFile));
         return response;
     }

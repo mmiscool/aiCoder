@@ -1,0 +1,13 @@
+[
+  "Find the first class method that is incomplete or a stub. Implement it.",
+  "Generate the classes and stub methods required to implement the plan. ",
+  "Look for class methods that are referenced but not implemented. Add stubs for these missing methods. ",
+  "Implement the first todo comment you find. ",
+  "Actually write the code for that stub.",
+  "Do not give me place holders. Give me actual code. ",
+  "Are there any place holders or unimplemented portions of the classes?\nList each method as an individual numbered item in the list like this:\n##ACTION LIST\n1. className.methodName\n2. className.methodName",
+  "fully write the next method in the list. ",
+  "Generate JSdoc strings for all the methods that are missing JSdoc comments. \n\nDo not generate all the code. Give me just the method stubs with the jsdoc strings.",
+  "Write the next method in this class. ",
+  "That was not in the correct format. "
+]
