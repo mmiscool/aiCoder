@@ -1,5 +1,3 @@
-
-// Browser-specific implementation
 export class BrowserFileSystem {
     constructor() {
         this.directoryHandle = null;
@@ -18,7 +16,6 @@ export class BrowserFileSystem {
         return files;
     }
 
-    
     async flatList(directory = this.currentDirectory, baseDirectory = this.currentDirectory) {
         if (!this.directoryHandle) throw new Error("Directory not opened.");
         const paths = [];
@@ -36,7 +33,6 @@ export class BrowserFileSystem {
         await traverse(this.directoryHandle, directory, baseDirectory);
         return paths;
     }
-
 
     async readFile(fileName) {
         if (!this.directoryHandle) throw new Error("Directory not opened.");

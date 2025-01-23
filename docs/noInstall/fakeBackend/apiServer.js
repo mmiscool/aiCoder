@@ -1,4 +1,3 @@
-// server.js
 import { ctx } from './main.js';
 import http from 'http';
 import url from 'url';
@@ -12,40 +11,21 @@ import { printAndPause, readArg } from './terminalHelpers.js';
 import { execSync } from 'child_process';
 export let wss;
 
-
-
-
-
-
-
 async function buildFrontend() {
-    //console.log('Building frontend...');
-
     try {
-        // Resolve the script directory
         let scriptPath = await getScriptFolderPath();
-        //console.log('scriptPath:', scriptPath);
-
-        // Define paths for the dist and cache directories
         const distPath = path.join(scriptPath, '../dist');
         const cachePath = path.join(scriptPath, '../.parcel-cache');
 
-        // Clean up old build artifacts
         await Promise.all([
             fs.rm(distPath, { recursive: true, force: true }),
             fs.rm(cachePath, { recursive: true, force: true }),
         ]);
 
-        // remove /src from the end of the scriptPath
         scriptPath = scriptPath.substring(0, scriptPath.length - 4);
 
-
-        // Execute Parcel build command
         const buildCommand = `npx parcel build ./public/index.html --no-optimize`;
-        //console.log(`Running command: ${buildCommand} in ${scriptPath}`);
         execSync(buildCommand, { cwd: scriptPath, stdio: 'inherit' });
-
-        //console.log('Frontend built successfully.');
     } catch (error) {
         console.error('Error during frontend build:', error);
     }
@@ -53,16 +33,14 @@ async function buildFrontend() {
 
 buildFrontend();
 
-
 export function setupServer() {
     try {
-        // ctx variables
         ctx.appData = {};
-        ctx.appData.serveDirectory = path.resolve(getScriptFolderPath() + "/../dist"); // Directory to serve files from
+        ctx.appData.serveDirectory = path.resolve(getScriptFolderPath() + "/../dist");
 
         ctx.aiCoderApiFunctions = new aiCoderApiFunctions();
 
-        let PORT = parseInt(readArg("-p")) || 3000; // Start port
+        let PORT = parseInt(readArg("-p")) || 3000;
         const HOST = '0.0.0.0';
 
         const createServer = () => {
@@ -73,7 +51,6 @@ export function setupServer() {
 
                     let parsedBody = {};
                     if (req.method === 'POST') {
-                        // Read the body of the request
                         const body = await new Promise((resolve, reject) => {
                             let data = '';
                             req.on('data', chunk => {
@@ -92,12 +69,11 @@ export function setupServer() {
                                 parsedBody = JSON.parse(body);
                             } catch (err) {
                                 console.error('Invalid JSON:', err.message);
-                                parsedBody = {}; // Default to an empty object if parsing fails
+                                parsedBody = {};
                             }
                         }
                     }
 
-                    // API method handling
                     const pathnameWithoutSlash = pathname.substring(1);
                     if (pathnameWithoutSlash in aiCoderApiFunctions.prototype) {
                         console.log('Calling method:', pathnameWithoutSlash);
@@ -108,14 +84,11 @@ export function setupServer() {
                         return;
                     }
 
-                    // File serving logic
                     const filePath = path.join(ctx.appData.serveDirectory, pathname);
 
                     try {
-                        // Check if the file exists
                         await fs.access(filePath);
 
-                        // Serve the file with the correct MIME type
                         const mimeType = mime.getType(filePath) || 'application/octet-stream';
                         res.setHeader('Content-Type', mimeType);
 
@@ -142,7 +115,6 @@ export function setupServer() {
                 }
             });
 
-            // Attach error listener for port conflicts
             server.on('error', (err) => {
                 if (err.code === 'EADDRINUSE') {
                     console.warn(`Port ${PORT} is in use. Trying port ${PORT + 1}...`);
@@ -153,12 +125,9 @@ export function setupServer() {
                 }
             });
 
-            // Start the server
             server.listen(PORT, HOST, () => {
                 console.log(`Server is running at http://localhost:${PORT}`);
-                //console.log(`Serving files from: ${ctx.appData.serveDirectory}`);
 
-                // WebSocket server setup
                 wss = new WebSocketServer({ server });
 
                 wss.on('connection', (ws) => {
@@ -180,7 +149,7 @@ export function setupServer() {
         };
 
         createServer();
-        // print server address after waiting for 5 seconds
+
         setTimeout(() => {
             printAndPause(`Server is running at http://localhost:${PORT}`);
         }, 5000);
@@ -188,6 +157,16 @@ export function setupServer() {
     } catch (error) {
         console.log('Error:', error);
     }
-
 }
 
+if (typeof Worker !== 'undefined') {
+    const worker = new Worker('./worker.js');
+
+    worker.onmessage = (event) => {
+        console.log('Message from worker:', event.data);
+    };
+
+    worker.postMessage('Start worker');
+} else {
+    console.log('Web Workers are not supported in this environment.');
+}
