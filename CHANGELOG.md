@@ -3,6 +3,12 @@
 [![semantic versioning](https://img.shields.io/badge/semantic%20versioning-2.0.0-green.svg)](https://semver.org)
 > All notable changes to this project will be documented in this file
 
+## [1.0.94](https://github.com/mmiscool/aiCoder/compare/v1.0.93...v1.0.94) (2025-01-23)
+
+### 🤖 Build System
+
+* Fixed LLM throttle ([eb8dc73](https://github.com/mmiscool/aiCoder/commit/eb8dc73aa148c440c2af53e209e272bf5fec073e))
+
 ## [1.0.93](https://github.com/mmiscool/aiCoder/compare/v1.0.92...v1.0.93) (2025-01-16)
 
 ### 🤖 Build System
