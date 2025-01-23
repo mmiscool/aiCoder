@@ -3,7 +3,7 @@ import * as escodegen from 'escodegen';
 import esprima from 'esprima-next';
 import estraverse from 'estraverse';
 
-const debug = false;
+const debug = true;
 
 
 export class javascriptManipulator {
@@ -34,16 +34,32 @@ export class javascriptManipulator {
         return await this.generateCode();
     }
     async mergeDuplicates() {
-        await this.parse();
-        await this.cleanUpComments();
-        await this.makeAllFunctionsExported();
-        await this.makeAllClassesExported();
-        await this.mergeDuplicateImports();
-        await this.mergeDuplicateVariables();
-        await this.mergeDuplicateFunctions();
-        await this.mergeDuplicateClasses();
-        await this.removeEmptyExports();
-        return await this.generateCode();
+        try {
+            await this.parse();
+            console.log('parsed');
+            await this.cleanUpComments();
+            console.log('cleaned up comments');
+            await this.makeAllFunctionsExported();
+            console.log('made all functions exported');
+            await this.makeAllClassesExported();
+            console.log('made all classes exported');
+            await this.mergeDuplicateImports();
+            console.log('merged duplicate imports');
+            await this.mergeDuplicateVariables();
+            console.log('merged duplicate variables');
+            await this.mergeDuplicateFunctions();
+            console.log('merged duplicate functions');
+            await this.mergeDuplicateClasses();
+            console.log('merged duplicate classes');
+            await this.removeEmptyExports();
+            console.log('removed empty exports');
+            return await this.generateCode();
+        } catch (e) {
+            console.error(e);
+            debugLog('Error parsing the new code snippet');
+            return false;
+        }
+
     }
     async removeEmptyExports() {
         // Remove empty export statements

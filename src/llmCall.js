@@ -49,7 +49,11 @@ async function throttle() {
     const currentTime = new Date().getTime();
     if (currentTime < lastCallTime + throttleTime * 1000) {
         const remainingTime = (lastCallTime + throttleTime) - currentTime;
-        await printAndPause(`Throttling. Please wait ${remainingTime / 1000} seconds.`, remainingTime / 1000);
+        await printAndPause(`Throttling. Please wait ${remainingTime / 1000} seconds.`);
+        // wait for the remaining time
+        await new Promise((resolve) => {
+            setTimeout(resolve, remainingTime);
+        });
     }
 
     lastCallTime = new Date().getTime();
