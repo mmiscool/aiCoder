@@ -34,13 +34,7 @@ export async function writeFile(filePath, content, makeBackup = false) {
     await fs.writeFileSync(filePath, content, 'utf8');
     await printAndPause(`File written: ${ filePath }`);
 }
-export async function appendFile(filePath, content, makeBackup = false) {
-    await printDebugMessage('Appending to file:', filePath);
-    filePath = await convertToRelativePath(filePath);
-    if (makeBackup)
-        await createBackup(filePath);
-    await fs.appendFileSync(filePath, content, 'utf8');
-}
+
 export function convertToRelativePath(filePath) {
     // check if the file path is already relative
     printDebugMessage('filePath:', filePath);

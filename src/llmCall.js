@@ -127,7 +127,7 @@ export async function llmSettings() {
         }
 
         return settingsObject;
-    } catch (error) { 
+    } catch (error) {
         console.error('Error fetching settings:', error);
         throw new Error('Error fetching settings:', error);
     }
@@ -270,15 +270,24 @@ async function pullOllamaModelWithProgress(model) {
 // groq related functions -----------------------------------------------------------------------------------------------
 
 export async function getGroqResponse(messages) {
-    const groq = new Groq({ apiKey: readSetting('llmConfig/groq-api-key.txt') });
+    const apiKey = await readSetting('llmConfig/groq-api-key.txt');
+    const groq = new Groq({ apiKey });
 
+    const formattedMessages = messages.map((message) => {
+        return {
+            role: message.role,
+            content: message.content
+        };
+    });
 
+    console.log(apiKey);
     const completion = await groq.chat.completions
         .create({
-            messages,
+            messages: formattedMessages,
             model: await readSetting('llmConfig/groq-model.txt'),
         })
     console.log(completion.choices[0].message.content);
+
 
     return completion.choices[0].message.content;
 }
@@ -293,7 +302,7 @@ async function getGroqModels() {
         const models = response.data;
 
         // filter list to only include models that have an id that is shorter than 13 characters
-        const listOfModels = models.filter(model => model.id.length < 25).map(model => model.id);
+        const listOfModels = models.filter(model => model.id.length < 300).map(model => model.id);
 
         return listOfModels;
     } catch (error) {

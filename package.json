@@ -30,6 +30,7 @@
     "@parcel/config-default": "^2.13.2",
     "@parcel/core": "^2.13.2",
     "cli-progress": "^3.12.0",
+    "comlink": "^4.4.2",
     "escodegen": "^2.1.0",
     "esm": "^3.2.25",
     "esprima-next": "^6.0.3",
