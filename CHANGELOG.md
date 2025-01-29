@@ -3,6 +3,12 @@
 [![semantic versioning](https://img.shields.io/badge/semantic%20versioning-2.0.0-green.svg)](https://semver.org)
 > All notable changes to this project will be documented in this file
 
+## [1.0.95](https://github.com/mmiscool/aiCoder/compare/v1.0.94...v1.0.95) (2025-01-29)
+
+### 🤖 Build System
+
+* fixed groq support to work with deepseek-r1 ([1598f19](https://github.com/mmiscool/aiCoder/commit/1598f19384db4affd6fef8bba8dfeca6f095fe1e))
+
 ## [1.0.94](https://github.com/mmiscool/aiCoder/compare/v1.0.93...v1.0.94) (2025-01-23)
 
 ### 🤖 Build System
