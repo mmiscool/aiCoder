@@ -11,6 +11,19 @@ let ctx = {};
 let doAjax;
 
 async function setup() {
+    // Initialize the file system using a web worker
+    if (typeof Worker !== 'undefined') {
+        const worker = new Worker('./worker.js');
+
+        worker.onmessage = (event) => {
+            console.log('Message from worker:', event.data);
+        };
+
+        worker.postMessage('Start worker');
+    } else {
+        console.log('Web Workers are not supported in this environment.');
+    }
+
     await fileSystem.start();
 
     const { fakeDoAjax } = await import("./fakeBackend/aiCoderApiFunctions.js")
@@ -63,7 +76,4 @@ async function setDefaultLocalStorageKey(key, value) {
 
 // call the setup function only after the DOM has loaded
 document.addEventListener('DOMContentLoaded', setup);
-
-
-
 

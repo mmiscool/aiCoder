@@ -1,7 +1,6 @@
 import { fileSystem } from '../fs/fileSystem.js';
 import { createBackup } from './backupSystem.js';
 
-
 const browserFS = new fileSystem();
 
 export async function readFile(filePath) {
