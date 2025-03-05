@@ -506,6 +506,6 @@ export class javascriptManipulator {
 
 async function debugLog(...args) {
     if (debug) {
-        debugLog(...args);
+        console.log(...args);
     }
 }
