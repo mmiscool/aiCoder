@@ -69,6 +69,15 @@ export class toolsManager {
         });
         this.toolBar.appendChild(prependClassStructureButton);
         this.container.appendChild(this.toolBar);
+        this.snippetTextArea = document.createElement('textarea');
+        this.snippetTextArea.style.width = '100%';
+        this.snippetTextArea.style.height = '100px';
+        this.snippetTextArea.style.margin = '5px';
+        this.snippetTextArea.style.border = '1px solid #ccc';
+        this.snippetTextArea.style.borderRadius = '5px';
+        this.snippetTextArea.style.padding = '5px';
+        this.snippetTextArea.placeholder = 'Paste the snippet here to merge and format';
+        this.container.appendChild(this.snippetTextArea);
         return await console.log('showToolBar');
     }
 
@@ -90,18 +99,10 @@ export class toolsManager {
         this.showToolBar();
         let snippet = '';
         if (this.snippetTextArea === null) {
-            this.snippetTextArea = document.createElement('textarea');
-            this.snippetTextArea.style.width = '100%';
-            this.snippetTextArea.style.height = '100px';
-            this.snippetTextArea.style.margin = '5px';
-            this.snippetTextArea.style.border = '1px solid #ccc';
-            this.snippetTextArea.style.borderRadius = '5px';
-            this.snippetTextArea.style.padding = '5px';
-            this.snippetTextArea.placeholder = 'Paste the snippet here to merge and format';
-            this.container.appendChild(this.snippetTextArea);
+
         } else {
             snippet = this.snippetTextArea.value;
-            this.snippetTextArea = null;
+            //this.snippetTextArea = null;
         }
         await doAjax('./applySnippet', {
             targetFile: ctx.targetFile,
