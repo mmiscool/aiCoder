@@ -62,8 +62,16 @@ async function throttle() {
 
 
 
-export async function callLLM(messages) {
+export async function callLLM(inputMessages) {
     const llmToUse = await readSetting(`llmConfig/ai-service.txt`);
+
+
+    const messages = inputMessages.map((message) => {
+        return {
+            role: message.role,
+            content: message.content
+        };
+    });
 
     // for each message in the array, check if it is a file path and if it is read the file and add the content to the messages array
     for (let i = 0; i < messages.length; i++) {
@@ -280,12 +288,10 @@ export async function getGroqResponse(messages) {
         };
     });
 
-    console.log(apiKey);
-    const completion = await groq.chat.completions
-        .create({
-            messages: formattedMessages,
-            model: await readSetting('llmConfig/groq-model.txt'),
-        })
+    const completion = await groq.chat.completions.create({
+        messages: formattedMessages,
+        model: await readSetting('llmConfig/groq-model.txt'),
+    })
     console.log(completion.choices[0].message.content);
 
 
@@ -321,7 +327,7 @@ async function getOpenAIResponse(messages) {
 
     let responseText = '';
 
-    const resultStream = await openai.chat.completions.create({
+    const resultStream = openai.chat.completions.create({
         model: await readSetting('llmConfig/openai-model.txt'),
         messages,
         stream: true
@@ -348,7 +354,7 @@ async function getOpenAIModels() {
         const models = response.data;
 
         // filter list to only include models that have an id that is shorter than 13 characters
-        const listOfModels = models.filter(model => model.id.length < 15).map(model => model.id);
+        const listOfModels = models.filter(model => model.id.length < 30).map(model => model.id);
 
         return listOfModels;
     } catch (error) {
@@ -495,6 +501,11 @@ async function getGoogleAIModels() {
         "gemini-1.5-pro",
         "gemini-1.5-flash-8b",
         "gemini-2.0-flash-exp",
-
+        "gemini-2.0-flash",
+        "gemini-2.0-flash-lite",
+        "gemini-2.0-pro-exp-02-05",
+        "gemini-2.0-flash-thinking-exp-01-21",
+        "gemini-1.0-pro",
+        "gemini-1.0-pro-vision"
     ]
 }
