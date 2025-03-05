@@ -26,6 +26,7 @@
   "type": "module",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.32.1",
+    "@google/generative-ai": "^0.22.0",
     "@mmiscool/scrape_to_markdown": "^1.0.6",
     "@parcel/config-default": "^2.13.2",
     "@parcel/core": "^2.13.2",
@@ -39,7 +40,7 @@
     "groq-sdk": "^0.7.0",
     "mime": "^4.0.4",
     "ollama": "^0.5.9",
-    "openai": "^4.68.4",
+    "openai": "^4.86.1",
     "parcel": "^2.13.2",
     "repomix": "^0.2.15",
     "turndown": "^7.2.0",
