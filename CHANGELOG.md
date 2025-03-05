@@ -3,6 +3,15 @@
 [![semantic versioning](https://img.shields.io/badge/semantic%20versioning-2.0.0-green.svg)](https://semver.org)
 > All notable changes to this project will be documented in this file
 
+## [1.0.96](https://github.com/mmiscool/aiCoder/compare/v1.0.95...v1.0.96) (2025-03-05)
+
+### 🤖 Build System
+
+* always display snippet past textarea on tools tab ([c2e99e8](https://github.com/mmiscool/aiCoder/commit/c2e99e89b333caf15e6f34382d63037fbdfbf4c3))
+* Fix bug in LLM call code to strip off and restore extra conversation message object atrributes. ([b6b7707](https://github.com/mmiscool/aiCoder/commit/b6b770751b40f408f5cdcc1fcd39a3299e333a4d))
+* Fix endless recursion in debugLog function ([42bbe5d](https://github.com/mmiscool/aiCoder/commit/42bbe5d4bf3f69d8e7f4055e57542a80a478dbb9))
+* Upgrade openAI api version. ([5dd62a6](https://github.com/mmiscool/aiCoder/commit/5dd62a68aba058f110cb22ff21403c47168e956c))
+
 ## [1.0.95](https://github.com/mmiscool/aiCoder/compare/v1.0.94...v1.0.95) (2025-01-29)
 
 ### 🤖 Build System
