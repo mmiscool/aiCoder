@@ -3,6 +3,12 @@
 [![semantic versioning](https://img.shields.io/badge/semantic%20versioning-2.0.0-green.svg)](https://semver.org)
 > All notable changes to this project will be documented in this file
 
+## [1.0.97](https://github.com/mmiscool/aiCoder/compare/v1.0.96...v1.0.97) (2025-03-08)
+
+### 🤖 Build System
+
+* Fixed broken openAI api call. ([835f32c](https://github.com/mmiscool/aiCoder/commit/835f32c9a009588319f4b955f98aec2ab0d1fdbc))
+
 ## [1.0.96](https://github.com/mmiscool/aiCoder/compare/v1.0.95...v1.0.96) (2025-03-05)
 
 ### 🤖 Build System
