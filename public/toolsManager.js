@@ -39,7 +39,7 @@ export class toolsManager {
         showOnlyStubsCheckbox.checked = localStorage.getItem('showOnlyStubs') === 'true';
         showOnlyStubsCheckbox.onchange = async () => {
             await localStorage.setItem('showOnlyStubs', showOnlyStubsCheckbox.checked);
-            console.log('showOnlyStubs', showOnlyStubsCheckbox.checked);
+            //console.log('showOnlyStubs', showOnlyStubsCheckbox.checked);
             this.onlyStubs = showOnlyStubsCheckbox.checked;
             await this.displayListOfStubsAndMethods();
         }
@@ -78,7 +78,7 @@ export class toolsManager {
         this.snippetTextArea.style.padding = '5px';
         this.snippetTextArea.placeholder = 'Paste the snippet here to merge and format';
         this.container.appendChild(this.snippetTextArea);
-        return await console.log('showToolBar');
+        //return await console.log('showToolBar');
     }
 
     async displayListOfStubsAndMethods() {
@@ -124,7 +124,7 @@ export class toolsManager {
     }
     async pullMethodsList() {
         const listOfMethods = await doAjax('./getMethodsList', { targetFile: ctx.targetFile });
-        console.log(listOfMethods);
+        //console.log(listOfMethods);
         // the response contains
         for (const className in listOfMethods) {
             // console.log(className);
@@ -180,11 +180,11 @@ export class toolsManager {
                 functionItemElement.style.color = 'green';
                 functionItemElement.addEventListener('click', async () => {
                     await this.addFunctionToChatPrompt(functionName, args, lineNumber);
-                    console.log('this is the line number ', lineNumber);
+                    //console.log('this is the line number ', lineNumber);
                     await this.pullFunctionList(this.onlyStubs);
                 });
             }
-            console.log(this.onlyStubs, isStub);
+            //console.log(this.onlyStubs, isStub);
 
             this.container.appendChild(functionItemElement);
             this.container.appendChild(document.createElement('br'));

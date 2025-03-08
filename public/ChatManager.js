@@ -13,6 +13,10 @@ export class ChatManager {
         this.setup(container, app_ctx);
     }
     async setup(container, app_ctx) {
+
+
+
+
         ctx = app_ctx;
         this.chatMode = 'chat';
         this.container = container;
@@ -22,6 +26,16 @@ export class ChatManager {
         this.conversationTitleInput = document.createElement('input');
         this.conversationTitleInput.type = 'text';
         this.conversationTitleInput.style.width = '100%';
+
+
+
+
+
+        //await this.populateModelSelect();
+
+
+
+
         //make it so that on change it saves the title
         this.conversationTitleInput.addEventListener('change', async () => {
             const conversationId = this.conversationPicker.value;
@@ -222,6 +236,50 @@ export class ChatManager {
         this.autoApplyCheckbox.checked = this.autoApplyMode;
         this.setInput('');
     }
+
+    async populateModelSelect() {
+
+
+        // model selector 
+        const modelData = await doAjax('./llmSettings', {});
+
+        // add a select element to the container
+        this.modelPicker = document.createElement('select');
+        this.modelPicker.style.margin = '10px';
+        this.modelPicker.style.width = '100%';
+        this.modelPicker.size = 1;
+        this.modelPicker.addEventListener('change', async () => {
+            const selectedModel = this.modelPicker.value;
+            alert(`Selected model: ${selectedModel}`);
+        });
+
+        // add the model picker to the container
+        this.container.appendChild(this.modelPicker);
+
+
+
+        // Clear existing options
+        this.modelPicker.innerHTML = '';
+
+        Object.entries(modelData).forEach(([provider, data]) => {
+            if (data.models && Array.isArray(data.models)) {
+                // Create optgroup for each provider
+                const group = document.createElement('optgroup');
+                group.label = provider;
+
+                data.models.forEach(model => {
+                    const option = document.createElement('option');
+                    option.value = `${provider}:${model}`;
+                    option.textContent = model;
+                    group.appendChild(option);
+                });
+
+                this.modelPicker.appendChild(group);
+            }
+        });
+    }
+
+
     async submitButtonHandler() {
         // test if message is empty. If empty, do not add message.
         if (this.userInput.value !== '') {
@@ -253,7 +311,7 @@ export class ChatManager {
         });
     }
     async loadConversation(conversationId) {
-        console.log('conversationId', conversationId);
+        //console.log('conversationId', conversationId);
         const response = await doAjax('./pullMessages', { id: conversationId });
         ctx.targetFile = response.targetFile;
         await this.setTargetFile(response.targetFile);
@@ -524,11 +582,11 @@ export class ChatManager {
             });
         }
         codeElements = Array.from(codeElements);
-        console.log('codeElements', codeElements);
+        //console.log('codeElements', codeElements);
         if (codeElements.length === 0)
             return;
         codeElements.forEach(codeElement => {
-            console.log('codeElement', codeElement);
+            //console.log('codeElement', codeElement);
             // Create a wrapper to hold the code and toolbar
             const wrapper = document.createElement('div');
             wrapper.style.position = 'relative';

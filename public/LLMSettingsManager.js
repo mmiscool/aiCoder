@@ -15,7 +15,7 @@ export class LLMSettingsManager {
         this.container.innerHTML = '';
         this.addRefreshButton();
         this.llmSettings = await this.fetchSettings();
-        console.log(this.llmSettings);
+        //console.log(this.llmSettings);
         this.createSettingsDiv();
         // check if there is an active LLM
         const activeLLM = await this.getActiveLLM();
@@ -177,7 +177,7 @@ export class LLMSettingsManager {
             return;
         }
 
-        console.log(newSettings);
+        //console.log(newSettings);
         await doAjax('./llmSettingsUpdate', newSettings);
 
         await this.init();

@@ -327,7 +327,7 @@ async function getOpenAIResponse(messages) {
 
     let responseText = '';
 
-    const resultStream = openai.chat.completions.create({
+    const resultStream = await openai.chat.completions.create({
         model: await readSetting('llmConfig/openai-model.txt'),
         messages,
         stream: true
