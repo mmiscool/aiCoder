@@ -1,0 +1,231 @@
+body {
+  color: #f1f1f1;
+  scroll-behavior: smooth;
+  background-color: #121212;
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  transition-duration: 1s;
+}
+
+.background {
+  z-index: -1;
+  background: linear-gradient(165deg, #470336 0%, #000 25% 70%, #00d4ffd4);
+  position: fixed;
+  inset: 0;
+}
+
+header {
+  text-align: center;
+  z-index: 1000;
+  background: #1f1f1f;
+  padding: 20px;
+  position: sticky;
+  top: 0;
+  box-shadow: 0 2px 5px #00000080;
+}
+
+header h1 {
+  color: #00d1b2;
+  margin: 0;
+  font-size: 2.5em;
+}
+
+header nav a {
+  color: #f1f1f1;
+  margin: 0 15px;
+  font-size: 1.1em;
+  text-decoration: none;
+  transition: color .3s;
+}
+
+header nav a:hover {
+  color: #00d1b2;
+}
+
+.button-group {
+  justify-content: center;
+  display: flex;
+}
+
+section {
+  border-radius: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 40px 20px;
+  display: flex;
+}
+
+section:nth-child(2n) {
+  background: #1f1f1f77;
+}
+
+section h2 {
+  color: #00d1b2;
+  margin-bottom: 15px;
+  font-size: 2em;
+}
+
+section p, section ul li {
+  color: #fff;
+  margin-bottom: 10px;
+  line-height: 1.8;
+}
+
+.container {
+  width: 90%;
+  max-width: 1200px;
+  margin: auto;
+}
+
+.content {
+  flex: 1;
+  min-width: 300px;
+  padding: 20px;
+}
+
+.image-container {
+  text-align: center;
+  box-sizing: border-box;
+  filter: drop-shadow(16px 16px #00000082);
+  flex: 1;
+  margin: 20px;
+}
+
+.image-container img {
+  border-radius: 8px;
+  max-width: 100%;
+}
+
+.cta {
+  text-align: center;
+  color: #121212;
+  border-radius: 8px;
+  padding: 50px 20px;
+}
+
+.cta a {
+  color: #00d1b2;
+  white-space: nowrap;
+  background: #181818da;
+  border-radius: 5px;
+  margin: 5px;
+  padding: 12px 24px;
+  font-weight: bold;
+  text-decoration: none;
+  transition: background .3s, color .3s;
+}
+
+.cta a:hover {
+  color: #121212;
+  background: #00d1b2;
+}
+
+#mergeButton {
+  color: #00d1b2;
+  white-space: nowrap;
+  text-align: center;
+  background: #064448;
+  border-radius: 5px;
+  width: 100%;
+  height: 50px;
+  margin: 5px 20%;
+  padding: 12px 24px;
+  font-weight: bold;
+  text-decoration: none;
+  transition: background .3s, color .3s;
+}
+
+#mergeButton:hover {
+  color: #121212;
+  background: #00d1b2;
+}
+
+footer {
+  text-align: center;
+  color: #777;
+  background: #1f1f1f;
+  padding: 20px;
+}
+
+footer a {
+  color: #00d1b2;
+  text-decoration: none;
+}
+
+textarea {
+  box-sizing: border-box;
+  color: #00d1b2;
+  background-color: #000;
+  border-width: 3px;
+  border-color: #00d1b2;
+  border-radius: 5px;
+  justify-content: center;
+  width: 250px;
+  height: 70px;
+  padding: 10px 40px 10px 10px;
+  overflow: hidden;
+}
+
+button {
+  box-sizing: border-box;
+  background-color: #000;
+  border-width: 3px;
+  border-color: #00d1b2;
+  border-radius: 5px;
+  margin: 0 -30px;
+}
+
+code {
+  color: #ff0;
+  white-space: pre;
+  background-color: #000;
+  border-radius: 5px;
+  padding: 5px;
+}
+
+.github-corner {
+  z-index: 100000;
+  position: fixed;
+  top: 0;
+  right: 0;
+}
+
+.github-corner:hover .octo-arm {
+  animation: .56s ease-in-out octocat-wave;
+}
+
+@keyframes octocat-wave {
+  0%, 100% {
+    transform: rotate(0);
+  }
+
+  20%, 60% {
+    transform: rotate(-25deg);
+  }
+
+  40%, 80% {
+    transform: rotate(10deg);
+  }
+}
+
+@media (width <= 500px) {
+  .github-corner:hover .octo-arm {
+    animation: none;
+  }
+
+  .github-corner .octo-arm {
+    animation: .56s ease-in-out octocat-wave;
+  }
+}
+
+.codeTextArea {
+  color: #ff0;
+  white-space: pre;
+  background-color: #000;
+  border-radius: 5px;
+  width: 100%;
+  height: 350px;
+  padding: 5px;
+}
+/*# sourceMappingURL=index.1372b0aa.css.map */
