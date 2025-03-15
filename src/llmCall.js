@@ -66,21 +66,26 @@ export async function callLLM(inputMessages) {
     const llmToUse = await readSetting(`llmConfig/ai-service.txt`);
 
 
-    const messages = inputMessages.map((message) => {
+
+
+    // for each message in the array, check if it is a file path and if it is read the file and add the content to the messages array
+    for (let i = 0; i < inputMessages.length; i++) {
+        if (inputMessages[i].filePath) {
+            console.log('file type message description:', inputMessages[i].description);
+            inputMessages[i].content = inputMessages[i].description + "\n\n" + await readFile(inputMessages[i].filePath);
+        }
+    }
+
+
+    const messages = await  inputMessages.map((message) => {
         return {
             role: message.role,
             content: message.content
         };
     });
 
-    // for each message in the array, check if it is a file path and if it is read the file and add the content to the messages array
-    for (let i = 0; i < messages.length; i++) {
-        if (messages[i].filePath) {
-            console.log('file type message description:', messages[i].description);
-            messages[i].content = messages[i].description + "\n\n" + await readFile(messages[i].filePath);
-        }
-    }
-    console.log('messages:', messages);
+
+    //console.log('messages:', messages);
 
 
     let response = '';
