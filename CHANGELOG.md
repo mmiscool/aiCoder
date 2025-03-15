@@ -3,6 +3,12 @@
 [![semantic versioning](https://img.shields.io/badge/semantic%20versioning-2.0.0-green.svg)](https://semver.org)
 > All notable changes to this project will be documented in this file
 
+## [1.0.98](https://github.com/mmiscool/aiCoder/compare/v1.0.97...v1.0.98) (2025-03-15)
+
+### 🤖 Build System
+
+* Fix bug related to file contents not being added to messages to be passed to LLM ([3f577fc](https://github.com/mmiscool/aiCoder/commit/3f577fc9f483d3b30a06b17fa0b4bdb1a971fbcf))
+
 ## [1.0.97](https://github.com/mmiscool/aiCoder/compare/v1.0.96...v1.0.97) (2025-03-08)
 
 ### 🤖 Build System
