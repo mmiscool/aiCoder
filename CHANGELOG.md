@@ -3,6 +3,12 @@
 [![semantic versioning](https://img.shields.io/badge/semantic%20versioning-2.0.0-green.svg)](https://semver.org)
 > All notable changes to this project will be documented in this file
 
+## [1.0.99](https://github.com/mmiscool/aiCoder/compare/v1.0.98...v1.0.99) (2025-04-10)
+
+### 🤖 Build System
+
+* Added support for xAI grok ([e11017e](https://github.com/mmiscool/aiCoder/commit/e11017e48a7b256eb9387db15f59b00c8f5f57e2))
+
 ## [1.0.98](https://github.com/mmiscool/aiCoder/compare/v1.0.97...v1.0.98) (2025-03-15)
 
 ### 🤖 Build System

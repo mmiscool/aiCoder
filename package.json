@@ -1,6 +1,6 @@
 {
   "name": "aicodertool",
-  "version": "1.0.98",
+  "version": "1.0.99",
   "homepage": "https://github.com/mmiscool/aiCoder",
   "bin": {
     "aicodertool": "src/main.js",
