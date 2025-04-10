@@ -7,11 +7,16 @@ import {
     fileDialog
 } from './fileDialog.js';
 import { auto } from 'groq-sdk/_shims/registry.mjs';
+let ctx = {};
 export class ChatManager {
     constructor(container, app_ctx) {
         this.setup(container, app_ctx);
     }
     async setup(container, app_ctx) {
+
+
+
+
         ctx = app_ctx;
         this.chatMode = 'chat';
         this.container = container;
@@ -21,7 +26,16 @@ export class ChatManager {
         this.conversationTitleInput = document.createElement('input');
         this.conversationTitleInput.type = 'text';
         this.conversationTitleInput.style.width = '100%';
+
+
+
+
+
         //await this.populateModelSelect();
+
+
+
+
         //make it so that on change it saves the title
         this.conversationTitleInput.addEventListener('change', async () => {
             const conversationId = this.conversationPicker.value;
@@ -222,9 +236,13 @@ export class ChatManager {
         this.autoApplyCheckbox.checked = this.autoApplyMode;
         this.setInput('');
     }
+
     async populateModelSelect() {
+
+
         // model selector 
         const modelData = await doAjax('./llmSettings', {});
+
         // add a select element to the container
         this.modelPicker = document.createElement('select');
         this.modelPicker.style.margin = '10px';
@@ -232,28 +250,38 @@ export class ChatManager {
         this.modelPicker.size = 1;
         this.modelPicker.addEventListener('change', async () => {
             const selectedModel = this.modelPicker.value;
-            alert(`Selected model: ${ selectedModel }`);
+            alert(`Selected model: ${selectedModel}`);
         });
+
         // add the model picker to the container
         this.container.appendChild(this.modelPicker);
+
+
+
+        // Clear existing options
         this.modelPicker.innerHTML = '';
+
         Object.entries(modelData).forEach(([provider, data]) => {
             if (data.models && Array.isArray(data.models)) {
                 // Create optgroup for each provider
                 const group = document.createElement('optgroup');
                 group.label = provider;
+
                 data.models.forEach(model => {
                     const option = document.createElement('option');
-                    option.value = `${ provider }:${ model }`;
+                    option.value = `${provider}:${model}`;
                     option.textContent = model;
                     group.appendChild(option);
                 });
+
                 this.modelPicker.appendChild(group);
             }
         });
     }
+
+
     async submitButtonHandler() {
-        // Test if message is empty. If empty, do not add message.
+        // test if message is empty. If empty, do not add message.
         if (this.userInput.value !== '') {
             await this.addMessage(this.userInput.value);
             this.userInput.value = '';
@@ -263,29 +291,155 @@ export class ChatManager {
     async setTargetFile(targetFile) {
         this.targetFileInput.value = targetFile;
         ctx.targetFile = targetFile;
-        // Test if target file ends with .css or .html
+        // test if target file ends with .css or .html
+
         return this.displayStubs();
     }
     async loadConversationsList() {
-        const conversations = await readFile('./conversationsList.json');
+        const conversations = await doAjax('./getConversationsList', {});
+        conversations.sort((a, b) => {
+            return new Date(b.lastModified) - new Date(a.lastModified);
+        });
+        // clear the conversation picker
+        this.conversationPicker.innerHTML = '';
+        // add an option for each conversation
+        conversations.forEach(conversation => {
+            const option = document.createElement('option');
+            option.value = conversation.id;
+            option.textContent = conversation.title || conversation.id;
+            this.conversationPicker.appendChild(option);
+        });
     }
     async loadConversation(conversationId) {
+        //console.log('conversationId', conversationId);
         const response = await doAjax('./pullMessages', { id: conversationId });
         ctx.targetFile = response.targetFile;
         await this.setTargetFile(response.targetFile);
         this.conversationTitleInput.value = response.title;
         this.chatMessageDiv.innerHTML = '';
-        const conversationMessages = response.messages;
-        await this.writeConversation(conversationId, {
-            messages: conversationMessages,
-            targetFile: response.targetFile,
-            model: response.model
-        });
-        conversationMessages.forEach(async message => {
-            await this.addMessage(message);
+        response.messages.forEach(async message => {
+            const individualMessageDiv = document.createElement('div');
+            individualMessageDiv.style.border = '1px solid black';
+            individualMessageDiv.style.padding = '10px';
+            individualMessageDiv.style.marginBottom = '10px';
+            if (message.hidden) individualMessageDiv.style.display = 'none';
+            if (message.role === 'user') {
+                individualMessageDiv.style.backgroundColor = 'rgba(0, 0, 255, 0.2)';
+            }
+            if (message.role === 'system') {
+                individualMessageDiv.style.backgroundColor = 'rgba(255, 0, 0, 0.1)';
+            }
+            if (message.role === 'assistant') {
+                individualMessageDiv.style.backgroundColor = 'rgba(0, 255, 0, 0.2)';
+            }
+            const roleDiv = document.createElement('div');
+            roleDiv.textContent = message.role;
+            roleDiv.style.fontWeight = 'bold';
+            individualMessageDiv.appendChild(roleDiv);
+            const contentDiv = document.createElement('div');
+            const markdown = await new MarkdownToHtml(contentDiv, message.content);
+            if (contentDiv.innerHTML === '') {
+                contentDiv.textContent = message.content;
+                contentDiv.style.whiteSpace = 'pre-wrap';
+            }
+            individualMessageDiv.appendChild(contentDiv);
+            if (message.role === 'assistant') {
+                // check if the conversation name starts with "plan"
+                if (this.conversationTitleInput.value.toLowerCase().startsWith('plan')) {
+                    const savePlanButton = document.createElement('button');
+                    savePlanButton.textContent = '💾 Replace plan';
+                    savePlanButton.addEventListener('click', async () => {
+                        await doAjax('./savePlan', { plan: message.content });
+                    });
+                    individualMessageDiv.appendChild(savePlanButton);
+                    const appendPlanButton = document.createElement('button');
+                    appendPlanButton.textContent = '📝 Append to plan';
+                    appendPlanButton.addEventListener('click', async () => {
+                        await doAjax('./savePlan', {
+                            plan: message.content,
+                            append: true
+                        });
+                    });
+                    individualMessageDiv.appendChild(appendPlanButton);
+                }
+
+                // check if this message contains a <h2> element with the inner text of "ACTION LIST"
+                const actionListHeader = contentDiv.querySelector('h2');
+                if (actionListHeader && actionListHeader.innerHTML.startsWith("ACTION LIST")) {
+                    const actionListItems = contentDiv.querySelectorAll('p');
+                    actionListItems.forEach(async actionListItem => {
+                        const newButtonElement = await changeTagName(actionListItem, 'button');
+
+                        const actionText = newButtonElement.textContent;
+
+                        const actionString = `Perform action ${actionText}`;
+                        newButtonElement.title = actionString;
+                        newButtonElement.addEventListener('click', async () => {
+                            await this.setInput(actionString);
+                            await this.submitButtonHandler();
+                        });
+
+                        // set the tooltip to the action text
+
+
+                        newButtonElement.style.width = '100%';
+                        newButtonElement.style.margin = '5px';
+                        newButtonElement.style.padding = '5px';
+                        // make text in button justify left
+                        newButtonElement.style.textAlign = 'left';
+
+                        // change the actionItem to a button
+
+                    });
+
+                }
+            }
+            if (message.role === 'user') {
+                const addPromptButton = document.createElement('button');
+                addPromptButton.textContent = '+ Save reusable prompt';
+                addPromptButton.style.cursor = 'pointer';
+                addPromptButton.style.background = 'none';
+                addPromptButton.style.border = '1px solid white';
+                addPromptButton.style.color = 'white';
+                addPromptButton.style.padding = '2px 5px';
+                addPromptButton.style.borderRadius = '3px';
+                addPromptButton.addEventListener('click', async () => {
+                    const prompt = message.content;
+                    const customPromptsJSON = await doAjax('./readFile', { targetFile: './.aiCoder/prompts/customPrompts.json' });
+                    let customPrompts = JSON.parse(customPromptsJSON.fileContent);
+                    if (!customPrompts)
+                        customPrompts = [];
+                    if (!customPrompts.includes(prompt)) {
+                        customPrompts.push(prompt);
+                        await doAjax('./writeFile', {
+                            targetFile: './.aiCoder/prompts/customPrompts.json',
+                            fileContent: JSON.stringify(customPrompts, null, 2)
+                        });
+                    }
+                });
+                individualMessageDiv.appendChild(addPromptButton);
+            }
+            this.chatMessageDiv.appendChild(individualMessageDiv);
+            this.submitButton.scrollIntoView();
+            if (response.messages.indexOf(message) === response.messages.length - 1) {
+                individualMessageDiv.scrollIntoView();
+                if (message.role === 'assistant' && this.autoApplyMode) {
+                    if (markdown.codeBlocks.length > 0) {
+                        for (const codeBlock of markdown.codeBlocks) {
+                            const applyCodeBlock = await confirm('Apply code block?', ctx.autoApplyTimeout, true);
+                            if (applyCodeBlock) {
+                                await this.applySnippet(codeBlock);
+                                await ctx.tabs.switchToTab('Tools');
+                                await this.displayStubs();
+                            }
+                        }
+                    }
+                }
+            }
         });
         await this.addCodeToolbars();
     }
+    //await ctx.tools.displayListOfStubsAndMethods();
     async displayPremadePromptsList(newConversation = false) {
         const customPromptsJSON = await doAjax('./readFile', { targetFile: '.aiCoder/prompts/customPrompts.json' });
         let customPrompts = JSON.parse(customPromptsJSON.fileContent);
@@ -357,7 +511,7 @@ export class ChatManager {
             trashIcon.addEventListener('click', async event => {
                 event.stopPropagation();
                 this.promptsDialog.close();
-                const confirmDelete = await confirm(`Delete prompt: \n "${ prompt }"?`, 0, false);
+                const confirmDelete = await confirm(`Delete prompt: \n "${prompt}"?`, 0, false);
                 if (confirmDelete) {
                     customPrompts = customPrompts.filter(p => p !== prompt);
                     await doAjax('./writeFile', {
@@ -378,17 +532,13 @@ export class ChatManager {
     }
     async addMessage(message) {
         const conversationId = this.conversationPicker.value;
-        let conversationData = await readFile(`./conversation_${ conversationId }.json`) || {
-            messages: [],
-            targetFile: ctx.targetFile,
-            model: this.modelPicker ? this.modelPicker.value : null,
-            lastModified: new Date().toISOString()
-        };
-        conversationData.messages.push(message);
-        conversationData.lastModified = new Date().toISOString();
-        await this.writeConversation(conversationId, conversationData);
+        await doAjax('./addMessage', {
+            id: conversationId,
+            message
+        });
         await this.loadConversation(conversationId);
     }
+    // Fix method call
     async newChat(title = false) {
         let targetFile = this.targetFileInput.value;
         if (!targetFile || targetFile === '') {
@@ -403,6 +553,7 @@ export class ChatManager {
         this.conversationPicker.value = response.id;
         return await this.loadConversation(response.id);
     }
+    // Fix method call
     async newPlanChat(title = false) {
         const response = await doAjax('./newPlanChat', { title });
         await this.loadConversationsList();
@@ -410,11 +561,13 @@ export class ChatManager {
         this.conversationPicker.value = response.id;
         await this.loadConversation(response.id);
     }
+    // Fix method call
     async callLLM() {
         const conversationId = this.conversationPicker.value;
         await doAjax('./callLLM', { id: conversationId });
         await this.loadConversation(conversationId);
     }
+    // Fix method call
     async addCodeToolbars() {
         // Query all <code> elements on the page
         let codeElements = [];
@@ -480,8 +633,8 @@ export class ChatManager {
                 await this.applySnippet(codeString);
                 codeElement.style.color = 'cyan';
                 this.displayStubs();
+                //ctx.tools.displayListOfStubsAndMethods();
             });
-            //ctx.tools.displayListOfStubsAndMethods();
             toolbar.appendChild(editButton);
             // Wrap the <code> element with the wrapper
             const parent = codeElement.parentNode;
@@ -493,10 +646,10 @@ export class ChatManager {
     }
     async displayStubs() {
         const targetFile = this.targetFileInput.value;
-        if (targetFile.endsWith('.css') || targetFile.endsWith('.html'))
-            return;
+        if (targetFile.endsWith('.css') || targetFile.endsWith('.html')) return;
         return await ctx.tools.displayListOfStubsAndMethods();
     }
+
     async applySnippet(codeString) {
         const conversationId = this.conversationPicker.value;
         const isCodeGood = await doAjax('./applySnippet', {
@@ -513,77 +666,38 @@ export class ChatManager {
             //     await this.addMessage(this.userInput.value);
             //     await this.callLLM();
             // }
+
             // refresh the conversation
             await this.loadConversation(conversationId);
         }
         return isCodeGood;
     }
-    async writeConversation(conversationId, conversationData) {
-        await writeFile(`./conversation_${ conversationId }.json`, conversationData);
-    }
 }
-let ctx = {};
-export function changeTagName(element, newTagName) {
+
+
+
+/**
+ * Change the tag name of an existing DOM element.
+ * @param {HTMLElement} element - The element to change.
+ * @param {string} newTagName - The desired tag name.
+ * @returns {HTMLElement} The newly created element with the updated tag name.
+ */
+function changeTagName(element, newTagName) {
     // Create a new element with the desired tag name
     const newElement = document.createElement(newTagName);
+
     // Copy attributes
     Array.from(element.attributes).forEach(attr => {
         newElement.setAttribute(attr.name, attr.value);
     });
+
     // Move child nodes
     while (element.firstChild) {
         newElement.appendChild(element.firstChild);
     }
+
     // Replace the old element with the new one
     element.parentNode.replaceChild(newElement, element);
+
     return newElement;
 }
-export {
-    writeFile,
-    readFile
-};
-export {
-    writeFile,
-    readFile
-};
-export {
-    writeFile,
-    readFile
-};
-export {
-    writeFile,
-    readFile
-};
-export {
-    writeFile,
-    readFile
-};
-export {
-    writeFile,
-    readFile
-};
-export {
-    writeFile,
-    readFile
-};
-//These functions are now correctly using local storage.
-export async function writeFile(filePath, content) {
-    try {
-        localStorage.setItem(filePath, JSON.stringify(content));
-    } catch (error) {
-        console.error('Error writing to local storage:', error);
-    }
-}
-export async function readFile(filePath) {
-    try {
-        const value = localStorage.getItem(filePath);
-        return value ? JSON.parse(value) : null;
-    } catch (error) {
-        console.error('Error reading from local storage:', error);
-        return null;
-    }
-}
-export {
-    writeFile,
-    readFile
-};
