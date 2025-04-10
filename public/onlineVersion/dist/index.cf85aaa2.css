@@ -1,0 +1,157 @@
+body {
+  color: #e0e0e0;
+  background: #121212;
+  flex-direction: column;
+  height: 100vh;
+  margin: 0;
+  font-family: Segoe UI, sans-serif;
+  display: flex;
+}
+
+#chat-ui {
+  flex: 1;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+.message {
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  box-sizing: border-box;
+  border-radius: .5rem;
+  max-width: 80%;
+  margin-bottom: 1.5rem;
+  padding: .75rem;
+}
+
+.message.user {
+  background-color: #1e3a8a;
+  align-self: flex-end;
+  margin-left: auto;
+}
+
+.message.assistant {
+  background-color: #272727;
+  align-self: flex-start;
+  margin-right: auto;
+}
+
+#input-area {
+  background: #1a1a1a;
+  border-top: 1px solid #333;
+  flex-direction: column;
+  padding: 1rem;
+  display: flex;
+}
+
+#user-input {
+  resize: none;
+  color: #fff;
+  background: #2a2a2a;
+  border: none;
+  border-radius: .5rem;
+  margin-bottom: .5rem;
+  padding: .5rem;
+  font-size: 1rem;
+}
+
+.code-wrapper {
+  background: #1e1e1e;
+  border-radius: .5rem;
+  margin-top: .5rem;
+  padding: 1rem;
+  position: relative;
+}
+
+.code-wrapper button {
+  color: #fff;
+  cursor: pointer;
+  background: #333;
+  border: none;
+  border-radius: 4px;
+  padding: .25rem .5rem;
+  font-size: .75rem;
+  position: absolute;
+  top: .25rem;
+  right: .25rem;
+}
+
+pre, code {
+  word-break: break-word;
+  box-sizing: border-box;
+  max-width: 100%;
+  overflow-x: auto;
+  white-space: pre-wrap !important;
+}
+
+#model-select {
+  color: #fff;
+  appearance: none;
+  cursor: pointer;
+  background: #2a2a2a;
+  border: none;
+  border-radius: .5rem;
+  padding: .4rem .6rem;
+  font-size: 1rem;
+}
+
+.input-row {
+  align-items: center;
+  gap: .5rem;
+  display: flex;
+}
+
+.flex-spacer {
+  flex: 1;
+}
+
+#send-btn {
+  color: #fff;
+  cursor: pointer;
+  background: #007bff;
+  border: none;
+  border-radius: .5rem;
+  padding: .5rem 1rem;
+  font-size: 1rem;
+}
+
+.conversation-title {
+  color: #90caf9;
+  background: #1e1e1e;
+  border-bottom: 1px solid #333;
+  padding: 1rem;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.conversation-controls {
+  background: #1e1e1e;
+  border-bottom: 1px solid #333;
+  align-items: center;
+  gap: .5rem;
+  padding: 1rem;
+  display: flex;
+}
+
+.conversation-controls button {
+  color: #fff;
+  cursor: pointer;
+  background: #007bff;
+  border: none;
+  border-radius: .5rem;
+  padding: .5rem 1rem;
+  font-size: 1rem;
+}
+
+.conversation-controls select {
+  color: #fff;
+  appearance: none;
+  cursor: pointer;
+  background: #2a2a2a;
+  border: none;
+  border-radius: .5rem;
+  padding: .4rem .6rem;
+  font-size: 1rem;
+}
+/*# sourceMappingURL=index.cf85aaa2.css.map */

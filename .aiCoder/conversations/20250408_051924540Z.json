@@ -1,0 +1,38 @@
+{
+  "messages": [
+    {
+      "role": "system",
+      "content": "./.aiCoder/prompts/default-system-prompt.md",
+      "filePath": "./.aiCoder/prompts/default-system-prompt.md",
+      "description": "",
+      "hidden": true
+    },
+    {
+      "role": "user",
+      "content": "./.aiCoder/prompts/default-plan-prompt.md",
+      "filePath": "./.aiCoder/prompts/default-plan-prompt.md",
+      "description": "",
+      "hidden": true
+    },
+    {
+      "role": "user",
+      "content": "./public/ChatManager.js",
+      "filePath": "./public/ChatManager.js",
+      "description": "This is the source code you will be working on",
+      "hidden": true
+    },
+    {
+      "role": "system",
+      "content": "./.aiCoder/prompts/snippet-production-prompt.md",
+      "filePath": "./.aiCoder/prompts/snippet-production-prompt.md",
+      "description": "",
+      "hidden": true
+    }
+  ],
+  "title": "Chat about ./public/ChatManager.js",
+  "id": "20250408_051924540Z",
+  "targetFile": "./public/ChatManager.js",
+  "chatMode": "chat",
+  "conversationNew": true,
+  "lastModified": "2025-04-08T05:19:24.548Z"
+}

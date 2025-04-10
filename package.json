@@ -39,6 +39,7 @@
     "estraverse": "^5.3.0",
     "express": "^4.21.2",
     "groq-sdk": "^0.7.0",
+    "marked": "^15.0.8",
     "mime": "^4.0.4",
     "ollama": "^0.5.9",
     "openai": "^4.86.1",

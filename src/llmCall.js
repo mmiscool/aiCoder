@@ -62,8 +62,8 @@ async function throttle() {
 
 
 
-export async function callLLM(inputMessages) {
-    const llmToUse = await readSetting(`llmConfig/ai-service.txt`);
+export async function callLLM(inputMessages, llmToUse = null) {
+    if (llmToUse === null) llmToUse = await readSetting(`llmConfig/ai-service.txt`);
 
 
 
@@ -71,13 +71,23 @@ export async function callLLM(inputMessages) {
     // for each message in the array, check if it is a file path and if it is read the file and add the content to the messages array
     for (let i = 0; i < inputMessages.length; i++) {
         if (inputMessages[i].filePath) {
-            console.log('file type message description:', inputMessages[i].description);
-            inputMessages[i].content = inputMessages[i].description + "\n\n" + await readFile(inputMessages[i].filePath);
+            //console.log('file type message description:', inputMessages[i].description);
+            const fileContent = await readFile(inputMessages[i].filePath);
+            inputMessages[i].content = "";
+            if (inputMessages[i].description === '') {
+                inputMessages[i].content = inputMessages[i].description + "\n\n" + fileContent;
+            } else {
+
+                inputMessages[i].content = `Contents of file: ${inputMessages[i].filePath}
+${inputMessages[i].description} 
+\`\`\` \n${fileContent}
+\`\`\`   `; // add the file content to the message`;
+            }
         }
     }
 
 
-    const messages = await  inputMessages.map((message) => {
+    const messages = await inputMessages.map((message) => {
         return {
             role: message.role,
             content: message.content
@@ -85,7 +95,7 @@ export async function callLLM(inputMessages) {
     });
 
 
-    //console.log('messages:', messages);
+    console.log('messages:', messages);
 
 
     let response = '';
@@ -104,6 +114,15 @@ export async function callLLM(inputMessages) {
     else if (llmToUse === 'googleAI') {
         response = await getGoogleAIResponse(messages);
     }
+    else if (llmToUse === 'X') {
+        response = await getXAIResponse(messages);
+    }
+    else if (llmToUse === 'ollama-install') {
+        await installOllama();
+        await pullOllamaModelWithProgress('granite3.1-dense:8b');
+        await pullOllamaModelWithProgress('granite3.1-moe');
+        response = 'Ollama installed';
+    }
     else {
         await printAndPause('Error:   No LLM selected.', 1.5);
         response = '';
@@ -121,7 +140,7 @@ export async function callLLM(inputMessages) {
 }
 
 
-const llmServices = ['ollama', 'openai', 'groq', 'anthropic', 'googleAI'];
+const llmServices = ['ollama', 'openai', 'groq', 'anthropic', 'googleAI', `X`];
 
 export async function llmSettings() {
     const currentService = await readSetting(`llmConfig/ai-service.txt`);
@@ -160,6 +179,8 @@ async function getModels(service) {
         return getClaudeModels();
     } else if (service === 'googleAI') {
         return getGoogleAIModels();
+    } else if (service === 'X') {
+        return getXAIModels();
     }
     return [];
 }
@@ -181,7 +202,25 @@ export async function llmSettingsUpdate(settings) {
 
 // ollama related functions -----------------------------------------------------------------------------------------------
 export async function getOllamaResponse(messages) {
-    const response = await ollama.chat({ model: await readSetting('llmConfig/ollama-model.txt'), messages, stream: true });
+    console.log('ollama messages:', messages);
+
+    // take the text of each message and add it to a string
+    let messagesText = '';
+    for (let i = 0; i < messages.length; i++) {
+        messagesText += messages[i].content + '\n\n';
+        console.log('messagesText:', messagesText);
+    }
+
+    // form a new message object with the role of user and the content of the messagesText
+    const newMessages = [{
+        role: 'user',
+        content: messagesText
+    }];
+
+
+
+
+    const response = await ollama.chat({ model: await readSetting('llmConfig/ollama-model.txt'), newMessages, stream: true });
     let responseText = '';
     for await (const part of response) {
         //process.stdout.write(part.message.content);
@@ -369,6 +408,55 @@ async function getOpenAIModels() {
     return [];
 }
 
+
+
+// xAI related functions -----------------------------------------------------------------------------------------------
+async function getXAIResponse(messages) {
+    const apiKey = await readSetting('llmConfig/X-api-key.txt');
+    let openai = new OpenAI({ apiKey, 
+        baseURL: 'https://api.x.ai/v1' 
+     });
+
+    let responseText = '';
+
+    const resultStream = await openai.chat.completions.create({
+        model: await readSetting('llmConfig/X-model.txt'),
+        messages,
+        stream: true
+    });
+
+    for await (const chunk of resultStream) {
+        const content = chunk.choices[0]?.delta?.content || '';
+        await printToTerminal(content); // Real-time printing to console
+        responseText += content;
+    }
+    // clear the console
+    //clearTerminal();
+    return responseText;
+}
+
+
+async function getXAIModels() {
+    const apiKey = await readSetting('llmConfig/X-api-key.txt');
+    if (!apiKey) return [];
+
+    let openai = new OpenAI({ apiKey, 
+        baseURL: 'https://api.x.ai/v1' 
+     });
+    try {
+        const response = await openai.models.list();
+        const models = response.data;
+
+        // filter list to only include models that have an id that is shorter than 13 characters
+        const listOfModels = models.filter(model => model.id.length < 30).map(model => model.id);
+
+        return listOfModels;
+    } catch (error) {
+        console.error("Error fetching models:", error);
+    }
+
+    return [];
+}
 
 
 

@@ -1,0 +1,179 @@
+body {
+    margin: 0;
+    background: #121212;
+    color: #e0e0e0;
+    font-family: 'Segoe UI', sans-serif;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+#chat-ui {
+    flex: 1;
+    padding: 1rem;
+    overflow-y: auto;
+}
+
+
+.message {
+    margin-bottom: 1.5rem;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    max-width: 80%;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    box-sizing: border-box;
+}
+
+.message.user {
+    background-color: #1e3a8a;
+    align-self: flex-end;
+    margin-left: auto;
+}
+
+.message.assistant {
+    background-color: #272727;
+    align-self: flex-start;
+    margin-right: auto;
+}
+
+#input-area {
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    background: #1a1a1a;
+    border-top: 1px solid #333;
+}
+
+#user-input {
+    resize: none;
+    padding: 0.5rem;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    background: #2a2a2a;
+    color: #fff;
+    margin-bottom: 0.5rem;
+}
+
+
+
+.code-wrapper {
+    position: relative;
+    background: #1e1e1e;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.code-wrapper button {
+    position: absolute;
+    top: 0.25rem;
+    right: 0.25rem;
+    background: #333;
+    color: white;
+    border: none;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+pre,
+code {
+    white-space: pre-wrap !important;
+    word-break: break-word;
+    overflow-x: auto;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+
+
+#model-select {
+    background: #2a2a2a;
+    color: white;
+    border: none;
+    padding: 0.4rem 0.6rem;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    appearance: none;
+    cursor: pointer;
+}
+
+
+
+.input-row {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.flex-spacer {
+    flex: 1;
+}
+
+
+
+#send-btn {
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+}
+
+.conversation-title {
+    padding: 1rem;
+    font-size: 1.5rem;
+    font-weight: bold;
+    background: #1e1e1e;
+    border-bottom: 1px solid #333;
+    color: #90caf9;
+}
+
+
+.conversation-controls {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    padding: 1rem;
+    background: #1e1e1e;
+    border-bottom: 1px solid #333;
+}
+
+
+.conversation-controls {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    padding: 1rem;
+    background: #1e1e1e;
+    border-bottom: 1px solid #333;
+}
+
+/* Match existing dark mode button style */
+.conversation-controls button {
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+}
+
+/* Match select styling used in #model-select */
+.conversation-controls select {
+    background: #2a2a2a;
+    color: white;
+    border: none;
+    padding: 0.4rem 0.6rem;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    appearance: none;
+    cursor: pointer;
+}
