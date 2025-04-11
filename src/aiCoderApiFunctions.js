@@ -20,7 +20,7 @@ import {
     intelligentlyMergeSnippets
 } from './mergeTools/mergeTool.js';
 import { launchEditor } from './terminalHelpers.js';
-import { conversation } from './conversation.js';
+import { conversation } from './llmCall.js';
 
 
 

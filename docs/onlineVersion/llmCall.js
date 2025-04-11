@@ -1,48 +1,33 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { spawn } from 'child_process';
-import cliProgress from 'cli-progress';
 import Groq from "groq-sdk";
 import ollama from 'ollama';
 import { OpenAI } from "openai";
-import { readFile, readSetting, writeFile, writeSetting } from "./fileIO.js";
-import {
-    clearTerminal,
-    printAndPause,
-    printToTerminal,
-    readArg,
-} from "./terminalHelpers.js";
-import { scrapeToMarkdown } from '@mmiscool/scrape_to_markdown';
-import fs from 'fs';
+
+
+async function readSetting(key) {
+    return localStorage.getItem("setting."+key);
+}
+
+async function writeSetting(key, value) {
+    localStorage.setItem("setting."+key, value);
+}
+
+async function readFile(filePath) {
+    return localStorage.getItem(filePath);
+}
+
+async function writeFile(filePath, content) {
+    localStorage.setItem(filePath, content);
+}
+
+
+
+
+
 
 
 
 let throttleTime = 20;
-
-async function setupMode() {
-    if (await readArg('-setup')) {
-        //loop 5 times to clear the terminal from 5 to 1
-        for (let i = 5; i > 0; i--) {
-            await clearTerminal();
-            await printAndPause(`Setting up LLM mode in ${i} seconds.`, 1);
-        }
-
-        await clearTerminal();
-        await printAndPause('Installing ollama . . . ', 1);
-        await installOllama();
-        await printAndPause('Ollama installed');
-        await printAndPause('Waiting for ollama service to start', 10);
-        await printAndPause('Pulling the default model');
-        await pullOllamaModelWithProgress('granite3.1-dense:8b');
-        await pullOllamaModelWithProgress('granite3.1-moe');
-
-        await writeSetting(`llmConfig/ai-service.txt`, 'ollama');
-        await writeSetting(`llmConfig/ollama-model.txt`, 'granite3.1-dense:8b');
-    }
-}
-
-setupMode();
-
-
 let lastCallTime = 0;
 
 async function throttle() {
@@ -62,6 +47,20 @@ async function throttle() {
     return;
 }
 
+
+export async function printAndPause(message, secondsToPause = 0) {
+    console.log(message);
+    if (secondsToPause === 0) {
+        return;
+    } else {
+        return await new Promise(resolve => setTimeout(resolve, secondsToPause * 1000));
+    }
+}
+
+
+export async function printToTerminal(message) {
+    console.log(message); // Real-time printing to console
+}
 
 
 export async function callLLM(inputMessages, llmToUse = null) {
@@ -248,75 +247,7 @@ async function getOllamaModels() {
 
 
 
-async function installOllama() {
-    await clearTerminal();
-    try {
-        return new Promise((resolve, reject) => {
-            const command = 'curl';
-            const args = ['-fsSL', 'https://ollama.com/install.sh', '|', 'sh'];
 
-            const installer = spawn(command, args, { stdio: 'inherit', shell: true });
-
-            installer.on('error', (error) => {
-                console.error(`Error: ${error.message}`);
-                reject(error);
-            });
-
-            installer.on('exit', (code) => {
-                if (code === 0) {
-                    console.log('Ollama installed successfully!');
-                    pullOllamaModelWithProgress('granite3.1-dense:latest');
-                    resolve();
-                } else {
-                    console.log(`Installation failed with code: ${code}`);
-                    reject(new Error(`Exit code: ${code}`));
-                }
-            });
-        });
-    } catch (error) {
-        console.error('Error installing Ollama:', error);
-        return;
-    }
-}
-
-
-
-
-async function pullOllamaModelWithProgress(model) {
-    await printAndPause(`downloading ${model}...`, 5)
-    const progressBar = new cliProgress.SingleBar({
-        format: 'Downloading {model} | {bar} | {percentage}%        ',
-        barCompleteChar: '#',
-        barIncompleteChar: '.',
-        hideCursor: true
-    });
-    // Start the progress bar with an initial value
-    progressBar.start(100, 0, {
-        model: model
-    });
-
-
-    let currentDigestDone = false
-    const stream = await ollama.pull({ model: model, stream: true })
-    for await (const part of stream) {
-        if (part.digest) {
-            let percent = 0
-            if (part.completed && part.total) {
-                percent = Math.round((part.completed / part.total) * 100)
-            }
-
-            progressBar.update(percent);
-            if (percent === 100 && !currentDigestDone) {
-                //console.log() // Output to a new line
-                currentDigestDone = true
-            } else {
-                currentDigestDone = false
-            }
-        } else {
-            console.log(part.status)
-        }
-    }
-}
 
 
 
@@ -415,9 +346,10 @@ async function getOpenAIModels() {
 // xAI related functions -----------------------------------------------------------------------------------------------
 async function getXAIResponse(messages) {
     const apiKey = await readSetting('llmConfig/X-api-key.txt');
-    let openai = new OpenAI({ apiKey, 
-        baseURL: 'https://api.x.ai/v1' 
-     });
+    let openai = new OpenAI({
+        apiKey,
+        baseURL: 'https://api.x.ai/v1'
+    });
 
     let responseText = '';
 
@@ -442,9 +374,10 @@ async function getXAIModels() {
     const apiKey = await readSetting('llmConfig/X-api-key.txt');
     if (!apiKey) return [];
 
-    let openai = new OpenAI({ apiKey, 
-        baseURL: 'https://api.x.ai/v1' 
-     });
+    let openai = new OpenAI({
+        apiKey,
+        baseURL: 'https://api.x.ai/v1'
+    });
     try {
         const response = await openai.models.list();
         const models = response.data;
@@ -615,14 +548,7 @@ export class conversation {
         this.conversationNew = true;
         if (id) {
             this.id = id;
-        }
-
-        else
-        //this.loadConversation(id);
-        //console.log('loaded conversation', this);
-        {
-            //generate a unique id for the conversation based on the current time in the format
-            // of yyyy-mm-dd-hh-mm-ss
+        } else {
             this.id = new Date().toISOString().replace(/[-:.]/g, '').replace('T', '_').split('.')[0];
         }
     }
@@ -639,34 +565,12 @@ export class conversation {
         await this.storeConversation();
     }
     async addMessage(role, content, hidden = false) {
-        while (true) {
-            const firstLine = content.split('\n')[0].trim();
-            const everyThingElse = content.split('\n').slice(1).join('\n').trim();
-            // Check if the first line is a URL
-            if (firstLine.startsWith('https://') || firstLine.startsWith('http://')) {
-                //const scrapedContent = await scrapeToMarkdown(firstLine);
-                const markdownLink = `[${firstLine}](${firstLine})`;
-                const scrapedContent = `${markdownLink}\n\n${await scrapeToMarkdown(firstLine)}`;
-                await this.messages.push({
-                    role,
-                    content: scrapedContent
-                });
-                content = everyThingElse;
-                // Update content to the remaining lines
-                // If there's no remaining content, break out of the loop
-                if (content.length === 0)
-                    break;
-            } else {
-                // If the first line is not a URL, add the remaining content and exit
-                if (content.length > 0) {
-                    await this.messages.push({
-                        role,
-                        content,
-                        hidden
-                    });
-                }
-                break;
-            }
+        if (content.length > 0) {
+            await this.messages.push({
+                role,
+                content,
+                hidden
+            });
         }
         await this.storeConversation();
     }
@@ -726,14 +630,14 @@ export class conversation {
             lastModified: new Date().toISOString()
         };
         const conversationJSON = await JSON.stringify(conversationObject, null, 2);
-        const filePath = `./.aiCoder/conversations/${id}.json`;
+        const filePath = `.aiCoder/conversations/${id}.json`;
         await writeFile(filePath, conversationJSON);
         return { success: true };
     }
     async loadConversation(id = this.id) {
         this.id = id;
         // load the conversation from a file  
-        const filePath = `./.aiCoder/conversations/${id}.json`;
+        const filePath = `.aiCoder/conversations/${id}.json`;
         try {
             const conversationJSON = await readFile(filePath);
             const conversationObject = await JSON.parse(conversationJSON);
@@ -750,7 +654,7 @@ export class conversation {
         }
     }
     async deleteConversation() {
-        const filePath = `./.aiCoder/conversations/${this.id}.json`;
+        const filePath = `.aiCoder/conversations/${this.id}.json`;
         if (fs.existsSync(filePath)) {
             await fs.unlinkSync(filePath);
         }
