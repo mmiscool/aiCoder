@@ -15,7 +15,7 @@ export async function createBackup(filePath) {
 
     await createFolderIfNotExists(path.dirname(backupFilePath)); // Ensure nested directories exist
 
-    await fs.copyFileSync(filePath, `${backupFilePath}${timestamp}`);
+    await fs.promises.copyFile(filePath, `${backupFilePath}${timestamp}`);
 
     // deduplicate the backups
     const allBackupFiles = await listFilesMatchingName(backupFilePath);
@@ -29,7 +29,7 @@ export async function createBackup(filePath) {
 
 
 export async function rollbackFile(pathToBackupFile) {
-    await fs.copyFileSync(pathToBackupFile, pathToBackupFile.replace('_backup_', ''));
+    await fs.promises.copyFile(pathToBackupFile, pathToBackupFile.replace('_backup_', ''));
 }
 
 
